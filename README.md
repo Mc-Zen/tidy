@@ -2,9 +2,19 @@
 # Typst-Doc
 *A doctor for your documentation*
 
-**typst-doc** is a package that generates documentation directly in [Typst](https://typst.app/) for your Typst modules. It parses docstring comments similar to javadoc and co. and can be used to easily build a reference section for each module.  
+**typst-doc** is a package that generates documentation directly in [Typst](https://typst.app/) for your Typst modules. It parses docstring comments similar to javadoc and co. and can be used to easily build a beautiful reference section for the parsed module.  
 
-The [documentation](./docs/typst-doc.pdf) describes the usage of this module and the format of the docstrings. 
+Within the docstring you may use any Typst syntax - so markup, equations and even figures are no problem!
+
+Features:
+- Annotate types of parameters and return values.
+- Read off default values for named parameters.
+- Function description.
+- Parameter descriptions.
+- Display function signature (with types).
+
+
+The [documentation](./docs/typst-doc.pdf) describes the usage of this module and the defined format for the docstrings. 
 
 ## Setup
 
