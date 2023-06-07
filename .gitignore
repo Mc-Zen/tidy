@@ -1,0 +1,7 @@
+
+# Python
+__pycache__/
+
+# Output
+/examples/*.pdf
+/tests/references/*.pdf
