@@ -1,3 +1,4 @@
+// Source code for the typst-doc package
 
 // Color to highlight function names in
 #let fn-color = rgb("#4b69c6")
@@ -38,9 +39,9 @@
 }
 
 // Create a parameter description block, containing name, type, description and optionally the default value. 
-#let param-description-block(name, types, content, default: "?") = block(
+#let param-description-block(name, types, content, show-default: false, default: none, breakable: false) = block(
   inset: 10pt, fill: luma(98%), width: 100%,
-  breakable: false,
+  breakable: breakable,
   [
     #text(weight: "bold", size: 1.1em, name) 
     #h(.5cm) 
@@ -48,7 +49,7 @@
   
     #eval("[" + content + "]")
     
-    #if default != "?" [ Default: #raw(lang: "typc", default) ]
+    #if show-default [ Default: #raw(lang: "typc", default) ]
   ]
 )
 
@@ -70,14 +71,14 @@
 /// #let func(p1, p2: 3pt, p3: (), p4: (entries: ())) = {...}
 /// ```
 /// Here, we would call `parse-argument-list(source-code, 9)` and retrieve
-/// ```typc
+/// #pad(x: 1em, ```typc
 /// (
 ///   p0: (:),
 ///   p1: (default: "3pt"),
 ///   p2: (default: "()"),
 ///   p4: (default: "(entries: ())"),
 /// ) 
-/// ```
+/// ```)
 ///
 /// - module-content (string): Source code.
 /// - index (integer): Index where the argument list starts. This index should point to the character *next* to the function name, i.e. to the opening brace `(` of the argument list if there is one (note, that function aliases for example produced by `myfunc.where(arg1: 3)` do not have an argument list).
@@ -105,6 +106,7 @@
   if brace-level > 0 { return none }
   let args = (:)
   for arg in arg-strings {
+    if arg.trim().len() == 0 { continue }
     let colon-pos = arg.position(":")
     if colon-pos == none {
       args.insert(arg.trim(), (:))
@@ -249,15 +251,26 @@
 ///
 /// - module-doc (dictionary): Module documentation information as returned by @@parse-module. 
 /// - first-heading-level (integer): Level for the module heading. 
+/// - type-colors (dictionary): Colors to use for each type. 
+///     Colors for missing types default to gray (`"#eff0f3"`).
+/// - allow-breaking (boolean): Whether to allow breaking of parameter description blocks
+/// - omit-empty-param-descriptions (boolean): Whether to omit description blocks for
+///       Parameters with empty description. 
 /// -> content
-#let show-module(module-doc, first-heading-level: 2) = {
+#let show-module(
+  module-doc, 
+  first-heading-level: 2,
+  type-colors: type-colors,
+  allow-breaking: true,
+  omit-empty-param-descriptions: true,
+) = {
   let label-prefix = module-doc.label-prefix
   if "name" in module-doc {
     let module-name = module-doc.name
     heading(module-name, level: first-heading-level)
   }
   
-  for fn in module-doc.functions {
+  for (index, fn) in module-doc.functions.enumerate() {
     [
       #heading(fn.name, level: first-heading-level + 1)
       #label(label-prefix + fn.name + "()")
@@ -265,41 +278,47 @@
     parbreak()
     eval("[" + fn.description + "]")
 
-    heading("Parameters", level: first-heading-level + 2)
-    
-    pad(x:10pt, {
-      set text(font: "Cascadia Mono", size: 0.85em, weight: 340)
-      text(fn.name, fill: fn-color)
-      "("
-      let inline-args = fn.args.len() < 2
-      if not inline-args { "\n  " }
-      let items = ()
-      for (arg, info) in fn.args {
-        let types 
-        if "types" in info {
-          types = ": " + info.types.map(x => type-box(x)).join(" ")
+    block(breakable: allow-breaking,
+      {
+        heading("Parameters", level: first-heading-level + 2)
+      
+        pad(x:10pt, {
+        set text(font: "Cascadia Mono", size: 0.85em, weight: 340)
+        text(fn.name, fill: fn-color)
+        "("
+        let inline-args = fn.args.len() < 2
+        if not inline-args { "\n  " }
+        let items = ()
+        for (arg, info) in fn.args {
+          let types 
+          if "types" in info {
+            types = ": " + info.types.map(x => type-box(x)).join(" ")
+          }
+          items.push(arg + types)
         }
-        items.push(arg + types)
-      }
-      items.join( if inline-args {", "} else { ",\n  "})
-      if not inline-args { "\n" } + ")"
-      if fn.return-types != none {
-        " -> " 
-        fn.return-types.map(x => type-box(x)).join(" ")
-      }
+        items.join( if inline-args {", "} else { ",\n  "})
+        if not inline-args { "\n" } + ")"
+        if fn.return-types != none {
+          " -> " 
+          fn.return-types.map(x => type-box(x)).join(" ")
+        }
+      })
     })
 
+    let blocks = ()
     for (name, info) in fn.args {
       let types = info.at("types", default: ())
       let description = info.at("description", default: "")
-      if description.trim() == "" { continue }
-      if "default" in info {
-        param-description-block(name, types, description, default: info.default)
-      } else {
-        param-description-block(name, types, description)          
-      }
+      if description.trim() == "" and omit-empty-param-descriptions { continue }
+      param-description-block(
+        name, 
+        types, description, 
+        show-default: "default" in info, 
+        default: info.at("default", default: none),
+        breakable: allow-breaking
+      )
     }
-    v(1cm)
+    if index < module-doc.functions.len() - 1 { v(1cm) }
   }
 }
 

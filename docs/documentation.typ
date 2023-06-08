@@ -1,5 +1,8 @@
 #import "template.typ": *
+#import "../typst-doc.typ": *
+#include "../tests/test_typst-doc.typ"
 #show link: underline
+
 
 // Take a look at the file `template.typ` in the file panel
 // to customize this template and discover how it works.
@@ -16,9 +19,13 @@
 )
 // #set text(font: "DM Sans")
 
-#import "../typst-doc.typ": *
 
 
+#{"integer" in type-colors}
+#{
+  type-colors.at("string") = blue
+  type-colors.at("string") 
+}
 
 #show heading: set text(size: 1.5em)
 #show heading.where(level: 4): set text(size: .7em)
