@@ -11,7 +11,7 @@ let result = parse-code(a)
 assert.eq(result.functions.len(), 1)
 assert.eq(result.functions.at(0).name, "a-3_56C")
 assert.eq(result.functions.at(0).description, " Func\n")
-assert.eq(result.functions.at(0).return-types, none)
+assert.eq(result.functions.at(0).return-types, "")
 }
 
 
