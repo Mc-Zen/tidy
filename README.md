@@ -2,6 +2,8 @@
 # Typst-Doc
 *A doctor for your documentation*
 
+[![Tests](https://github.com/Mc-Zen/typst-doc/actions/workflows/run_tests.yml/badge.svg)](https://github.com/Mc-Zen/typst-doc/actions/workflows/run_tests.yml)
+
 **typst-doc** is a package that generates documentation directly in [Typst](https://typst.app/) for your Typst modules. It parses docstring comments similar to javadoc and co. and can be used to easily build a beautiful reference section for the parsed module.  
 
 Within the docstring you may use any Typst syntax - so markup, equations and even figures are no problem!
