@@ -1,7 +1,6 @@
 
   
 name: Build Documentation
-on: push
 
 jobs:
   build_typst_documents:
