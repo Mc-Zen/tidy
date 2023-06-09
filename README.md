@@ -23,6 +23,9 @@ The [documentation](./docs/typst-doc.pdf) describes the usage of this module and
 Since there is no package manager for Typst yet, in order to use this library, download the [typst-doc.typ](./typst-doc.typ) file and place it in your Typst project. 
 
 ## Example
+
+A full example on how to use this module for your own package (maybe even consisting of multiple files) can be found at [examples](../examples/).
+
 Feed **typst-doc** your in-code documented source files and get beautiful documentation of all your functions printed out. Enjoy features like type annotations, links to other documented functions and arbitrary formatting within function and parameter descriptions. Let's get started.
 
 You can document your functions similar to javadoc by prepending a block of `///` comments. 
