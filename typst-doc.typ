@@ -237,10 +237,15 @@
 /// See @@parse-code() for more details. 
 ///
 /// - filename (string): Filename for the `.typ` file to analyze for docstrings.
-#let parse-module(filename) = {
-  let name = filename.replace(".typ", "")
-  let result = parse-code(read(filename), label-prefix: name)
-  result.insert("name", name)
+/// - name (string, none): The name for the module. If not given, the module name will be derived form the filename. 
+#let parse-module(filename, name: none) = {
+  let mname = filename.replace(".typ", "")
+  let result = parse-code(read(filename), label-prefix: mname)
+  if name != none {
+    result.insert("name", name)
+  } else {
+    result.insert("name", mname)
+  }
   return result
 }
 
@@ -250,7 +255,8 @@
 /// This displays all (documented) functions in the module sorted alphabetically. 
 ///
 /// - module-doc (dictionary): Module documentation information as returned by @@parse-module. 
-/// - first-heading-level (integer): Level for the module heading. 
+/// - first-heading-level (integer): Level for the module heading. Function names are created as second-level headings and the "Parameters" heading is two levels below the first heading level. 
+/// - show-module-name (boolean): Whether to output the name of the module.  
 /// - type-colors (dictionary): Colors to use for each type. 
 ///     Colors for missing types default to gray (`"#eff0f3"`).
 /// - allow-breaking (boolean): Whether to allow breaking of parameter description blocks
@@ -260,12 +266,13 @@
 #let show-module(
   module-doc, 
   first-heading-level: 2,
+  show-module-name: true,
   type-colors: type-colors,
   allow-breaking: true,
   omit-empty-param-descriptions: true,
 ) = {
   let label-prefix = module-doc.label-prefix
-  if "name" in module-doc {
+  if "name" in module-doc and show-module-name {
     let module-name = module-doc.name
     heading(module-name, level: first-heading-level)
   }
@@ -318,7 +325,7 @@
         breakable: allow-breaking
       )
     }
-    if index < module-doc.functions.len() - 1 { v(1cm) }
+    if index < module-doc.functions.len()  { v(1cm) }
   }
 }
 
