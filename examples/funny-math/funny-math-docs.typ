@@ -28,11 +28,11 @@
 
 
 #{
-  let funny-module = parse-module("examples/funny-math/funny-math.typ", name: "Funny module")
+  let funny-module = parse-module("/funny-math.typ", name: "Funny module")
 
   show-module(funny-module, first-heading-level: 1)
   
-  let funny-module-ext = parse-module("examples/funny-math/funny-math-complex.typ")
+  let funny-module-ext = parse-module("/funny-math-complex.typ")
 
   // Also show the "complex" sub-module which belongs to the main module (funny-math.typ) since it is imported by it. 
   show-module(funny-module-ext, show-module-name: false, first-heading-level: 1)
