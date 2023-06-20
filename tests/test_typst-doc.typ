@@ -121,3 +121,42 @@ let a = ```
 let result = parse-code(a)
 assert.eq(result.functions.len(), 0)
 }
+
+
+
+
+// Test image
+#{
+  let result = eval-with-images("[asd#image(\"/test.svg\")]")
+}
+
+// Test image code mode
+#{
+  let result = eval-with-images("image(\"/test.svg\")")
+}
+
+// Test image filename with opening parenthesis
+#{
+  let result = eval-with-images("[asd#image(\"/test (2.svg\")]")
+}
+
+// Test image with parameters
+#{
+  let result = eval-with-images("[asd#image(\"/test.svg\", width: 20pt, height: 20pt)]")
+}
+
+// Test image with parameters, complex expressions inside `image()`
+#{
+  let result = eval-with-images("[asd#image(\"/test.sv\" + (\"g\"), width: 20pt-(10pt*2), height: 20pt)]")
+}
+
+
+// Test image, multiple images
+#{
+  let result = eval-with-images("[asd#image(\"/test.svg\") ]; image(\"/test (2.svg\")")
+}
+
+// Test image, inside grid
+#{
+  let result = eval-with-images("grid(image(\"/test.svg\"), image(\"/test (2.svg\"))")
+}

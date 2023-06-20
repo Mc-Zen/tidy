@@ -28,6 +28,193 @@
   "function": rgb("#f9dfff"),
 )
 
+
+
+// Parse a comma-separated argument list that may contain
+// arbitrary code syntax until the first parenthesis is closed
+// return none, if it is never closed
+//
+// We deal with
+//  - any number of opening and closing parenthesis
+//  - string literals
+// We don't deal with:
+//  - commented out code (// or /**/)
+//  - raw strings that contain " or ( or )
+// Returns list of strings for arguments that are separated by commata at
+// scope level and the number of characters that have been "swallowed"
+#let parse-argument-list(text, index) = {
+  if text.at(index) != "(" { return ((:), 0) }
+  index += 1
+  let brace-level = 1
+  let literal-mode = none
+  let arg-strings = ()
+  let current-arg = ""
+  let previous-char = none
+  let count = 0
+  for c in text.slice(index) {
+    let ignore-char = false
+    if c == "\"" and previous-char != "\\" { 
+      if literal-mode == none { literal-mode = "\"" }
+      else if literal-mode == "\"" { literal-mode = none }
+    }
+    if literal-mode == none {
+      if c == "(" { brace-level += 1 }
+      else if c == ")" { brace-level -= 1 }
+      else if c == "," and brace-level == 1 {
+        arg-strings.push(current-arg)
+        current-arg = ""
+        ignore-char = true
+      }
+    }
+    if brace-level == 0 {
+      arg-strings.push(current-arg)
+      break
+    }
+    if not ignore-char { current-arg += c }
+    previous-char = c
+    count += 1
+  }
+  if brace-level > 0 { return none }
+  return (arg-strings, count)
+}
+
+/// Parse an argument list from source code at given position. 
+/// This function returns `none`, if the argument list is not properly closed. 
+/// Otherwise, a dictionary is returned with an entry for each parsed 
+/// argument name. The values are dictionaries that may be empty or 
+/// have an entry for `default` containing a string with the parsed
+/// default value for this argument. 
+/// 
+/// 
+/// 
+/// *Example*
+///
+/// Let's take some source code:
+/// ```typ
+/// #let func(p1, p2: 3pt, p3: (), p4: (entries: ())) = {...}
+/// ```
+/// Here, we would call `parse-parameter-list(source-code, 9)` and retrieve
+/// #pad(x: 1em, ```typc
+/// (
+///   p0: (:),
+///   p1: (default: "3pt"),
+///   p2: (default: "()"),
+///   p4: (default: "(entries: ())"),
+/// ) 
+/// ```)
+///
+/// - module-content (string): Source code.
+/// - index (integer): Index where the argument list starts. This index should point to the character *next* to the function name, i.e. to the opening brace `(` of the argument list if there is one (note, that function aliases for example produced by `myfunc.where(arg1: 3)` do not have an argument list).
+/// -> none, dictionary
+#let parse-parameter-list(text, index) = {
+  let result = parse-argument-list(text, index)
+  if result == none { return none }
+  let (arg-strings, count) = result
+  let args = (:)
+  for arg in arg-strings {
+    if arg.trim().len() == 0 { continue }
+    let colon-pos = arg.position(":")
+    if colon-pos == none {
+      args.insert(arg.trim(), (:))
+    } else {
+      let name = arg.slice(0, colon-pos)
+      let default-value = arg.slice(colon-pos + 1)
+      args.insert(name.trim(), (default: default-value.trim()))
+    }
+  }
+  return args
+}
+
+
+// Take an array of arg strings and retrieve a list of positional and named
+// arguments, respectively. THe values are `eval()`ed. 
+#let parse-arg-strings(args) = {
+  let positional-args = ()
+  let named-args = (:)
+  for arg in args {
+    if arg.trim().len() == 0 { continue }
+    let colon-pos = arg.position(":")
+    if colon-pos == none {
+      positional-args.push(eval(arg.trim()))
+    } else {
+      let name = arg.slice(0, colon-pos)
+      let value = arg.slice(colon-pos + 1)
+      named-args.insert(name.trim(), eval(value.trim()))
+    }
+  }
+  return (positional-args, named-args)
+}
+
+// some stuff #{image("settings.svg")} asd#image("settings.svg")
+
+// Find all calls to `image()` in the given code string and return an array
+// of objects containing info about
+// - the start index of the image call (including the `#` if present)
+// - the end index of the image call, pointing to the closing `)`
+// - whether the call takes place in code mode (no `#`) or in content mode
+// - positional and named args for the `image()` function call
+#let find-image-commands(text) = {
+  let matches = text.matches("image(")
+  let image-commands = ()
+  for match in matches {
+    let (arg-strings, length) = parse-argument-list(text, match.start + 5)
+    let (positional-args, named-args) = parse-arg-strings(arg-strings)
+    
+    let code-mode = not (match.start > 0 and text.at(match.start - 1) == "#")
+    text.slice(match.start + 6, match.end + length)
+    image-commands.push(
+      (
+        start: match.start - int(not code-mode), 
+        end: match.end + length,
+        positional-args: positional-args,
+        named-args: named-args,
+        code-mode: code-mode
+      )
+    )
+  }
+  return image-commands
+}
+
+// In given code string, replace every `image()` call with a placeholder string
+// `%%img0%%` (the number is incremented subsequently). 
+#let replace-image-commands(text, image-commands) = {
+  let result-text = ""
+  let position = 0
+  for (index, image-command) in image-commands.enumerate() {
+    result-text += text.slice(position, image-command.start)
+    let placeholder = "%%img" + str(index) + "%%"
+    if image-command.code-mode { placeholder = "[" + placeholder + "]"}
+    result-text += placeholder
+    position = image-command.end + 1
+  }
+  return result-text + text.slice(position)
+}
+
+// This function `eval()`s the given string and shows images that are to be 
+// inserted with the `image()` function. 
+//
+// `eval()` does not allow access to the file system, so calls to #image()
+// do not work. We work around that by identifying all these calls and
+// replacing them with some placeholder. We use show rules to show these
+// placeholders as the correct images. 
+//  - Any number of images is supported
+//  - image() amy be called in content or code mode
+//  - arguments like `width` for images are respected
+#let eval-with-images(text) = {
+  if "image" not in text { return eval(text) }
+  
+  let image-commands = find-image-commands(text)
+  let replaced-text = replace-image-commands(text, image-commands)
+  
+  show regex("%%img\\d+%%") : it => {
+    let index = int(it.text.slice(5, -2))
+    let filename = image-commands.at(index).positional-args.at(0)
+    image(filename, ..image-commands.at(index).named-args)
+  }
+  eval(replaced-text)
+}
+
+
 #let get-type-color(type) = type-colors.at(type, default: rgb("#eff0f3"))
 
 // Create beautiful, colored type box
@@ -47,79 +234,14 @@
     #h(.5cm) 
     #types.map(x => type-box(x)).join([ #text("or",size:.6em) ])
   
-    #eval("[" + content + "]")
+    #eval-with-images("[" + content + "]")
     
     #if show-default [ Default: #raw(lang: "typc", default) ]
   ]
 )
 
-
-
-/// Parse an argument list from source code at given position. 
-/// This function returns `none`, if the argument list is not properly closed. 
-/// Otherwise, a dictionary is returned with an entry for each parsed 
-/// argument name. The values are dictionaries that may be empty or 
-/// have an entry for `default` containing a string with the parsed
-/// default value for this argument. 
-/// 
-/// 
-/// 
-/// *Example*
-///
-/// Let's take some source code:
-/// ```typ
-/// #let func(p1, p2: 3pt, p3: (), p4: (entries: ())) = {...}
-/// ```
-/// Here, we would call `parse-argument-list(source-code, 9)` and retrieve
-/// #pad(x: 1em, ```typc
-/// (
-///   p0: (:),
-///   p1: (default: "3pt"),
-///   p2: (default: "()"),
-///   p4: (default: "(entries: ())"),
-/// ) 
-/// ```)
-///
-/// - module-content (string): Source code.
-/// - index (integer): Index where the argument list starts. This index should point to the character *next* to the function name, i.e. to the opening brace `(` of the argument list if there is one (note, that function aliases for example produced by `myfunc.where(arg1: 3)` do not have an argument list).
-/// -> none, dictionary
-#let parse-argument-list(module-content, index) = {
-  if module-content.at(index) != "(" { return (:) }
-  index += 1
-  let brace-level = 1
-  let arg-strings = ()
-  let current-arg = ""
-  for c in module-content.slice(index) {
-    if c == "(" { brace-level += 1 }
-    if c == ")" { brace-level -= 1 }
-    if c == "," and brace-level == 1 {
-      arg-strings.push(current-arg)
-      current-arg = ""
-      continue
-    }
-    if brace-level == 0 {
-      arg-strings.push(current-arg)
-      break
-    }
-    current-arg += c
-  }
-  if brace-level > 0 { return none }
-  let args = (:)
-  for arg in arg-strings {
-    if arg.trim().len() == 0 { continue }
-    let colon-pos = arg.position(":")
-    if colon-pos == none {
-      args.insert(arg.trim(), (:))
-    } else {
-      let name = arg.slice(0, colon-pos)
-      let default-value = arg.slice(colon-pos + 1)
-      args.insert(name.trim(), (default: default-value.trim()))
-    }
-  }
-  return args
-}
-
-// #parse-argument-list("sadsdasd (p0, p1: 3, p2: (), p4: (entries: ())) = ) asd", 9)
+// #parse-parameter-list("(asd: \"\", 4)", 0)
+// #parse-parameter-list("sadsdasd (p0, p1: 3, p2: (), p4: (entries: ())) = ) asd", 9)
 
 
 // Matches Typst docstring for a function declaration. Example:
@@ -191,7 +313,7 @@
     let docstring = match.captures.at(0)
     let fn-name = match.captures.at(1)
 
-    let args = parse-argument-list(content, match.end)
+    let args = parse-parameter-list(content, match.end)
     
     let fn-desc = ""
     let started-args = false
@@ -283,7 +405,7 @@
       #label(label-prefix + fn.name + "()")
     ]
     parbreak()
-    eval("[" + fn.description + "]")
+    eval-with-images("[" + fn.description + "]")
 
     block(breakable: allow-breaking,
       {
