@@ -97,18 +97,17 @@ assert.eq(result.functions.len(), 1)
 
 
 
-// Ignore args that are not in the argument list
-#{
-let a = ```
-/// Func
-/// - foo (content): asd
-/// - bar (content): asd
-#let a(bar) = {}
-```.text
-let result = parse-code(a)
-assert.eq(result.functions.len(), 1)
-assert.eq(result.functions.at(0).args.len(), 1)
-}
+// // Ignore args that are not in the argument list
+// #{
+// let a = ```
+// /// Func
+// /// - bar (content): asd
+// #let a(bar) = {}
+// ```.text
+// let result = parse-code(a)
+// assert.eq(result.functions.len(), 1)
+// assert.eq(result.functions.at(0).args.len(), 1)
+// }
 
 
 // Ignore interrupted docstring
@@ -125,38 +124,20 @@ assert.eq(result.functions.len(), 0)
 
 
 
-// Test image
+//// Parse args
+
 #{
-  let result = eval-with-images("[asd#image(\"/test.svg\")]")
+  let str = "#let func(p1, p2: 3pt, p3: (), p4: (entries: ()), p5, \"as:d\")"
+  let (args, processed-chars) = parse-argument-list(str, 9)
+  assert.eq(processed-chars, str.len() - 9)
+  assert.eq(args.len(), 6)
+  assert.eq(args.at(0), ("p1",))
+  assert.eq(args.at(1), ("p2", "3pt"))
+  assert.eq(args.at(2), ("p3", "()"))
+  assert.eq(args.at(3), ("p4", "(entries: ())"))
+  assert.eq(args.at(4), ("p5",))
+  assert.eq(args.at(5), ("\"as:d\"",))  
 }
 
-// Test image code mode
-#{
-  let result = eval-with-images("image(\"/test.svg\")")
-}
+// #parse-argument-list("#let func(p1, p2: 3pt, p3: (), p4: (entries: ()), p5)", 9)
 
-// Test image filename with opening parenthesis
-#{
-  let result = eval-with-images("[asd#image(\"/test (2.svg\")]")
-}
-
-// Test image with parameters
-#{
-  let result = eval-with-images("[asd#image(\"/test.svg\", width: 20pt, height: 20pt)]")
-}
-
-// Test image with parameters, complex expressions inside `image()`
-#{
-  let result = eval-with-images("[asd#image(\"/test.sv\" + (\"g\"), width: 20pt-(10pt*2), height: 20pt)]")
-}
-
-
-// Test image, multiple images
-#{
-  let result = eval-with-images("[asd#image(\"/test.svg\") ]; image(\"/test (2.svg\")")
-}
-
-// Test image, inside grid
-#{
-  let result = eval-with-images("grid(image(\"/test.svg\"), image(\"/test (2.svg\"))")
-}

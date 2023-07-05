@@ -28,29 +28,77 @@
   "function": rgb("#f9dfff"),
 )
 
+#let get-type-color(type) = type-colors.at(type, default: rgb("#eff0f3"))
+
+// Create beautiful, colored type box
+#let type-box(type) = { 
+  h(2pt)
+  box(outset: 2pt, fill: get-type-color(type), radius: 2pt, raw(type))
+  h(2pt)
+}
 
 
-// Parse a comma-separated argument list that may contain
-// arbitrary code syntax until the first parenthesis is closed
-// return none, if it is never closed
-//
-// We deal with
+/// Parse a Typst argument list either at
+///  - call site, e.g., "f("Timbuktu", value: 23)" or at
+///  - declaration, e.g. "let f(place, value: 0)".
+///
+/// This function returns a tuple `(args, count-processed-chars)` where
+/// `count-processed-chars` is the number of processed characters, i.e. the
+/// length of the argument list and `args` is a list with an entry for each 
+/// argument. 
+/// 
+/// The entries are lists with either one item if the argument is positional
+/// or two items if the argument is named. In this case, the first item holds
+/// the name, the second the value. Names as well as values are returned as 
+/// strings. 
+/// 
+/// This function returns `none`, if the argument list is not properly closed. 
+/// Note, that valid Typst code is expected. 
+///
+// Example: 
+// Calling this function with the following text 
+//   `"#let func(p1, p2: 3pt, p3: (), p4: (entries: ())) = {...}"`
+// and index 9 (which points to the opening parenthesis) yields the result 
+// ```
+//   (
+//     (
+//       ("p1",),
+//       ("p2", "3pt"),
+//       ("p3", "()"),
+//       ("p4", "(entries: ())"),
+//       ("p5",),
+//     ),
+//     44,
+//   )
+// ```
+// 
+// This function can deal with
 //  - any number of opening and closing parenthesis
 //  - string literals
 // We don't deal with:
 //  - commented out code (// or /**/)
 //  - raw strings that contain " or ( or )
-// Returns list of strings for arguments that are separated by commata at
-// scope level and the number of characters that have been "swallowed"
 #let parse-argument-list(text, index) = {
   if text.at(index) != "(" { return ((:), 0) }
   index += 1
   let brace-level = 1
-  let literal-mode = none
+  let literal-mode = none // Whether in ".."
   let arg-strings = ()
   let current-arg = ""
+  let is-named = false // Whether current argument is a named arg
+  
   let previous-char = none
-  let count = 0
+  let count-processed-chars = 1
+
+  let maybe-split-argument(arg, is-named) = {
+      if is-named {
+        let colon-pos = arg.position(":")
+        return (arg.slice(0, colon-pos).trim(), arg.slice(colon-pos + 1).trim())
+      } else {
+        return (arg.trim(),)
+      }
+  }
+  
   for c in text.slice(index) {
     let ignore-char = false
     if c == "\"" and previous-char != "\\" { 
@@ -61,22 +109,26 @@
       if c == "(" { brace-level += 1 }
       else if c == ")" { brace-level -= 1 }
       else if c == "," and brace-level == 1 {
-        arg-strings.push(current-arg)
+        arg-strings.push(maybe-split-argument(current-arg, is-named))
         current-arg = ""
         ignore-char = true
+        is-named = false
+      } else if c == ":" and brace-level == 1 {
+        is-named = true
       }
     }
+    count-processed-chars += 1
     if brace-level == 0 {
-      arg-strings.push(current-arg)
+      arg-strings.push(maybe-split-argument(current-arg, is-named))
       break
     }
     if not ignore-char { current-arg += c }
     previous-char = c
-    count += 1
   }
   if brace-level > 0 { return none }
-  return (arg-strings, count)
+  return (arg-strings, count-processed-chars)
 }
+
 
 /// Parse an argument list from source code at given position. 
 /// This function returns `none`, if the argument list is not properly closed. 
@@ -103,7 +155,7 @@
 /// ) 
 /// ```)
 ///
-/// - module-content (string): Source code.
+/// - text (string): Source code.
 /// - index (integer): Index where the argument list starts. This index should point to the character *next* to the function name, i.e. to the opening brace `(` of the argument list if there is one (note, that function aliases for example produced by `myfunc.where(arg1: 3)` do not have an argument list).
 /// -> none, dictionary
 #let parse-parameter-list(text, index) = {
@@ -112,40 +164,31 @@
   let (arg-strings, count) = result
   let args = (:)
   for arg in arg-strings {
-    if arg.trim().len() == 0 { continue }
-    let colon-pos = arg.position(":")
-    if colon-pos == none {
-      args.insert(arg.trim(), (:))
+    if arg.len() == 1 {
+      args.insert(arg.at(0), (:))
     } else {
-      let name = arg.slice(0, colon-pos)
-      let default-value = arg.slice(colon-pos + 1)
-      args.insert(name.trim(), (default: default-value.trim()))
+      args.insert(arg.at(0), (default: arg.at(1)))
     }
   }
   return args
 }
 
 
-// Take an array of arg strings and retrieve a list of positional and named
-// arguments, respectively. THe values are `eval()`ed. 
+// Take the result of `parse-argument-list()` and retrieve a list of positional and named
+// arguments, respectively. The values are `eval()`ed. 
 #let parse-arg-strings(args) = {
   let positional-args = ()
   let named-args = (:)
   for arg in args {
-    if arg.trim().len() == 0 { continue }
-    let colon-pos = arg.position(":")
-    if colon-pos == none {
-      positional-args.push(eval(arg.trim()))
+    if arg.len() == 1 {
+      positional-args.push(eval(arg.at(0)))
     } else {
-      let name = arg.slice(0, colon-pos)
-      let value = arg.slice(colon-pos + 1)
-      named-args.insert(name.trim(), eval(value.trim()))
+      named-args.insert(arg.at(0), eval(arg.at(1)))
     }
   }
   return (positional-args, named-args)
 }
 
-// some stuff #{image("settings.svg")} asd#image("settings.svg")
 
 // Find all calls to `image()` in the given code string and return an array
 // of objects containing info about
@@ -161,11 +204,10 @@
     let (positional-args, named-args) = parse-arg-strings(arg-strings)
     
     let code-mode = not (match.start > 0 and text.at(match.start - 1) == "#")
-    text.slice(match.start + 6, match.end + length)
     image-commands.push(
       (
         start: match.start - int(not code-mode), 
-        end: match.end + length,
+        end: match.end + length - 2,
         positional-args: positional-args,
         named-args: named-args,
         code-mode: code-mode
@@ -215,15 +257,6 @@
 }
 
 
-#let get-type-color(type) = type-colors.at(type, default: rgb("#eff0f3"))
-
-// Create beautiful, colored type box
-#let type-box(type) = { 
-  let color = get-type-color(type)
-  h(2pt)
-  box(outset: 2pt, fill: color, radius: 2pt, raw(type))
-  h(2pt)
-}
 
 // Create a parameter description block, containing name, type, description and optionally the default value. 
 #let param-description-block(name, types, content, show-default: false, default: none, breakable: false) = block(
@@ -239,10 +272,6 @@
     #if show-default [ Default: #raw(lang: "typc", default) ]
   ]
 )
-
-// #parse-parameter-list("(asd: \"\", 4)", 0)
-// #parse-parameter-list("sadsdasd (p0, p1: 3, p2: (), p4: (entries: ())) = ) asd", 9)
-
 
 // Matches Typst docstring for a function declaration. Example:
 // 
@@ -279,11 +308,58 @@
 #let reference-matcher = regex(`@@([\w\d\-_\)\(]+)`.text)
 
 
-#let process-function-references(text, label-prefix: none) = {
+#let process-function-references(text, parse-info) = {
   return text.replace(reference-matcher, info => {
     let target = info.captures.at(0).trim(")").trim("(")
-    return "#link(label(\"" + label-prefix + target + "()\"))[`" + target + "()`]"
+    return "#link(label(\"" + parse-info.label-prefix + target + "()\"))[`" + target + "()`]"
   })
+}
+
+#let parse-function-docstring(content, match, parse-info) = {
+  let docstring = match.captures.at(0)
+  let fn-name = match.captures.at(1)
+
+  
+  let fn-desc = ""
+  let started-args = false
+  let documented-args = ()
+  let return-types = none
+  for line in docstring.split("\n") {
+    let arg-match = line.match(argument-type-matcher)
+    if arg-match == none {
+      let trimmed-line = line.trim().trim("/")
+      if not started-args { fn-desc += trimmed-line + "\n"}
+      else { // Return type:
+        if trimmed-line.trim().starts-with("->") {
+          return-types = trimmed-line.trim().slice(2).split(",").map(x => x.trim())
+        } else {
+          documented-args.last().desc += "\n" + trimmed-line 
+        }
+      }
+    } else {
+      started-args = true
+      let param-name = arg-match.captures.at(0)
+      let param-types = arg-match.captures.at(1).split(",").map(x => x.trim())
+      let param-desc = arg-match.captures.at(2)
+      documented-args.push((name: param-name, types: param-types, desc: param-desc))
+    }
+  }
+  fn-desc = process-function-references(fn-desc, parse-info)
+  let args = parse-parameter-list(content, match.end)
+  for arg in documented-args {
+    if arg.name in args {
+      args.at(arg.name).description = process-function-references(arg.desc, parse-info)
+      args.at(arg.name).types = arg.types
+    } else {
+      assert(false, message: "The parameter \"" + arg.name + "\" does not appear in the argument list of the function \"" + fn-name + "\"")
+    }
+  }
+  if parse-info.require-all-parameters {
+    for arg in args {
+      assert(documented-args.find(x => x.name == arg.at(0)) != none, message: "The parameter \"" + arg.at(0) + "\" of the function \"" + fn-name + "\" is not documented. ")
+    }
+  }
+  return (name: fn-name, description: fn-desc, args: args, return-types: return-types)
 }
 
 /// Parse the docstrings of Typst code. This function returns a dictionary with the keys
@@ -304,51 +380,21 @@
 ///
 /// - content (string): Typst code to parse for docs. 
 /// - label-prefix (none, string): Prefix for internally created labels 
-///   and references. Use this to avoid name conflicts with labels. 
-#let parse-code(content, label-prefix: none) = {
+/// - require-all-parameters (boolean): Require that all parameters of a functions are documented and fail if some are not. 
+#let parse-code(
+  content, 
+  label-prefix: none, 
+  require-all-parameters: false
+) = {
   let matches = content.matches(docstring-matcher)
   let function-docs = ()
+  let parse-info = (
+    label-prefix: label-prefix,
+    require-all-parameters: require-all-parameters
+  )
 
   for match in matches {
-    let docstring = match.captures.at(0)
-    let fn-name = match.captures.at(1)
-
-    let args = parse-parameter-list(content, match.end)
-    
-    let fn-desc = ""
-    let started-args = false
-    let documented-args = ()
-    let return-types = none
-    for line in docstring.split("\n") {
-      let match = line.match(argument-type-matcher)
-      if match == none {
-        let trimmed-line = line.trim().trim("/")
-        if not started-args { fn-desc += trimmed-line + "\n"}
-        else {
-          if trimmed-line.trim().starts-with("->") {
-            return-types = trimmed-line.trim().slice(2).split(",").map(x => x.trim())
-          } else {
-            documented-args.last().desc += "\n" + trimmed-line 
-          }
-        }
-      } else {
-        started-args = true
-        let param-name = match.captures.at(0)
-        let param-types = match.captures.at(1).split(",").map(x => x.trim())
-        let param-desc = match.captures.at(2)
-        documented-args.push((name: param-name, types: param-types, desc: param-desc))
-      }
-    }
-    fn-desc = process-function-references(fn-desc, label-prefix: label-prefix)
-    for arg in documented-args {
-      if arg.name in args {
-        args.at(arg.name).description = process-function-references(arg.desc, label-prefix: label-prefix)
-        args.at(arg.name).types = arg.types
-      } else {
-        assert(false, message: "The parameter \"" + arg.name + "\" does not appear in the argument list of the function \"" + fn-name + "\"")
-      }
-    }
-    function-docs.push((name: fn-name, description: fn-desc, args: args, return-types: return-types))
+    function-docs.push(parse-function-docstring(content, match, parse-info))
   }
   let result = (functions: function-docs, label-prefix: label-prefix)
   return result
@@ -363,15 +409,16 @@
 ///
 /// - filename (string): Filename for the `.typ` file to analyze for docstrings.
 /// - name (string, none): The name for the module. If not given, the module name will be derived form the filename. 
-#let parse-module(filename, name: none, label-prefix: none) = {
+#let parse-module(
+  filename, 
+  name: none, 
+  label-prefix: none,
+  require-all-parameters: false
+) = {
   let mname = filename.replace(".typ", "")
   let prefix = if label-prefix != none { label-prefix } else { mname }
-  let result = parse-code(read(filename), label-prefix: prefix)
-  if name != none {
-    result.insert("name", name)
-  } else {
-    result.insert("name", mname)
-  }
+  let result = parse-code(read(filename), label-prefix: prefix, require-all-parameters: require-all-parameters)
+  result.name = if name != none { name } else { mname }
   return result
 }
 
@@ -385,13 +432,19 @@
   list(..items)
 }
 
-#let show-function(fn, label-prefix: "", first-heading-level: 2, allow-breaking: false, omit-empty-param-descriptions: true) = {
+#let show-function(
+  fn, 
+  label-prefix: none, 
+  first-heading-level: 2, 
+  allow-breaking: false, 
+  omit-empty-param-descriptions: true
+) = {
   [
     #heading(fn.name, level: first-heading-level + 1)
     #label(label-prefix + fn.name + "()")
   ]
   parbreak()
-  eval("[" + fn.description + "]")
+  eval-with-images("[" + fn.description + "]")
 
   block(breakable: allow-breaking,
     {
