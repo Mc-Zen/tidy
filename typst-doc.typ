@@ -274,7 +274,7 @@
 // Matches the function name (any Typst identifier)
 
 
-#let argument-type-matcher = regex(`[^\S\r\n]*/{3} - ([\w\d\-_]+) \(([\w\d\-_ ,]+)\): ?(.*)`.text)
+#let argument-type-matcher = regex(`[^\S\r\n]*/{3} - ([.\w\d\-_]+) \(([\w\d\-_ ,]+)\): ?(.*)`.text)
 
 #let reference-matcher = regex(`@@([\w\d\-_\)\(]+)`.text)
 
@@ -344,6 +344,8 @@
       if arg.name in args {
         args.at(arg.name).description = process-function-references(arg.desc, label-prefix: label-prefix)
         args.at(arg.name).types = arg.types
+      } else {
+        assert(false, message: "The parameter \"" + arg.name + "\" does not appear in the argument list of the function \"" + fn-name + "\"")
       }
     }
     function-docs.push((name: fn-name, description: fn-desc, args: args, return-types: return-types))
@@ -355,14 +357,16 @@
 /// Parse the docstrings of a typst module. This function returns a dictionary with the keys
 /// - `name`: The module name as a string.
 /// - `functions`: A list of function documentations as dictionaries.
+/// - `label-prefix`: The prefix for internal labels and references. 
 /// The label prefix will automatically be the name of the module. /// 
 /// See @@parse-code() for more details. 
 ///
 /// - filename (string): Filename for the `.typ` file to analyze for docstrings.
 /// - name (string, none): The name for the module. If not given, the module name will be derived form the filename. 
-#let parse-module(filename, name: none) = {
+#let parse-module(filename, name: none, label-prefix: none) = {
   let mname = filename.replace(".typ", "")
-  let result = parse-code(read(filename), label-prefix: mname)
+  let prefix = if label-prefix != none { label-prefix } else { mname }
+  let result = parse-code(read(filename), label-prefix: prefix)
   if name != none {
     result.insert("name", name)
   } else {
@@ -372,25 +376,88 @@
 }
 
 
+#let show-outline(module-doc) = {
+  let prefix = module-doc.label-prefix
+  let items = ()
+  for fn in module-doc.functions {
+    items.push(link(label(prefix + fn.name + "()"), fn.name + "()"))
+  }
+  list(..items)
+}
+
+#let show-function(fn, label-prefix: "", first-heading-level: 2, allow-breaking: false, omit-empty-param-descriptions: true) = {
+  [
+    #heading(fn.name, level: first-heading-level + 1)
+    #label(label-prefix + fn.name + "()")
+  ]
+  parbreak()
+  eval("[" + fn.description + "]")
+
+  block(breakable: allow-breaking,
+    {
+      heading("Parameters", level: first-heading-level + 2)
+    
+      pad(x:10pt, {
+      set text(font: "Cascadia Mono", size: 0.85em, weight: 340)
+      text(fn.name, fill: fn-color)
+      "("
+      let inline-args = fn.args.len() < 2
+      if not inline-args { "\n  " }
+      let items = ()
+      for (arg, info) in fn.args {
+        let types 
+        if "types" in info {
+          types = ": " + info.types.map(x => type-box(x)).join(" ")
+        }
+        items.push(arg + types)
+      }
+      items.join( if inline-args {", "} else { ",\n  "})
+      if not inline-args { "\n" } + ")"
+      if fn.return-types != none {
+        " -> " 
+        fn.return-types.map(x => type-box(x)).join(" ")
+      }
+    })
+  })
+
+  let blocks = ()
+  for (name, info) in fn.args {
+    let types = info.at("types", default: ())
+    let description = info.at("description", default: "")
+    if description.trim() == "" and omit-empty-param-descriptions { continue }
+    param-description-block(
+      name, 
+      types, description, 
+      show-default: "default" in info, 
+      default: info.at("default", default: none),
+      breakable: allow-breaking
+    )
+  }
+  v(1cm)
+  // if index < module-doc.functions.len()  { v(1cm) }
+}
 
 /// Show given module in the style of the Typst online documentation. 
 /// This displays all (documented) functions in the module sorted alphabetically. 
 ///
-/// - module-doc (dictionary): Module documentation information as returned by @@parse-module. 
-/// - first-heading-level (integer): Level for the module heading. Function names are created as second-level headings and the "Parameters" heading is two levels below the first heading level. 
+/// - module-doc (dictionary): Module documentation information as returned by 
+///           @@parse-module. 
+/// - first-heading-level (integer): Level for the module heading. Function names are 
+///           created as second-level headings and the "Parameters" heading is two levels 
+///           below the first heading level. 
 /// - show-module-name (boolean): Whether to output the name of the module.  
 /// - type-colors (dictionary): Colors to use for each type. 
-///     Colors for missing types default to gray (`"#eff0f3"`).
-/// - allow-breaking (boolean): Whether to allow breaking of parameter description blocks
+///           Colors for missing types default to gray (`"#eff0f3"`).
+/// - allow-breaking (boolean): Whether to allow breaking of parameter description blocks.
 /// - omit-empty-param-descriptions (boolean): Whether to omit description blocks for
-///       Parameters with empty description. 
+///           Parameters with empty description. 
 /// -> content
 #let show-module(
   module-doc, 
   first-heading-level: 2,
   show-module-name: true,
   type-colors: type-colors,
-  allow-breaking: true,
+  allow-breaking: false,
   omit-empty-param-descriptions: true,
 ) = {
   let label-prefix = module-doc.label-prefix
@@ -400,54 +467,13 @@
   }
   
   for (index, fn) in module-doc.functions.enumerate() {
-    [
-      #heading(fn.name, level: first-heading-level + 1)
-      #label(label-prefix + fn.name + "()")
-    ]
-    parbreak()
-    eval-with-images("[" + fn.description + "]")
-
-    block(breakable: allow-breaking,
-      {
-        heading("Parameters", level: first-heading-level + 2)
-      
-        pad(x:10pt, {
-        set text(font: "Cascadia Mono", size: 0.85em, weight: 340)
-        text(fn.name, fill: fn-color)
-        "("
-        let inline-args = fn.args.len() < 2
-        if not inline-args { "\n  " }
-        let items = ()
-        for (arg, info) in fn.args {
-          let types 
-          if "types" in info {
-            types = ": " + info.types.map(x => type-box(x)).join(" ")
-          }
-          items.push(arg + types)
-        }
-        items.join( if inline-args {", "} else { ",\n  "})
-        if not inline-args { "\n" } + ")"
-        if fn.return-types != none {
-          " -> " 
-          fn.return-types.map(x => type-box(x)).join(" ")
-        }
-      })
-    })
-
-    let blocks = ()
-    for (name, info) in fn.args {
-      let types = info.at("types", default: ())
-      let description = info.at("description", default: "")
-      if description.trim() == "" and omit-empty-param-descriptions { continue }
-      param-description-block(
-        name, 
-        types, description, 
-        show-default: "default" in info, 
-        default: info.at("default", default: none),
-        breakable: allow-breaking
-      )
-    }
-    if index < module-doc.functions.len()  { v(1cm) }
+    show-function(
+      fn, 
+      label-prefix: label-prefix, 
+      first-heading-level: first-heading-level, 
+      allow-breaking: allow-breaking, 
+      omit-empty-param-descriptions: omit-empty-param-descriptions
+    )
   }
 }
 
