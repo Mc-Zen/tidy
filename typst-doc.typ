@@ -31,7 +31,7 @@
 #let get-type-color(type) = type-colors.at(type, default: rgb("#eff0f3"))
 
 // Create beautiful, colored type box
-#let type-box(type) = { 
+#let colored-type-box(type) = { 
   h(2pt)
   box(outset: 2pt, fill: get-type-color(type), radius: 2pt, raw(type))
   h(2pt)
@@ -259,19 +259,26 @@
 
 
 // Create a parameter description block, containing name, type, description and optionally the default value. 
-#let param-description-block(name, types, content, show-default: false, default: none, breakable: false) = block(
+#let param-description-block(
+  name, types, content, 
+  show-default: false, 
+  default: none, 
+  breakable: false,
+  display-type-function: colored-type-box 
+) = block(
   inset: 10pt, fill: luma(98%), width: 100%,
   breakable: breakable,
   [
     #text(weight: "bold", size: 1.1em, name) 
     #h(.5cm) 
-    #types.map(x => type-box(x)).join([ #text("or",size:.6em) ])
+    #types.map(x => display-type-function(x)).join([ #text("or",size:.6em) ])
   
     #eval-with-images("[" + content + "]")
     
     #if show-default [ Default: #raw(lang: "typc", default) ]
   ]
 )
+
 
 // Matches Typst docstring for a function declaration. Example:
 // 
@@ -286,7 +293,8 @@
 // 
 // The entire block may be indented by any amount, the declaration can either start with `#let` or `let`. The docstring must start with `///` on every line and the function declaration needs to start exactly at the next line. 
 // #let docstring-matcher = regex(`((?:[^\S\r\n]*/{3} ?.*\n)+)[^\S\r\n]*#?let (\w[\w\d\-_]+)`.text)
-#let docstring-matcher = regex(`([^\S\r\n]*///.*(?:\n[^\S\r\n]*///.*)*)\n[^\S\r\n]*#?let (\w[\w\d\-_]*)`.text)
+// #let docstring-matcher = regex(`([^\S\r\n]*///.*(?:\n[^\S\r\n]*///.*)*)\n[^\S\r\n]*#?let (\w[\w\d\-_]*)`.text)
+#let docstring-matcher = regex(`(?m)^((?:[^\S\r\n]*///.*\n)+)[^\S\r\n]*#?let (\w[\w\d\-_]*)`.text)
 // The regex explained: 
 //
 // First capture group: ([^\S\r\n]*///.*(?:\n[^\S\r\n]*///.*)*)
@@ -303,11 +311,15 @@
 // Matches the function name (any Typst identifier)
 
 
-#let argument-type-matcher = regex(`[^\S\r\n]*/{3} - ([.\w\d\-_]+) \(([\w\d\-_ ,]+)\): ?(.*)`.text)
+// Matches an argument documentation of the form `/// - myparameter (string)`. 
+#let argument-documentation-matcher = regex(`[^\S\r\n]*/{3} - ([.\w\d\-_]+) \(([\w\d\-_ ,]+)\): ?(.*)`.text)
 
+// Matches docstring references of the form `@@otherfunc` or `@@otherfunc()`. 
 #let reference-matcher = regex(`@@([\w\d\-_\)\(]+)`.text)
 
 
+// Take some text (i.e. a function or parameter description) and process
+// docstring references (starting with `@@`). 
 #let process-function-references(text, parse-info) = {
   return text.replace(reference-matcher, info => {
     let target = info.captures.at(0).trim(")").trim("(")
@@ -315,19 +327,22 @@
   })
 }
 
+// Parse a function docstring that has been located in the source code
+// with given match. The first capture group should hold the entire, raw
+// docstring and the second capture the function name. 
 #let parse-function-docstring(content, match, parse-info) = {
   let docstring = match.captures.at(0)
   let fn-name = match.captures.at(1)
-
   
   let fn-desc = ""
   let started-args = false
   let documented-args = ()
   let return-types = none
   for line in docstring.split("\n") {
-    let arg-match = line.match(argument-type-matcher)
+    let arg-match = line.match(argument-documentation-matcher)
     if arg-match == none {
       let trimmed-line = line.trim().trim("/")
+      if trimmed-line.len() == 0 { continue }
       if not started-args { fn-desc += trimmed-line + "\n"}
       else { // Return type:
         if trimmed-line.trim().starts-with("->") {
@@ -404,26 +419,29 @@
 /// - `name`: The module name as a string.
 /// - `functions`: A list of function documentations as dictionaries.
 /// - `label-prefix`: The prefix for internal labels and references. 
-/// The label prefix will automatically be the name of the module. /// 
+/// The label prefix will automatically be the name of the module if not given explicity.
+/// 
 /// See @@parse-code() for more details. 
 ///
 /// - filename (string): Filename for the `.typ` file to analyze for docstrings.
-/// - name (string, none): The name for the module. If not given, the module name will be derived form the filename. 
+/// - name (auto, string): The name for the module. If `auto`, the module name will be derived from the filename. 
+/// - label-prefix (auto, string): The label-prefix for internal function references. If `auto`, the label-prefix name will be derived from the filename. 
+/// - require-all-parameters (boolean): Require that all parameters of a functions are documented and fail if some are not. 
 #let parse-module(
   filename, 
-  name: none, 
-  label-prefix: none,
+  name: auto, 
+  label-prefix: auto,
   require-all-parameters: false
 ) = {
-  let mname = filename.replace(".typ", "")
-  let prefix = if label-prefix != none { label-prefix } else { mname }
+  let module-name = filename.replace(".typ", "")
+  let prefix = if label-prefix == auto { module-name } else { label-prefix }
   let result = parse-code(read(filename), label-prefix: prefix, require-all-parameters: require-all-parameters)
-  result.name = if name != none { name } else { mname }
+  result.name = if name == auto { module-name } else { name }
   return result
 }
 
 
-#let show-outline(module-doc) = {
+#let default-show-outline(module-doc) = {
   let prefix = module-doc.label-prefix
   let items = ()
   for fn in module-doc.functions {
@@ -432,48 +450,51 @@
   list(..items)
 }
 
+#let default-display-parameter-list-function(fn, display-type-function) = {
+  pad(x: 10pt, {
+    set text(font: "Cascadia Mono", size: 0.85em, weight: 340)
+    text(fn.name, fill: fn-color)
+    "("
+    let inline-args = fn.args.len() < 2
+    if not inline-args { "\n  " }
+    let items = ()
+    for (arg-name, info) in fn.args {
+      let types 
+      if "types" in info {
+        types = ": " + info.types.map(x => display-type-function(x)).join(" ")
+      }
+      items.push(arg-name + types)
+    }
+    items.join( if inline-args {", "} else { ",\n  "})
+    if not inline-args { "\n" } + ")"
+    if fn.return-types != none {
+      " -> " 
+      fn.return-types.map(x => display-type-function(x)).join(" ")
+    }
+  })
+}
+
+
 #let show-function(
   fn, 
   label-prefix: none, 
   first-heading-level: 2, 
   allow-breaking: false, 
-  omit-empty-param-descriptions: true
+  omit-empty-param-descriptions: true,
+  display-type-function: colored-type-box,
+  display-parameter-list-function: default-display-parameter-list-function
 ) = {
   [
     #heading(fn.name, level: first-heading-level + 1)
     #label(label-prefix + fn.name + "()")
   ]
-  parbreak()
   eval-with-images("[" + fn.description + "]")
 
-  block(breakable: allow-breaking,
-    {
-      heading("Parameters", level: first-heading-level + 2)
-    
-      pad(x:10pt, {
-      set text(font: "Cascadia Mono", size: 0.85em, weight: 340)
-      text(fn.name, fill: fn-color)
-      "("
-      let inline-args = fn.args.len() < 2
-      if not inline-args { "\n  " }
-      let items = ()
-      for (arg, info) in fn.args {
-        let types 
-        if "types" in info {
-          types = ": " + info.types.map(x => type-box(x)).join(" ")
-        }
-        items.push(arg + types)
-      }
-      items.join( if inline-args {", "} else { ",\n  "})
-      if not inline-args { "\n" } + ")"
-      if fn.return-types != none {
-        " -> " 
-        fn.return-types.map(x => type-box(x)).join(" ")
-      }
-    })
+  block(breakable: allow-breaking, {
+    heading("Parameters", level: first-heading-level + 2)
+    display-parameter-list-function(fn, display-type-function)
   })
 
-  let blocks = ()
   for (name, info) in fn.args {
     let types = info.at("types", default: ())
     let description = info.at("description", default: "")
@@ -483,11 +504,10 @@
       types, description, 
       show-default: "default" in info, 
       default: info.at("default", default: none),
-      breakable: allow-breaking
+      breakable: allow-breaking,
+      display-type-function: display-type-function
     )
   }
-  v(1cm)
-  // if index < module-doc.functions.len()  { v(1cm) }
 }
 
 /// Show given module in the style of the Typst online documentation. 
@@ -504,6 +524,12 @@
 /// - allow-breaking (boolean): Whether to allow breaking of parameter description blocks.
 /// - omit-empty-param-descriptions (boolean): Whether to omit description blocks for
 ///           Parameters with empty description. 
+/// - show-function (function): Function to use to show the documentation for a single
+///           function. This can be used to customize the look of the documentation. 
+/// - show-outline (function): Function to use to show the documentation for a single
+/// - sort (auto, none, function): Function to use to sort the function documentations. 
+///           With `auto`, they are sorted alphabetatically by name and with `none` they
+///           are not sorted. 
 /// -> content
 #let show-module(
   module-doc, 
@@ -512,11 +538,21 @@
   type-colors: type-colors,
   allow-breaking: false,
   omit-empty-param-descriptions: true,
+  show-outline: false,
+  sort: auto,
+  show-function: show-function
 ) = {
   let label-prefix = module-doc.label-prefix
   if "name" in module-doc and show-module-name {
-    let module-name = module-doc.name
-    heading(module-name, level: first-heading-level)
+    heading(module-doc.name, level: first-heading-level)
+    parbreak()
+  }
+  
+  if sort == auto { module-doc.functions = module-doc.functions.sorted(key: x => x.name) }
+  else if type(sort) == "function" { module-doc.functions = module-doc.functions.sorted(key: sort) }
+  
+  if show-outline {
+    default-show-outline(module-doc)
   }
   
   for (index, fn) in module-doc.functions.enumerate() {
@@ -527,6 +563,7 @@
       allow-breaking: allow-breaking, 
       omit-empty-param-descriptions: omit-empty-param-descriptions
     )
+    // if index < module-doc.functions.len() - 1  { v(1cm) }
   }
 }
 
