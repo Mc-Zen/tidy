@@ -1,0 +1,8 @@
+
+[package]
+name = "tidy"
+version = "0.1.0"
+entrypoint = "tidy.typ"
+authors = ["Mc-Zen"]
+license = "MIT"
+description = "Generate documentation directly in Typst."

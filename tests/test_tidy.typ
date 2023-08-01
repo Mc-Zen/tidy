@@ -1,4 +1,9 @@
-#import "../typst-doc.typ": *
+#import "/src/tidy.typ": *
+#import "/src/tidy-parse.typ": *
+
+// Color to highlight function names in
+#let fn-color = rgb("#4b69c6")
+
 
 
 // Basic tests
@@ -7,10 +12,10 @@ let a = ```
 /// Func
 #let a-3_56C() = {}
 ```.text
-let result = parse-code(a)
+let result = parse-module(a)
 assert.eq(result.functions.len(), 1)
 assert.eq(result.functions.at(0).name, "a-3_56C")
-assert.eq(result.functions.at(0).description, " Func\n")
+assert.eq(result.functions.at(0).description, [Func])
 assert.eq(result.functions.at(0).return-types, none)
 }
 
@@ -19,13 +24,14 @@ assert.eq(result.functions.at(0).return-types, none)
 let a = ```
 #{
   /// Func
+  /// 
   let a() = {}
 }
 ```.text
-let result = parse-code(a)
+let result = parse-module(a)
 assert.eq(result.functions.len(), 1)
 assert.eq(result.functions.at(0).name, "a")
-assert.eq(result.functions.at(0).description, " Func\n")
+assert.eq(result.functions.at(0).description, [Func])
 assert.eq(result.functions.at(0).return-types, none)
 }
 
@@ -37,12 +43,12 @@ let a = ```
 /// Func
 #let a(p1, p2: 2, p3: (), p4: ("entries": ())) = {}
 ```.text
-let result = parse-code(a)
+let result = parse-module(a)
 assert.eq(result.functions.len(), 1)
 let f0 = result.functions.at(0)
 
 assert.eq(f0.name, "a")
-assert.eq(f0.description, " Func\n")
+assert.eq(f0.description, [Func])
 assert.eq(f0.args.len(), 4)
 assert.eq(f0.args.p1, (:))
 assert.eq(f0.args.p2, (default: "2"))
@@ -65,16 +71,16 @@ let a = ```
 /// -> content, integer
 #let a(p1, p2: 2, p3: (), p4: ("entries": ())) = {}
 ```.text
-let result = parse-code(a)
+let result = parse-module(a)
 assert.eq(result.functions.len(), 1)
 let f0 = result.functions.at(0)
 
 assert.eq(f0.name, "a")
-assert.eq(f0.description, " Func\n")
+assert.eq(f0.description, [Func])
 assert.eq(f0.args.len(), 4)
-assert.eq(f0.args.p1, (description: "a param $a$", types: ("string",)))
+assert.eq(f0.args.p1, (description: [a param $a$], types: ("string",)))
 assert.eq(f0.args.p2.default, "2")
-assert.eq(f0.args.p2.description, "a param $b$\n        Oh yes")
+assert.eq(f0.args.p2.description, [a param $b$ Oh yes])
 assert.eq(f0.args.p2.types, ("boolean", "function"))
 assert.eq(f0.return-types, ("content", "integer"))
 }
@@ -88,7 +94,7 @@ let a = ```
 /// Func
 #let a = myfunc.where(e: 1)
 ```.text
-let result = parse-code(a)
+let result = parse-module(a)
 assert.eq(result.functions.len(), 1)
 }
 
@@ -104,7 +110,7 @@ assert.eq(result.functions.len(), 1)
 // /// - bar (content): asd
 // #let a(bar) = {}
 // ```.text
-// let result = parse-code(a)
+// let result = parse-module(a)
 // assert.eq(result.functions.len(), 1)
 // assert.eq(result.functions.at(0).args.len(), 1)
 // }
@@ -117,7 +123,7 @@ let a = ```
 // a
 #let a()
 ```.text
-let result = parse-code(a)
+let result = parse-module(a)
 assert.eq(result.functions.len(), 0)
 }
 
