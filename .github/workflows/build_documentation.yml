@@ -12,4 +12,4 @@ jobs:
       - name: Typst
         uses: lvignoli/typst-action@main
         with:
-          source_file: docs/documentation.typ
+          source_file: docs/tidy-guide.typ
