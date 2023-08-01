@@ -10,4 +10,4 @@ jobs:
       - name: Typst
         uses: lvignoli/typst-action@main
         with:
-          source_file: tests/test_typst-doc.typ
+          source_file: tests/test_tidy.typ
