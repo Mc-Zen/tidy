@@ -21,9 +21,8 @@ The [documentation](./docs/tidy-guide.pdf) describes the usage of this module an
 ## Usage
 
 ```java
-
 #import "@preview/tidy:0.1.0"
-#let module = #tidy.parse-module("my-module.typ")
+#let module = tidy.parse-module("my-module.typ")
 #tidy.show-module(module, style: tidy.styles.default)
 ```
 
@@ -52,6 +51,6 @@ You can document your functions similar to javadoc by prepending a block of `///
 #let something(param1, param2: 3pt) = { return true }
 ```
 
-**tidy** turns this into (without the gray background):
+**tidy** turns this into:
 
-![](docs/images/example.svg)
+![](docs/images/my-module-docs.svg)

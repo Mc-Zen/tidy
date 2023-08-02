@@ -43,59 +43,62 @@ Feed *tidy* your in-code documented source files and get beautiful documentation
 First, we import *tidy*. 
 #raw(block: true, lang: "typ", import-statement)
 
-You can document your functions similar to javadoc by prepending a block of `///` comments. 
+We now assume we have a Typst module called `my-module.typ`, containing a definition for a function called `something()`. 
 
 *Example of some documented source code:*
 
-#let example-code = ```typ
-/// This function does something. It always returns true.
-///
-/// We can have *markdown* and 
-/// even $m^a t_h$ here. A list? No problem:
-///  - Item one 
-///  - Item two 
-///
-///
-/// - param1 (string): This is param1.
-/// - param2 (content, length): This is param2.
-///           Yes, it really is. 
-/// -> boolean
-#let something(param1, param2: 3pt) = { return true }
+#let example-code = read("/examples/my-module.typ")
+#raw(lang: "typ", example-code)
+
+You can document your functions similar to javadoc by prepending a block of `///` comments. Each line needs to start with three slashes `///` (whitespace is allowed at the beginning of the line). Parameters of the function can be documented by listing them as 
+#show raw.where(lang: "markspace"): it => {
+  show " ": box(inset: (x: 0.3pt), box(
+    fill: red.lighten(70%), 
+    width: .7em, height: 1em,
+    radius: 1pt,
+    outset: (bottom: 2pt),
+  ))
+  it
+}
+```markspace
+/// - parameter-name (type): ...
 ```
-#example-code
+Following this exact form is important (see the marked spaces) since this allows to distinguish the parameter list from ordinary markup lists in the function description or in parameter descriptions. For example, another space in front of the `-` could be added to those if necessary. 
 
-Each line needs to start with three slashes `///` (whitespace is allowed at the beginning of the line). Parameters of the function can be documented by listing them as `- parameter-name (type): ...` as shown above. The possible types for each parameter are given in parentheses and after a colon `:`, the parameter description follows. An optional return type can be annotated by ending with a line that contains `->` and the return type. 
+The possible types for each parameter are given in parentheses and after a colon `:`, the parameter description follows. Indicating a type is mandatory. An optional return type can be annotated by ending with a line that contains `->` and the return type(s). 
 
-In front of the arguments, a function description can be put. Both function and parameter descriptions may span multiple lines and can contain any Typst code. 
+In front of the parameter list, a function description can be put. Both function and parameter descriptions may span multiple lines and can contain any Typst code (see @user-defined-symbols on how to use images, user-defined variables and functions in the docstring). 
 
-Calling `tidy.parse-module()` on the snippet above will read out the documentation of the given string. We can now invoke `tidy.show-module()` on the result to obtain the following result:
+Calling #raw(lang: "typc", "tidy.parse-module()") will read out the documentation of the given string. We can then invoke #raw(lang: "typc", "tidy.show-module()") on the result.
 
-#block(stroke: .5pt, inset: 20pt, 
+```typ
+#let my-module = tidy.parse-module(read("my-module.typ"), name: "my-module")
+#tidy.show-module(my-module)
+```
+
+#block(stroke: .5pt, inset: 20pt, breakable: false,
 {
   set text(size: .8em)
-  let example-code-doc = tidy.parse-module(example-code.text)
+  let example-code-doc = tidy.parse-module(example-code, name: "my-module")
   tidy.show-module(example-code-doc)
 })
 
 Cool, he?
 
-Usually, you'll want to parse a file, so you can instead just call 
-```typ
-#tidy.parse-module(read("my-module.typ"))
-```
-and then `tidy.show-module()` the result. 
-
-
-There is another little nice feature: in the docstring, you can reference other functions by writing `@@other-function()`. This will automatically create a link that when clicked will lead you to the documentation of that function. 
+There is another little nice feature: in the docstring, you can reference other functions with the extra syntax `@@other-function()`. This will automatically create a link that when clicked in the PDF will lead you to the documentation of that function. 
 
 Of course, everything happens instantaneously, so you can see the live result while writing the docs for your package. Keep your code documented!
 
+
+
+
 #pagebreak()
-= Accessing User-Defined Symbols
+= Accessing User-Defined Symbols <user-defined-symbols>
 
-This package uses the Typst function `eval()` to process any function or parameter descriptions in order to enable arbitrary Typst markup in them. Since `eval()` does not allow access to the filesystem and evaluates the content in a context where no user-defined variables or functions are available, it is not possible to call `#import`, `#image` or functions that you define in your code. 
 
-Instead, definitions can be made available by passing them to `tidy.parse-module()` with the optional `scope` parameter. 
+This package uses the Typst function #raw(lang: "typc", "eval()") to process function or parameter descriptions in order to enable arbitrary Typst markup in them. Since #raw(lang: "typc", "eval()") does not allow access to the filesystem and evaluates the content in a context where no user-defined variables or functions are available, it is not possible to call #raw(lang: "typ", "#import"), #raw(lang: "typ", "#image") or functions that you define in your code. 
+
+Instead, definitions can be made available by passing them to #raw(lang: "typc", "tidy.parse-module()") with the optional `scope` parameter: 
 ```typ
 #let make-square(width) = rect(width: width, height: width)
 
@@ -110,12 +113,12 @@ A function declared in `my-module.typ` can now use this variable in the descript
 #let my-function() = {}
 ```
 
-It is even possible to add entire modules to the scope which makes rendering examples using your module really easy. Let us say, `my-module.typ` looks like the following:
-#raw(lang: "typ", block: true, read("/examples/my-module.typ"))
+It is even possible to add entire modules to the scope which makes rendering examples using your module really easy. Let us say, `my-sine.typ` looks like the following:
+#raw(lang: "typ", block: true, read("/examples/my-sine.typ"))
 
 We can now parse the module and 
 ```typ
-#import "my-module.typ" // don't import something specific from the module!
+#import "my-sine.typ" // don't import something specific from the module!
 
 #let module = tidy.parse-module(
   read("my-module.typ"), 
@@ -126,15 +129,15 @@ We can now parse the module and
 
 #{
   set text(size: 0.7em)
-  import "/examples/my-module.typ"
+  import "/examples/my-sine.typ"
   
-  let module = tidy.parse-module(read("/examples/my-module.typ"), scope: (my-module: my-module))
+  let module = tidy.parse-module(read("/examples/my-sine.typ"), scope: (my-sine: my-sine))
   block(
     stroke: 0.5pt, 
     inset: 20pt, 
     breakable: false,
     columns(tidy.show-module(module)))
-  my-module.draw-sine(1cm, 0.5cm, 2)
+  my-sine.draw-sine(1cm, 0.5cm, 2)
 }
 
 
@@ -142,7 +145,7 @@ We can now parse the module and
 
 There are multiple ways to customize the output style. You can
 - pick a different predefined style,
-- apply show rules before showing the module,
+- apply show rules before printing the module documentation or
 - create an entirely new style.
 
 
@@ -154,7 +157,7 @@ A different predefined style can be selected by passing a style to the `style` p
 )
 ```
 
-A simple modification is also using show rules to customize the document style before calling #ref-fn("show-module()"). Setting any text and paragraph attributes works just out of the box. Furthermore, heading styles can be set to affect the appearance of the module name (relative heading level 1), function names (relative heading level 2) and the word *Parameters* (relative heading level 3), all relative to what is set with the parameter `first-heading-level` of #ref-fn("show-module()"). 
+You can use show rules to customize the document style before calling #ref-fn("show-module()"). Setting any text and paragraph attributes works just out of the box. Furthermore, heading styles can be set to affect the appearance of the module name (relative heading level 1), function names (relative heading level 2) and the word *Parameters* (relative heading level 3), all relative to what is set with the parameter `first-heading-level` of #ref-fn("show-module()"). 
 
 
 
@@ -174,12 +177,12 @@ Let us now "self-document" this package:
   tidy.show-module(module, show-outline: true, sort-functions: true, style: style)
 }
 
-#pagebreak()
+// #pagebreak()
 
-#{
-  set text(size: 9pt)
+// #{
+//   set text(size: 9pt)
 
-  let module = tidy.parse-module(read("/src/tidy-parse.typ"), require-all-parameters: true)
-  tidy.show-module(module, show-outline: true, sort-functions: true, break-param-descriptions: true, style: style)
-}
+//   let module = tidy.parse-module(read("/src/tidy-parse.typ"), require-all-parameters: true)
+//   tidy.show-module(module, show-outline: true, sort-functions: true, break-param-descriptions: true, style: style)
+// }
 
