@@ -1,9 +1,10 @@
 #import "funny-math-complex.typ": *
 
 
-/// This function computes the square root $sqrt(x)$ of it's argument. 
-/// #image("/examples/funny-math/settings.svg", width: 20pt)
+/// This function computes the square root $sqrt(x)$ of it's argument #image1
+/// Calling `funny-sqrt(12)` produces #funny-math.funny-sqrt(12). 
 /// - x (float, integer): Argument to take the square root of. 
+///  #image1
 /// -> float
 #let funny-sqrt(x) = { calc.sqrt(x) }
 

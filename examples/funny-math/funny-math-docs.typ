@@ -1,5 +1,5 @@
 #import "template.typ": *
-#import "/src/tidy.typ": parse-module, show-module
+#import "@preview/tidy:0.1.0"
 #show link: underline
 
 
@@ -26,14 +26,16 @@
 #show heading: set text(size: 1.5em)
 #show heading.where(level: 3): set text(size: .7em, style: "italic")
 
-
+#pagebreak()
 #{
-  let funny-module = parse-module(read("/examples/funny-math/funny-math.typ"), name: "Funny module")
-
-  show-module(funny-module, first-heading-level: 1)
+  import "funny-math.typ"
+  let image1 = image("/settings.svg", width: 20pt)
+  let funny-module = tidy.parse-module(read("/funny-math.typ"), name: "Funny module", scope: (image1: image1, funny-math: funny-math))
+  tidy.show-module(funny-module, first-heading-level: 1)
   
-  let funny-module-ext = parse-module(read("/examples/funny-math/funny-math-complex.typ"))
-
+  let funny-module-ext = tidy.parse-module(read("/funny-math-complex.typ"), name: "Funny Math Extension Module")
+  
+  pagebreak()
   // Also show the "complex" sub-module which belongs to the main module (funny-math.typ) since it is imported by it. 
-  show-module(funny-module-ext, show-module-name: false, first-heading-level: 1)
+  tidy.show-module(funny-module-ext, first-heading-level: 1)
 }
