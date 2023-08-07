@@ -9,3 +9,4 @@ __pycache__/
 
 # Misc
 /*.txt
+!tidy-guide.pdf
