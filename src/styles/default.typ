@@ -1,8 +1,4 @@
 
-// #import "../eval-with-images.typ": eval-with-images
-
-
-
 // Color to highlight function names in
 #let fn-color = rgb("#4b69c6")
 
@@ -92,9 +88,8 @@
     #h(.5cm) 
     #types.map(x => (style-args.style.show-type)(x)).join([ #text("or",size:.6em) ])
   
-    // #eval-with-images("[" + content + "]", scope: style-args.scope)
     #content
-    #if show-default [ Default: #raw(lang: "typc", default) ]
+    #if show-default [ #parbreak() Default: #raw(lang: "typc", default) ]
   ]
 )
 
@@ -107,7 +102,6 @@
     #label(style-args.label-prefix + fn.name + "()")
   ]
   fn.description
-  // eval-with-images("[" + fn.description + "]", scope: style-args.scope)
 
   block(breakable: style-args.break-param-descriptions, {
     heading("Parameters", level: style-args.first-heading-level + 2)

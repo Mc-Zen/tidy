@@ -38,12 +38,13 @@ Furthermore, it is possible to access user-defined functions and use images thro
     let module = tidy.parse-module(read("my-module.typ"))
     let an-image = image("img1.png")
     tidy.show-module(
-        module, style: tidy.styles.default,
+        module,
+        style: tidy.styles.default,
         scope: (my-module: my-module, img1: an-image)
     )
 }
 ```
-The docstrings in `my-module.typ` may now access the image with `#img1` and can call any function or variable from `my-module` in the style of `my-module.my-function`. This makes rendering examples right in the docstrings as easy as a breeze!
+The docstrings in `my-module.typ` may now access the image with `#img1` and can call any function or variable from `my-module` in the style of `#my-module.my-function`. This makes rendering examples right in the docstrings as easy as a breeze!
 
 ## Example
 

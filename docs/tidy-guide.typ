@@ -12,7 +12,7 @@
     "Mc-Zen",
   ),
   abstract: [*tidy* is a package that generates documentation directly in #link("https://typst.app/", [Typst])  for your Typst modules. It parses docstring comments similar to javadoc and co. and can be used to easily build a reference section for each module.  ],
-  date: "July 31, 2023",
+  date: "August 7, 2023",
   version: version,
   url: "https://github.com/Mc-Zen/tidy"
 )
@@ -68,7 +68,7 @@ The possible types for each parameter are given in parentheses and after a colon
 
 In front of the parameter list, a function description can be put. Both function and parameter descriptions may span multiple lines and can contain any Typst code (see @user-defined-symbols on how to use images, user-defined variables and functions in the docstring). 
 
-Calling #raw(lang: "typc", "tidy.parse-module()") will read out the documentation of the given string. We can then invoke #raw(lang: "typc", "tidy.show-module()") on the result.
+Calling #ref-fn("parse-module()") will read out the documentation of the given string. We can then invoke #ref-fn("show-module()") on the result.
 
 ```typ
 #let my-module = tidy.parse-module(read("my-module.typ"), name: "my-module")
@@ -79,12 +79,14 @@ Calling #raw(lang: "typc", "tidy.parse-module()") will read out the documentatio
 {
   set text(size: .8em)
   let example-code-doc = tidy.parse-module(example-code, name: "my-module")
-  tidy.show-module(example-code-doc)
+  figure(align(left, tidy.show-module(example-code-doc)))
 })
 
 Cool, he?
 
-There is another little nice feature: in the docstring, you can reference other functions with the extra syntax `@@other-function()`. This will automatically create a link that when clicked in the PDF will lead you to the documentation of that function. 
+By default, an outline for all functions is displayed at the top. This behaviour can be turned off with the parameter `show-outline` of #ref-fn("show-module()"). 
+
+There is another nice little feature: in the docstring, you can reference other functions with the extra syntax `@@other-function()`. This will automatically create a link that when clicked in the PDF will lead you to the documentation of that function. 
 
 Of course, everything happens instantaneously, so you can see the live result while writing the docs for your package. Keep your code documented!
 
@@ -95,24 +97,24 @@ Of course, everything happens instantaneously, so you can see the live result wh
 = Accessing User-Defined Symbols <user-defined-symbols>
 
 
-This package uses the Typst function #raw(lang: "typc", "eval()") to process function or parameter descriptions in order to enable arbitrary Typst markup in them. Since #raw(lang: "typc", "eval()") does not allow access to the filesystem and evaluates the content in a context where no user-defined variables or functions are available, it is not possible to call #raw(lang: "typ", "#import"), #raw(lang: "typ", "#image") or functions that you define in your code by default. 
+This package uses the Typst function #raw(lang: "typc", "eval()") to process function and parameter descriptions in order to enable arbitrary Typst markup in them. Since #raw(lang: "typc", "eval()") does not allow access to the filesystem and evaluates the content in a context where no user-defined variables or functions are available, it is not possible to directly call #raw(lang: "typ", "#import"), #raw(lang: "typ", "#image") or functions that you define in your code. 
 
-Instead, definitions can be made available by passing them to #raw(lang: "typc", "tidy.parse-module()") with the optional `scope` parameter in form of a dictionary: 
+Nevertheless, definitions can be made accessible by passing them to #ref-fn("parse-module()") through the optional `scope` parameter in form of a dictionary: 
 ```typ
 #let make-square(width) = rect(width: width, height: width)
 
-#parse-module(read(my-module.typ), scope: (make-square: make-square))
+#tidy.parse-module(read("my-module.typ"), scope: (make-square: make-square))
 ```
 This makes any symbol in specified in the `scope` dictionary available under the name of the key. A function declared in `my-module.typ` can now use this variable in the description:
 ```typ
 /// This is a function
 /// 
-/// #makesquare(20pt)
+/// #make-square(20pt)
 /// 
 #let my-function() = {}
 ```
 
-It is even possible to add *entire modules* to the scope which makes rendering examples using your module really easy. Let us say, `my-sine.typ` looks like the following:
+It is even possible to add *entire modules* to the scope which makes rendering examples using your module really easy. Let us say, `my-sine.typ` contains:
 #raw(lang: "typ", block: true, read("/examples/my-sine.typ"))
 
 We can now parse the module and pass the module `my-sine` through the `scope` parameter:
@@ -131,12 +133,13 @@ We can now parse the module and pass the module `my-sine` through the `scope` pa
   import "/examples/my-sine.typ"
   
   let module = tidy.parse-module(read("/examples/my-sine.typ"), scope: (my-sine: my-sine))
-  block(
+  figure(align(left,block(
+    width: 80%,
     stroke: 0.5pt, 
     inset: 20pt, 
     breakable: false,
-    columns(tidy.show-module(module))
-  )
+    tidy.show-module(module, show-outline: false)
+  )))
 }
 
 
@@ -173,15 +176,10 @@ Let us now "self-document" this package:
   set text(size: 9pt)
 
   let module = tidy.parse-module(read("/src/tidy.typ"), name: "tidy", require-all-parameters: true)
-  tidy.show-module(module, show-outline: true, sort-functions: true, style: style)
+  tidy.show-module(
+    module, 
+    style: style,
+    show-outline: true, 
+    sort-functions: auto, 
+  )
 }
-
-// #pagebreak()
-
-// #{
-//   set text(size: 9pt)
-
-//   let module = tidy.parse-module(read("/src/tidy-parse.typ"), require-all-parameters: true)
-//   tidy.show-module(module, show-outline: true, sort-functions: true, break-param-descriptions: true, style: style)
-// }
-

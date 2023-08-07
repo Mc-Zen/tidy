@@ -6,7 +6,8 @@
 ///
 /// - height (length): Width of bounding rectangle.
 /// - width (length): Height of bounding rectangle.
-/// - periods (integer, float): Number of periods to draw. Example with many periods: #my-sine.draw-sine(4cm, 0.3cm, 10)
+/// - periods (integer, float): Number of periods to draw. 
+///      Example with many periods: #my-sine.draw-sine(4cm, 0.3cm, 10)
 /// -> content
 #let draw-sine(width, height, periods) = box(width: width, height: height, {
   let prev-point = (0pt, height / 2)
