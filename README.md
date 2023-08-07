@@ -2,7 +2,7 @@
 # Tidy
 *Keep it tidy.*
 
-[![Tests](https://github.com/Mc-Zen/tidy/actions/workflows/run_tests.yml/badge.svg)](https://github.com/Mc-Zen/tidy/actions/workflows/run_tests.yml)
+<!-- [![Tests](https://github.com/Mc-Zen/tidy/actions/workflows/run_tests.yml/badge.svg)](https://github.com/Mc-Zen/tidy/actions/workflows/run_tests.yml) -->
 
 **tidy** is a package that generates documentation directly in [Typst](https://typst.app/) for your Typst modules. It parses docstring comments similar to javadoc and co. and can be used to easily build a beautiful reference section for the parsed module.  
 
@@ -68,5 +68,5 @@ A full example on how to use this module for your own package (maybe even consis
 **tidy** turns this into:
 
 <h3 align="center">
-  <img alt="Bell Circuit" src="docs/images/my-module-docs.svg" style="max-width: 100%; padding: 10px 10px; box-shadow: 1pt 1pt 10pt 0pt #AAAAAA; border-radius: 4pt; box-sizing: border-box; background: white">
+  <img alt="Tidy example output" src="docs/images/my-module-docs.svg" style="max-width: 100%; padding: 10px 10px; box-shadow: 1pt 1pt 10pt 0pt #AAAAAA; border-radius: 4pt; box-sizing: border-box; background: white">
 </h3>
