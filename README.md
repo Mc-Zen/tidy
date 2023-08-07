@@ -9,11 +9,10 @@
 Within the docstring you may use any Typst syntax - so markup, equations and even figures are no problem!
 
 Features:
+- Customizable output styles. 
+- Call you own module's code within the docstring, e.g., to render examples. 
 - Annotate types of parameters and return values.
-- Read off default values for named parameters.
-- Function description.
-- Parameter descriptions.
-- Display function signature (with types).
+- Automatically read off default values for named parameters.
 
 
 The [documentation](./docs/tidy-guide.pdf) describes the usage of this module and the defined format for the docstrings. 

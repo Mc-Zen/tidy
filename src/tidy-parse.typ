@@ -214,6 +214,31 @@
   })
 }
 
+
+#let example(code) = {
+  set text(size: .9em)
+  grid(
+    columns: 1,
+    gutter: 1em,
+    block(radius: 3pt, inset: 5pt, stroke: .5pt + luma(180), code, width: 100%),
+    block(
+      width: 100%,
+      fill: luma(230), radius: 3pt,
+      inset: 5pt,
+      rect(
+        width: 100%,
+        fill: white,
+        eval(code.text)
+      )
+    )
+  )
+}
+#let eval-docstring(docstring, parse-info) = {
+  let scope = parse-info.scope
+  let content = process-function-references(docstring.trim(), parse-info)
+  eval(content, mode: "markup", scope: scope)
+}
+
 /// Parse a function docstring that has been located in the source code with given match. 
 ///
 /// The return value is a dictionary with the keys
@@ -264,11 +289,10 @@
       documented-args.push((name: param-name, types: param-types, desc: param-desc))
     }
   }
-  fn-desc = process-function-references(fn-desc, parse-info)
   let args = parse-parameter-list(source-code, match.end)
   for arg in documented-args {
     if arg.name in args {
-      args.at(arg.name).description = eval("[" + process-function-references(arg.desc, parse-info).trim() + "]")
+      args.at(arg.name).description = eval-docstring(arg.desc, parse-info)
       args.at(arg.name).types = arg.types
     } else {
       assert(false, message: "The parameter \"" + arg.name + "\" does not appear in the argument list of the function \"" + fn-name + "\"")
@@ -279,5 +303,11 @@
       assert(documented-args.find(x => x.name == arg.at(0)) != none, message: "The parameter \"" + arg.at(0) + "\" of the function \"" + fn-name + "\" is not documented. ")
     }
   }
-  return (name: fn-name, description: eval("[" + fn-desc.trim() + "]"), args: args, return-types: return-types)
+  return (
+    name: fn-name, 
+    description: eval-docstring(fn-desc, parse-info), 
+    args: args, 
+    return-types: return-types
+  )
 }
+

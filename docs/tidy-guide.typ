@@ -1,6 +1,5 @@
 #import "template.typ": *
 #import "/src/tidy.typ"
-// #import tidy: *
 #include "/tests/test_tidy.typ"
 #show link: underline
 
@@ -43,7 +42,7 @@ Feed *tidy* your in-code documented source files and get beautiful documentation
 First, we import *tidy*. 
 #raw(block: true, lang: "typ", import-statement)
 
-We now assume we have a Typst module called `my-module.typ`, containing a definition for a function called `something()`. 
+We now assume we have a Typst module called `my-module.typ`, containing a definition for a function named `something()`. 
 
 *Example of some documented source code:*
 
@@ -63,9 +62,9 @@ You can document your functions similar to javadoc by prepending a block of `///
 ```markspace
 /// - parameter-name (type): ...
 ```
-Following this exact form is important (see the marked spaces) since this allows to distinguish the parameter list from ordinary markup lists in the function description or in parameter descriptions. For example, another space in front of the `-` could be added to those if necessary. 
+Following this exact form is important (see also the spaces marked in red) since this allows to distinguish the parameter list from ordinary markup lists in the function description or in parameter descriptions. For example, another space in front of the `-` could be added to markup lists if necessary. 
 
-The possible types for each parameter are given in parentheses and after a colon `:`, the parameter description follows. Indicating a type is mandatory. An optional return type can be annotated by ending with a line that contains `->` and the return type(s). 
+The possible types for each parameter are given in parentheses and after a colon `:`, the parameter description follows. Indicating a type is mandatory (you may want to pick `any` in some cases). An optional return type can be annotated by ending with a line that contains `->` and the return type(s). 
 
 In front of the parameter list, a function description can be put. Both function and parameter descriptions may span multiple lines and can contain any Typst code (see @user-defined-symbols on how to use images, user-defined variables and functions in the docstring). 
 
@@ -96,15 +95,15 @@ Of course, everything happens instantaneously, so you can see the live result wh
 = Accessing User-Defined Symbols <user-defined-symbols>
 
 
-This package uses the Typst function #raw(lang: "typc", "eval()") to process function or parameter descriptions in order to enable arbitrary Typst markup in them. Since #raw(lang: "typc", "eval()") does not allow access to the filesystem and evaluates the content in a context where no user-defined variables or functions are available, it is not possible to call #raw(lang: "typ", "#import"), #raw(lang: "typ", "#image") or functions that you define in your code. 
+This package uses the Typst function #raw(lang: "typc", "eval()") to process function or parameter descriptions in order to enable arbitrary Typst markup in them. Since #raw(lang: "typc", "eval()") does not allow access to the filesystem and evaluates the content in a context where no user-defined variables or functions are available, it is not possible to call #raw(lang: "typ", "#import"), #raw(lang: "typ", "#image") or functions that you define in your code by default. 
 
-Instead, definitions can be made available by passing them to #raw(lang: "typc", "tidy.parse-module()") with the optional `scope` parameter: 
+Instead, definitions can be made available by passing them to #raw(lang: "typc", "tidy.parse-module()") with the optional `scope` parameter in form of a dictionary: 
 ```typ
 #let make-square(width) = rect(width: width, height: width)
 
 #parse-module(read(my-module.typ), scope: (make-square: make-square))
 ```
-A function declared in `my-module.typ` can now use this variable in the description:
+This makes any symbol in specified in the `scope` dictionary available under the name of the key. A function declared in `my-module.typ` can now use this variable in the description:
 ```typ
 /// This is a function
 /// 
@@ -113,16 +112,16 @@ A function declared in `my-module.typ` can now use this variable in the descript
 #let my-function() = {}
 ```
 
-It is even possible to add entire modules to the scope which makes rendering examples using your module really easy. Let us say, `my-sine.typ` looks like the following:
+It is even possible to add *entire modules* to the scope which makes rendering examples using your module really easy. Let us say, `my-sine.typ` looks like the following:
 #raw(lang: "typ", block: true, read("/examples/my-sine.typ"))
 
-We can now parse the module and 
+We can now parse the module and pass the module `my-sine` through the `scope` parameter:
 ```typ
 #import "my-sine.typ" // don't import something specific from the module!
 
 #let module = tidy.parse-module(
-  read("my-module.typ"), 
-  scope: (my-module: my-module)
+  read("my-sine.typ"), 
+  scope: (my-sine: my-sine)
 )
 ```
 
@@ -136,8 +135,8 @@ We can now parse the module and
     stroke: 0.5pt, 
     inset: 20pt, 
     breakable: false,
-    columns(tidy.show-module(module)))
-  my-sine.draw-sine(1cm, 0.5cm, 2)
+    columns(tidy.show-module(module))
+  )
 }
 
 

@@ -38,6 +38,10 @@
 ) = {
   if label-prefix == auto { label-prefix = name }
   
+  if "example" not in scope { 
+    scope.insert("example", tidy-parse.example) 
+  }
+  
   let parse-info = (
     label-prefix: label-prefix,
     require-all-parameters: require-all-parameters,

@@ -4,8 +4,7 @@
 /// even $m^a t_h$ here. A list? No problem:
 ///  - Item one 
 ///  - Item two 
-///
-///
+/// 
 /// - param1 (string): This is param1.
 /// - param2 (content, length): This is param2.
 ///           Yes, it really is. 
