@@ -4,4 +4,4 @@ version = "0.1.0"
 entrypoint = "src/tidy.typ"
 authors = ["Mc-Zen <https://github.com/Mc-Zen>"]
 license = "MIT"
-description = "Generate documentation directly in Typst."
+description = "Documentation generator for Typst code in Typst."
