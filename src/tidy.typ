@@ -119,7 +119,6 @@
   
   for (index, fn) in module-doc.functions.enumerate() {
     (style.show-function)(fn, style-args)
-    if index < module-doc.functions.len() - 1  { v(3em) }
   }
 }
 

@@ -95,4 +95,5 @@
       default: info.at("default", default: none),
     )
   }
+  v(4em, weak: true)
 }
