@@ -98,6 +98,22 @@
     heading(module-doc.name, level: first-heading-level)
     parbreak()
   }
+
+  let show-reference(label, name, style-args) = link(label, raw(name))
+
+  let style-dict = style 
+  if type(style) == "module" {
+    import style: *
+    style-dict = (
+      show-outline: show-outline,
+      show-type: show-type,
+      show-function: show-function,
+      show-parameter-list: show-parameter-list,
+      show-parameter-block: show-parameter-block,
+      show-reference: show-reference,
+    )
+  }
+
   
   if sort-functions == auto { 
     module-doc.functions = module-doc.functions.sorted(key: x => x.name) 
@@ -106,19 +122,30 @@
   }
 
   let style-args = (
-    style: style,
+    style: style-dict,
     label-prefix: label-prefix, 
     first-heading-level: first-heading-level, 
     break-param-descriptions: break-param-descriptions, 
     omit-empty-param-descriptions: omit-empty-param-descriptions,
     scope: (:)
   )
+  
+  
+
+  show link: it => {
+    if repr(it.body).starts-with("[tidy-ref-") {
+      (style-dict.show-reference)(it.dest, repr(it.body).slice(10, -1), style-args)
+    } else {
+      it
+    }
+  }
+  
   if show-outline {
-    (style.show-outline)(module-doc)
+    (style-dict.show-outline)(module-doc)
   }
   
   for (index, fn) in module-doc.functions.enumerate() {
-    (style.show-function)(fn, style-args)
+    (style-dict.show-function)(fn, style-args)
   }
 }
 

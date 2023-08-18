@@ -210,7 +210,9 @@
 #let process-function-references(text, parse-info) = {
   return text.replace(reference-matcher, info => {
     let target = info.captures.at(0).trim(")").trim("(")
-    return "#link(label(\"" + parse-info.label-prefix + target + "()\"))[`" + target + "()`]"
+    return "#link(label(\"" + parse-info.label-prefix + target + "()\"))[tidy-ref-" + target + "()]"
+    let l = label(parse-info.label-prefix + target)
+    return "#show-reference(label(\"" + parse-info.label-prefix + target + "()\"), \"" + target + "()\")"
   })
 }
 

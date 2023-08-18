@@ -123,11 +123,6 @@
 }
 
 
-#let style = (
-  show-outline: show-outline,
-  show-type: show-type,
-  show-function: show-function,
-  show-parameter-list: show-parameter-list,
-  show-parameter-block: show-parameter-block,
-)
-
+#let show-reference(label, name, style-args) = {
+  link(label, raw(name))
+}

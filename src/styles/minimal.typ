@@ -97,3 +97,8 @@
   }
   v(4em, weak: true)
 }
+
+
+#let show-reference(label, name, style-args) = {
+  link(label, raw(name))
+}
