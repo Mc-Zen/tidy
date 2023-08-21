@@ -165,7 +165,11 @@
 /// ```)
 ///
 /// - text (string): String to parse. 
-/// - index (integer): Index where the argument list starts. This index should point to the character *next* to the function name, i.e., to the opening brace `(` of the argument list if there is one (note, that function aliases for example produced by `myfunc.where(arg1: 3)` do not have an argument list).
+/// - index (integer): Index where the argument list starts. This index should 
+///        point to the character *next* to the function name, i.e., to the 
+///        opening brace `(` of the argument list if there is one (note, that 
+///        function aliases for example produced by `myfunc.where(arg1: 3)` do 
+///        not have an argument list).
 /// -> none, dictionary
 #let parse-parameter-list(text, index) = {
   let result = parse-argument-list(text, index)
@@ -183,8 +187,8 @@
 }
 
 
-// Take the result of `parse-argument-list()` and retrieve a list of positional and named
-// arguments, respectively. The values are `eval()`ed. 
+// Take the result of `parse-argument-list()` and retrieve a list of positional
+// and named arguments, respectively. The values are `eval()`ed. 
 #let parse-arg-strings(args) = {
   let positional-args = ()
   let named-args = (:)
@@ -218,8 +222,9 @@
   count
 }
 
-/// Parse a function docstring that has been located in the source code with given match. 
-///
+/// Parse a function docstring that has been located in the source code with 
+/// given match. 
+/// 
 /// The return value is a dictionary with the keys
 /// - `name` (string): the function name.
 /// - `description` (content): the function description.
@@ -230,14 +235,16 @@
 /// - `default` (string): the default value for the argument.
 /// - `description` (content): the argument description.
 /// - `types` (array(string)): A list of possible argument types. 
-/// Every entry is optional and the dictionary also contains any non-documented arguments. 
+/// Every entry is optional and the dictionary also contains any non-documented 
+/// arguments. 
 ///
 ///
 ///
 /// - source-code (string): The source code containing some documented Typst code. 
-/// - match (match): A regex match that matches a documentation string. The first capture
-///   group should hold the entire, raw docstring and the second capture the function name 
-///   (excluding the opening parenthesis of the argument list if present). 
+/// - match (match): A regex match that matches a documentation string. The first 
+///   capture group should hold the entire, raw docstring and the second capture 
+///   the function name (excluding the opening parenthesis of the argument list
+///   if present). 
 /// - parse-info (dictionary): 
 /// -> dictionary
 #let parse-function-docstring(source-code, match, parse-info) = {
@@ -254,7 +261,8 @@
   for (line-number, line) in docstring.split("\n").enumerate(start: first-line-number) {
     // Check if line is a test line -> replace it with a call to #test()
     if line.starts-with("/// >>> ") {
-      line = "/// #test(`" + line.slice(8) + "`, source-location: (module: \"" + parse-info.label-prefix + "\", line: " + str(line-number) + "))"
+      line = "/// #test(`" + line.slice(8) + "`, source-location: (module: \""
+      line += parse-info.label-prefix + "\", line: " + str(line-number) + "))"
     }
     let arg-match = line.match(argument-documentation-matcher)
     if arg-match == none {
@@ -281,12 +289,18 @@
       args.at(arg.name).description = arg.desc
       args.at(arg.name).types = arg.types
     } else {
-      assert(false, message: "The parameter \"" + arg.name + "\" does not appear in the argument list of the function \"" + fn-name + "\"")
+      assert(
+        false, 
+        message: "The parameter \"" + arg.name + "\" does not appear in the argument list of the function \"" + fn-name + "\""
+      )
     }
   }
   if parse-info.require-all-parameters {
     for arg in args {
-      assert(documented-args.find(x => x.name == arg.at(0)) != none, message: "The parameter \"" + arg.at(0) + "\" of the function \"" + fn-name + "\" is not documented. ")
+      assert(
+        documented-args.find(x => x.name == arg.at(0)) != none, 
+        message: "The parameter \"" + arg.at(0) + "\" of the function \"" + fn-name + "\" is not documented. "
+      )
     }
   }
   return (
