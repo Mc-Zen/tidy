@@ -235,10 +235,37 @@
     )
   )
 }
+
+/// Evaluate a docstring description (i.e., a function or parameter description)
+/// while processing cross-references (@@...) and providing the scope to the evaluation
+/// context. 
+///
+/// - docstring (string): Docstring to evaluate. 
+/// - parse-info (dictionary): Object holding information for cross-reference processing
+///        and evluation scope. 
 #let eval-docstring(docstring, parse-info) = {
   let scope = parse-info.scope
   let content = process-function-references(docstring.trim(), parse-info)
   eval(content, mode: "markup", scope: scope)
+}
+
+
+/// Count the occurences of a single character in a string
+/// 
+/// - string (string): String to investigate.
+/// - char (string): Character to count. The string needs to be of length 1. 
+/// - start (integer): Start index.
+/// - end (end): Start index. If `-1`, the entire string is searched. 
+/// -> integer
+#let count-occurences(string, char, start: 0, end: -1) = {
+  let count = 0
+  if end == -1 { end = string.len() }
+  let i = 0
+  while i < end {
+    if string.at(i) == char { count += 1}
+    i += 1
+  }
+  count
 }
 
 /// Parse a function docstring that has been located in the source code with given match. 
@@ -266,12 +293,19 @@
 #let parse-function-docstring(source-code, match, parse-info) = {
   let docstring = match.captures.at(0)
   let fn-name = match.captures.at(1)
+
+  let first-line-number = count-occurences(source-code, "\n", end: match.start) + 1
   
   let fn-desc = ""
   let started-args = false
   let documented-args = ()
   let return-types = none
-  for line in docstring.split("\n") {
+  let tests = ()
+  for (line-number, line) in docstring.split("\n").enumerate(start: first-line-number) {
+    // Check if line is a test line -> replace it with a call to #test()
+    if line.starts-with("/// >>> ") {
+      line = "/// #test(`" + line.slice(8) + "`, source-location: (module: \"" + parse-info.label-prefix + "\", line: " + str(line-number) + "))"
+    }
     let arg-match = line.match(argument-documentation-matcher)
     if arg-match == none {
       let trimmed-line = line.trim().trim("/")

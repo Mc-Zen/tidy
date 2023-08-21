@@ -3,6 +3,7 @@
 
 #import "styles.typ"
 #import "tidy-parse.typ"
+#import "testing.typ"
 
 
 
@@ -37,9 +38,10 @@
   scope: (:)
 ) = {
   if label-prefix == auto { label-prefix = name }
-  
+
   if "example" not in scope { 
     scope.insert("example", tidy-parse.example) 
+    scope.insert("test", testing.test.with(inherited-scope: testing.assertations + scope)) 
   }
   
   let parse-info = (

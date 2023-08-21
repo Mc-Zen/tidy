@@ -3,6 +3,19 @@
 /// *Example:*
 /// 
 /// #my-sine.draw-sine(1cm, 0.5cm, 2)
+/// #test(
+///   `2 == 2`,
+///   `2 == 2`,
+///   `my-sine.sine(0) == 0`,
+/// )
+/// 
+/// >>> 2 == 2
+/// >>> eq(2, 2)
+/// >>> eq((a: 13, b: 21) + (a: 3), (a: 3, b:21))
+/// >>> my-sine.sine(0) == 0
+/// >>> my-sine.sine(0) == 0
+/// >>> eq(my-sine.sine(0), 0)
+/// >>> approx(my-sine.sine(calc.pi), 0)
 ///
 /// - height (length): Width of bounding rectangle.
 /// - width (length): Height of bounding rectangle.
@@ -19,3 +32,6 @@
     prev-point = (x, y)
   }
 })
+
+/// h
+#let sine(x) = calc.sin(x)
