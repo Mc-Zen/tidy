@@ -13,7 +13,7 @@
 
 #{
   let module = parse-module(read("/examples/my-sine.typ"), name: "my-sine", scope: (my-sine: my-sine/*, example: example*/))
-  show-module(module)
+  show-module(module, style: styles.default)
 
 
   let k = `asdasd`

@@ -4,6 +4,7 @@
 #import "styles.typ"
 #import "tidy-parse.typ"
 #import "testing.typ"
+#import "example.typ"
 
 
 
@@ -38,16 +39,10 @@
   scope: (:)
 ) = {
   if label-prefix == auto { label-prefix = name }
-
-  if "example" not in scope { 
-    scope.insert("example", tidy-parse.example) 
-    scope.insert("test", testing.test.with(inherited-scope: testing.assertations + scope)) 
-  }
   
   let parse-info = (
     label-prefix: label-prefix,
     require-all-parameters: require-all-parameters,
-    scope: scope
   )
   
   let matches = content.matches(tidy-parse.docstring-matcher)
@@ -60,7 +55,8 @@
   return (
     name: name,
     functions: function-docs, 
-    label-prefix: label-prefix
+    label-prefix: label-prefix,
+    scope: scope
   )
 }
 
@@ -101,8 +97,10 @@
     parbreak()
   }
 
+  // Default implementations for some style functions
   let show-reference(label, name, style-args) = link(label, raw(name))
-
+  let show-example = example.example
+  
   let style-dict = style 
   if type(style) == "module" {
     import style: *
@@ -113,6 +111,7 @@
       show-parameter-list: show-parameter-list,
       show-parameter-block: show-parameter-block,
       show-reference: show-reference,
+      show-example: show-example,
     )
   }
 
@@ -123,13 +122,21 @@
     module-doc.functions = module-doc.functions.sorted(key: sort-functions) 
   }
 
+  
+  let eval-scope = (
+    example: style-dict.show-example.with(inherited-scope: module-doc.scope),
+    test: testing.test.with(inherited-scope: testing.assertations + module-doc.scope),
+  )
+
+  eval-scope += module-doc.scope
+
   let style-args = (
     style: style-dict,
     label-prefix: label-prefix, 
     first-heading-level: first-heading-level, 
     break-param-descriptions: break-param-descriptions, 
     omit-empty-param-descriptions: omit-empty-param-descriptions,
-    scope: (:)
+    scope: eval-scope
   )
   
   
