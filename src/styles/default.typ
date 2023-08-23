@@ -32,7 +32,7 @@
 #let get-type-color(type) = type-colors.at(type, default: rgb("#eff0f3"))
 
 
-#let show-outline(module-doc) = {
+#let show-outline(module-doc, style-args: (:)) = {
   let prefix = module-doc.label-prefix
   let items = ()
   for fn in module-doc.functions {
@@ -85,7 +85,8 @@
   inset: 10pt, fill: luma(98%), width: 100%,
   breakable: style-args.break-param-descriptions,
   [
-    #text(weight: "bold", size: 1.1em, name) 
+    // #text(weight: "bold", size: 1.1em, name) 
+    #box(heading(level: style-args.first-heading-level + 3, name))
     #h(.5cm) 
     #types.map(x => (style-args.style.show-type)(x)).join([ #text("or",size:.6em) ])
   
@@ -125,7 +126,7 @@
 }
 
 
-#let show-reference(label, name, style-args) = {
+#let show-reference(label, name, style-args: none) = {
   link(label, raw(name))
 }
 

@@ -8,13 +8,12 @@
 /// turning them into links. 
 ///
 /// - text (string): Source code.
-/// - parse-info (dictionary): 
-#let process-function-references(text, parse-info) = {
-  return text.replace(reference-matcher, info => {
-    let target = info.captures.at(0).trim(")").trim("(")
-    return "#link(label(\"" + parse-info.label-prefix + target + "()\"))[tidy-ref-" + target + "()]"
-    // let l = label(parse-info.label-prefix + target)
-    // return "#show-reference(label(\"" + parse-info.label-prefix + target + "()\"), \"" + target + "()\")"
+/// - info (dictionary): 
+#let process-function-references(text, info) = {
+  return text.replace(reference-matcher, match => {
+    let target = match.captures.at(0).trim(")").trim("(")
+    // return "#link(label(\"" + info.label-prefix + target + "()\"))[tidy-ref-" + target + "()]"
+    return "#(tidy.show-reference)(label(\"" + info.label-prefix + target + "()\"), \"" + target + "()\")"
   })
 }
 
@@ -25,10 +24,34 @@
 /// evaluation context. 
 ///
 /// - docstring (string): Docstring to evaluate. 
-/// - parse-info (dictionary): Object holding information for cross-reference 
+/// - info (dictionary): Object holding information for cross-reference 
 ///        processing and evaluation scope. 
-#let eval-docstring(docstring, parse-info) = {
-  let scope = parse-info.scope
-  let content = process-function-references(docstring.trim(), parse-info)
+#let eval-docstring(docstring, info) = {
+  let scope = info.scope
+  let content = process-function-references(docstring.trim(), info)
   eval(content, mode: "markup", scope: scope)
+}
+
+
+#let get-style-functions(style) = {
+  // Default implementations for some style functions
+  let show-reference(label, name, style-args) = link(label, raw(name))
+
+  import "styles.typ"
+  let show-example = styles.default.show-example
+  
+  let style-functions = style 
+  if type(style) == "module" {
+    import style: *
+    style-functions = (
+      show-outline: show-outline,
+      show-type: show-type,
+      show-function: show-function,
+      show-parameter-list: show-parameter-list,
+      show-parameter-block: show-parameter-block,
+      show-reference: show-reference,
+      show-example: show-example,
+    )
+  }
+  return style-functions
 }

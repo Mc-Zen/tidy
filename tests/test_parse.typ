@@ -1,7 +1,8 @@
-#import "/src/tidy-parse.typ": *
 #import "/src/tidy.typ": *
+#import "/src/tidy-parse.typ": *
+#import "/src/utilities.typ": *
 
-
+#let eval-string(string) = eval-docstring(string, (scope: (:)))
 
 // Test reference-matcher
 #{
@@ -29,7 +30,7 @@
   // multiline argument description
   let matches = "/// - arg (type): desc\n\tasd\n-3$234$".matches(argument-documentation-matcher)
   assert.eq(matches.len(), 1)
-  assert.eq(matches.at(0).captures, ("arg","type", "desc"))
+  assert.eq(matches.at(0).captures, ("arg", "type", "desc"))
 }
 
 
@@ -42,7 +43,7 @@ let a = ```
 let result = parse-module(a)
 assert.eq(result.functions.len(), 1)
 assert.eq(result.functions.at(0).name, "a-3_56C")
-assert.eq(result.functions.at(0).description, [Func])
+assert.eq(eval-string(result.functions.at(0).description), [Func])
 assert.eq(result.functions.at(0).return-types, none)
 }
 
@@ -58,7 +59,7 @@ assert.eq(result.functions.at(0).return-types, none)
   let result = parse-module(a)
   assert.eq(result.functions.len(), 1)
   assert.eq(result.functions.at(0).name, "a")
-  assert.eq(result.functions.at(0).description, [Func])
+  assert.eq(eval-string(result.functions.at(0).description), [Func])
   assert.eq(result.functions.at(0).return-types, none)
 }
 
@@ -75,7 +76,7 @@ assert.eq(result.functions.at(0).return-types, none)
   let f0 = result.functions.at(0)
   
   assert.eq(f0.name, "a")
-  assert.eq(f0.description, [Func])
+  assert.eq(eval-string(f0.description), [Func])
   assert.eq(f0.args.len(), 4)
   assert.eq(f0.args.p1, (:))
   assert.eq(f0.args.p2, (default: "2"))
@@ -103,11 +104,12 @@ assert.eq(result.functions.at(0).return-types, none)
   let f0 = result.functions.at(0)
   
   assert.eq(f0.name, "a")
-  assert.eq(f0.description, [Func])
+  assert.eq(eval-string(f0.description), [Func])
   assert.eq(f0.args.len(), 4)
-  assert.eq(f0.args.p1, (description: [a param $a$], types: ("string",)))
+  assert.eq(f0.args.p1.types, ("string",))
+  assert.eq(eval-string(f0.args.p1.description), [a param $a$])
   assert.eq(f0.args.p2.default, "2")
-  assert.eq(f0.args.p2.description, [a param $b$ Oh yes])
+  assert.eq(eval-string(f0.args.p2.description), [a param $b$ Oh yes])
   assert.eq(f0.args.p2.types, ("boolean", "function"))
   assert.eq(f0.return-types, ("content", "integer"))
 }

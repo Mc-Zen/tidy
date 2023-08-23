@@ -3,8 +3,8 @@
 
 #import "styles.typ"
 #import "tidy-parse.typ"
+#import "utilities.typ"
 #import "testing.typ"
-#import "example.typ"
 
 
 
@@ -103,30 +103,6 @@
   sort-functions: auto
 ) = {
   let label-prefix = module-doc.label-prefix
-  if "name" in module-doc and show-module-name and module-doc.name != "" {
-    heading(module-doc.name, level: first-heading-level)
-    parbreak()
-  }
-
-  // Default implementations for some style functions
-  let show-reference(label, name, style-args) = link(label, raw(name))
-  let show-example = example.example
-  
-  let style-dict = style 
-  if type(style) == "module" {
-    import style: *
-    style-dict = (
-      show-outline: show-outline,
-      show-type: show-type,
-      show-function: show-function,
-      show-parameter-list: show-parameter-list,
-      show-parameter-block: show-parameter-block,
-      show-reference: show-reference,
-      show-example: show-example,
-    )
-  }
-
-  
   if sort-functions == auto { 
     module-doc.functions = module-doc.functions.sorted(key: x => x.name) 
   } else if type(sort-functions) == "function" { 
@@ -134,38 +110,45 @@
   }
 
   
-  let eval-scope = (
-    example: style-dict.show-example.with(inherited-scope: module-doc.scope),
-    test: testing.test.with(inherited-scope: testing.assertations + module-doc.scope),
-  )
-
-  eval-scope += module-doc.scope
-
+  let style-functions = utilities.get-style-functions(style)
+  
   let style-args = (
-    style: style-dict,
+    style: style-functions,
     label-prefix: label-prefix, 
     first-heading-level: first-heading-level, 
     break-param-descriptions: break-param-descriptions, 
     omit-empty-param-descriptions: omit-empty-param-descriptions,
-    scope: eval-scope
   )
   
   
+  let eval-scope = (
+    // Predefined functions that may be called by the user in docstring code
+    example: style-functions.show-example.with(inherited-scope: module-doc.scope),
+    test: testing.test.with(inherited-scope: testing.assertations + module-doc.scope),
+    // Internally generated functions 
+    tidy: (
+      show-reference: style-functions.show-reference.with(style-args: style-args)
+    )
+  )
 
-  show link: it => {
-    if repr(it.body).starts-with("[tidy-ref-") {
-      (style-dict.show-reference)(it.dest, repr(it.body).slice(10, -1), style-args)
-    } else {
-      it
-    }
+  eval-scope += module-doc.scope
+
+  style-args.scope = eval-scope
+  
+
+  // Show the docs
+  
+  if "name" in module-doc and show-module-name and module-doc.name != "" {
+    heading(module-doc.name, level: first-heading-level)
+    parbreak()
   }
   
   if show-outline {
-    (style-dict.show-outline)(module-doc)
+    (style-functions.show-outline)(module-doc, style-args: style-args)
   }
   
   for (index, fn) in module-doc.functions.enumerate() {
-    (style-dict.show-function)(fn, style-args)
+    (style-functions.show-function)(fn, style-args)
   }
 }
 

@@ -7,7 +7,7 @@
 #let get-type-color(type) = rgb("#eff0f3")
 
 
-#let show-outline(module-doc) = {
+#let show-outline(module-doc, style-args: (:)) = {
   let prefix = module-doc.label-prefix
   let items = ()
   for fn in module-doc.functions {
@@ -101,7 +101,7 @@
 }
 
 
-#let show-reference(label, name, style-args) = {
+#let show-reference(label, name, style-args: none) = {
   link(label, raw(name))
 }
 
