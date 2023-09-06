@@ -214,11 +214,14 @@
 #let count-occurences(string, char, start: 0, end: -1) = {
   let count = 0
   if end == -1 { end = string.len() }
-  let i = 0
-  while i < end {
-    if string.at(i) == char { count += 1}
-    i += 1
+  for c in string.slice(start, end) {
+    if c == char { count += 1 }
   }
+  // let i = 0
+  // while i < end {
+  //   if string.at(i) == char { count += 1}
+  //   i += 1
+  // }
   count
 }
 
