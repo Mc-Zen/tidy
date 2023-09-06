@@ -133,7 +133,7 @@ We can now parse the module and pass the module `my-sine` through the `scope` pa
   import "/examples/my-sine.typ"
   
   let module = tidy.parse-module(read("/examples/my-sine.typ"), scope: (my-sine: my-sine))
-  figure(align(left,block(
+  figure(align(left, block(
     width: 80%,
     stroke: 0.5pt, 
     inset: 20pt, 
@@ -166,6 +166,49 @@ You can use show rules to customize the document style before calling #ref-fn("s
 Finally, if that is not enough, you can design a completely new style. Examples of styles can be found in the folder `src/styles/` in the #link("https://github.com/Mc-Zen/tidy", "GitHub Repository"). 
 
 
+
+
+
+
+#pagebreak()
+= Docstring testing
+
+Tidy supports small-scale docstring tests that are executed automatically and throw appropriate error messages when a test fails. 
+
+In every docstring, the function #raw(lang: "typc", "test(..tests, scope: (:))") is available. An arbitrary number of tests can be passed in and the evaluation scope may be extended through the `scope` parameter. Any definition exposed to the docstring evaluation context through the `scope` parameter passed to #ref-fn("parse-module()") is also accessible in the tests. Let us create a module `num.typ` with the following content:
+
+```typ
+/// #test(
+///   `num.my-square(2) == 4`,
+///   `num.my-square(4) == 16`,
+/// )
+#let my-square(n) = n*n
+```
+
+Parsing and showing the module will run the docstring tests. 
+
+```typ
+#import "num.typ"
+#let module = tidy.parse-module(
+  read("num.typ"), 
+  name: "num", 
+  scope: (num: num)
+)
+#tidy.show-module(module) // tests are run here
+```
+
+As alternative to using `test()`, the following dedicated shorthand syntax can be used:
+
+```typ
+/// >>> my-square(2) == 4
+/// >>> my-square(4) == 16
+#let my-square(n) = n*n
+```
+
+When using the shorthand syntax, the error message even shows the line number of the failed test in the corresponding module. 
+
+A few test assertation functions are available to improve readability, simplicity and error messages. Currently, these are `eq(a, b)` for equality tests, `ne(a, b)` for inequality tests and `approx(a, b, eps: 1e-10)` for floating point comparisons. These assertation helper functions are always available within docstring tests (with both `test()` and `>>>` syntax)
+
 #pagebreak()
 = Function Documentation
 
@@ -174,7 +217,7 @@ Let us now "self-document" this package:
 #let style = tidy.styles.default
 #{
   set text(size: 9pt)
-
+  
   let module = tidy.parse-module(read("/src/tidy.typ"), name: "tidy", require-all-parameters: true)
   tidy.show-module(
     module, 

@@ -51,12 +51,15 @@
 /// - source-location (dictionary): Information about the location of the test 
 ///          source code. Should contain values for the keys `module` and 
 ///          `line`. This parameter is only used internally.
+/// - enable (boolean): When set to `false`, the tests are ignored. 
 #let test(
   ..tests, 
   scope: (:), 
   inherited-scope: (:), 
-  source-location: none
+  source-location: none,
+  enable: true
 ) = {
+  if not enable { return }
   let source-info = get-source-info-str(source-location)
 
   for test in tests.pos() {

@@ -83,7 +83,7 @@
 /// - show-outline (function): Whether to output an outline of all functions in 
 ///           the module at the beginning.
 /// - sort-functions (auto, none, function): Function to use to sort the function  
-///           documentations. With `auto`, they are sorted alphabetatically by 
+///           documentations. With `auto`, they are sorted alphabetically by 
 ///           name and with `none` they are not sorted. Otherwise a function can 
 ///           be passed that each function documentation object is passed to and 
 ///           that should return some key to sort the functions by.
@@ -91,6 +91,7 @@
 ///           defining the functions `show-outline`, `show-type`, `show-function`, 
 ///           `show-parameter-list` and `show-parameter-block` or a dictionary with
 ///           functions for the same keys. 
+/// - enable-tests (boolean): Whether to run docstring tests. 
 /// -> content
 #let show-module(
   module-doc, 
@@ -100,7 +101,8 @@
   break-param-descriptions: false,
   omit-empty-param-descriptions: true,
   show-outline: true,
-  sort-functions: auto
+  sort-functions: auto,
+  enable-tests: true,
 ) = {
   let label-prefix = module-doc.label-prefix
   if sort-functions == auto { 
@@ -123,8 +125,13 @@
   
   let eval-scope = (
     // Predefined functions that may be called by the user in docstring code
-    example: style-functions.show-example.with(inherited-scope: module-doc.scope),
-    test: testing.test.with(inherited-scope: testing.assertations + module-doc.scope),
+    example: style-functions.show-example.with(
+      inherited-scope: module-doc.scope
+    ),
+    test: testing.test.with(
+      inherited-scope: testing.assertations + module-doc.scope, 
+      enable: enable-tests
+    ),
     // Internally generated functions 
     tidy: (
       show-reference: style-functions.show-reference.with(style-args: style-args)
