@@ -25,6 +25,7 @@
 
 #let assertations = (
   eq: eq,
+  ne: ne,
   approx: approx
 )
 
@@ -73,7 +74,7 @@
     } else if result-type == "boolean" {
       if not result {
         let msg = test.text
-        assert(false, "Failed test " + source-info + ": " + msg)
+        assert(false, message: "Failed test " + source-info + ": " + msg)
       }
     } else {
       assert(
