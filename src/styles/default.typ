@@ -126,6 +126,20 @@
 }
 
 
+
+#let show-variable(
+  var, style-args,
+) = {
+  [
+    #heading(var.name, level: style-args.first-heading-level + 1)
+    #label(style-args.label-prefix + var.name + "()")
+  ]
+  
+  eval-docstring(var.description, style-args)
+  v(4.8em, weak: true)
+}
+
+
 #let show-reference(label, name, style-args: none) = {
   link(label, raw(name))
 }
@@ -160,7 +174,7 @@
     mode = "markup"
   }
   set text(size: .9em)
-        
+          
   let output = [#eval(code.text, mode: mode, scope: scope + inherited-scope)]
   
   let spacing = .5em
@@ -201,11 +215,11 @@
               width: output-size.width * output-scale-factor, 
               height: output-size.height * output-scale-factor, 
               scale(origin: top + left, scale-output, output)
-            )
+                          )
           )
         )
       ))
-      let height = if dir.axis() == "vertical" { auto } 
+            let height = if dir.axis() == "vertical" { auto } 
         else { measure(arrangement(width: size.width), style).height }
       arrangement(height: height)
     })

@@ -52,14 +52,20 @@
   
   let matches = content.matches(tidy-parse.docstring-matcher)
   let function-docs = ()
+  let variable-docs = ()
 
   for match in matches {
-    function-docs.push(tidy-parse.parse-function-docstring(content, match, parse-info))
+    if content.len() <= match.end or content.at(match.end) != "(" {
+      variable-docs.push(tidy-parse.parse-variable-docstring(content, match, parse-info))
+    } else {
+      function-docs.push(tidy-parse.parse-function-docstring(content, match, parse-info))
+    }
   }
   
   return (
     name: name,
     functions: function-docs, 
+    variables: variable-docs, 
     label-prefix: label-prefix,
     scope: scope
   )
@@ -156,6 +162,9 @@
   
   for (index, fn) in module-doc.functions.enumerate() {
     (style-functions.show-function)(fn, style-args)
+  }
+  for (index, fn) in module-doc.variables.enumerate() {
+    (style-functions.show-variable)(fn, style-args)
   }
 }
 

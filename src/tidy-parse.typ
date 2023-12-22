@@ -86,6 +86,7 @@
 /// - index (integer): Position of the opening parenthesis of the argument list. 
 /// -> array
 #let parse-argument-list(text, index) = {
+  if text.len() <= index or text.at(index) != "(" { return none }
   if text.len() <= index or text.at(index) != "(" { return ((:), 0) }
   index += 1
   let brace-level = 1
@@ -225,6 +226,55 @@
   count
 }
 
+#let parse-description-and-documented-args(docstring, parse-info, first-line-number: 0) = {
+  
+  let fn-desc = ""
+  let started-args = false
+  let documented-args = ()
+  let return-types = none
+  
+  for (line-number, line) in docstring.split("\n").enumerate(start: first-line-number) {
+    // Check if line is a test line -> replace it with a call to #test()
+    if line.starts-with("/// >>> ") {
+      line = "/// #test(`" + line.slice(8) + "`, source-location: (module: \""
+      line += parse-info.label-prefix + "\", line: " + str(line-number) + "))"
+    }
+    let arg-match = line.match(argument-documentation-matcher)
+    if arg-match == none {
+      let trimmed-line = line.trim().trim("/")
+      if not started-args { fn-desc += trimmed-line + "\n"}
+      else { // Return type:
+        if trimmed-line.trim().starts-with("->") {
+          return-types = trimmed-line.trim().slice(2).split(",").map(x => x.trim())
+        } else {
+          documented-args.last().desc += "\n" + trimmed-line 
+        }
+      }
+    } else {
+      started-args = true
+      let param-name = arg-match.captures.at(0)
+      let param-types = arg-match.captures.at(1).split(",").map(x => x.trim())
+      let param-desc = arg-match.captures.at(2)
+      documented-args.push((name: param-name, types: param-types, desc: param-desc))
+    }
+  }
+  return (fn-desc, documented-args, return-types)
+}
+
+#let parse-variable-docstring(source-code, match, parse-info) = {
+  let docstring = match.captures.at(0)
+  let var-name = match.captures.at(1)
+
+  let first-line-number = count-occurences(source-code, "\n", end: match.start) + 1
+
+  let (var-desc, _, _) = parse-description-and-documented-args(docstring, parse-info, first-line-number: first-line-number)
+
+  return (
+    name: var-name, 
+    description: var-desc, 
+  )
+}
+
 /// Parse a function docstring that has been located in the source code with 
 /// given match. 
 /// 
@@ -255,38 +305,12 @@
   let fn-name = match.captures.at(1)
 
   let first-line-number = count-occurences(source-code, "\n", end: match.start) + 1
+
+  let (fn-desc, documented-args, return-types) = parse-description-and-documented-args(docstring, parse-info, first-line-number: first-line-number)
+
   
-  let fn-desc = ""
-  let started-args = false
-  let documented-args = ()
-  let return-types = none
-  let tests = ()
-  for (line-number, line) in docstring.split("\n").enumerate(start: first-line-number) {
-    // Check if line is a test line -> replace it with a call to #test()
-    if line.starts-with("/// >>> ") {
-      line = "/// #test(`" + line.slice(8) + "`, source-location: (module: \""
-      line += parse-info.label-prefix + "\", line: " + str(line-number) + "))"
-    }
-    let arg-match = line.match(argument-documentation-matcher)
-    if arg-match == none {
-      let trimmed-line = line.trim().trim("/")
-      if not started-args { fn-desc += trimmed-line + "\n"}
-      else { // Return type:
-        if trimmed-line.trim().starts-with("->") {
-          return-types = trimmed-line.trim().slice(2).split(",").map(x => x.trim())
-        } else {
-          documented-args.last().desc += "\n" + trimmed-line 
-        }
-      }
-    } else {
-      started-args = true
-      let param-name = arg-match.captures.at(0)
-      let param-types = arg-match.captures.at(1).split(",").map(x => x.trim())
-      let param-desc = arg-match.captures.at(2)
-      documented-args.push((name: param-name, types: param-types, desc: param-desc))
-    }
-  }
   let args = parse-parameter-list(source-code, match.end)
+  
   for arg in documented-args {
     if arg.name in args {
       args.at(arg.name).description = arg.desc.trim("\n")
