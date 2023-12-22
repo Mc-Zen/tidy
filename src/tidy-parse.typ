@@ -86,7 +86,7 @@
 /// - index (integer): Position of the opening parenthesis of the argument list. 
 /// -> array
 #let parse-argument-list(text, index) = {
-  if text.at(index) != "(" { return ((:), 0) }
+  if text.len() <= index or text.at(index) != "(" { return ((:), 0) }
   index += 1
   let brace-level = 1
   let literal-mode = none // Whether in ".."
@@ -289,7 +289,7 @@
   let args = parse-parameter-list(source-code, match.end)
   for arg in documented-args {
     if arg.name in args {
-      args.at(arg.name).description = arg.desc
+      args.at(arg.name).description = arg.desc.trim("\n")
       args.at(arg.name).types = arg.types
     } else {
       assert(
