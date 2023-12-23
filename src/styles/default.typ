@@ -1,13 +1,16 @@
 #import "../utilities.typ": *
 
 // Color to highlight function names in
-#let fn-color = rgb("#4b69c6")
+#let function-name-color = rgb("#4b69c6")
+#let rainbow-map = ((rgb("#7cd5ff"), 0%), (rgb("#a6fbca"), 33%),(rgb("#fff37c"), 66%), (rgb("#ffa49d"), 100%))
+#let gradient-for-color-types = gradient.linear(angle: 7deg, ..rainbow-map)
 
+#let default-type-color = rgb("#eff0f3")
 
 // Colors for Typst types
 #let type-colors = (
+  "default": default-type-color,
   "content": rgb("#a6ebe6"),
-  "color": rgb("#a6ebe6"),
   "string": rgb("#d1ffe2"),
   "none": rgb("#ffcbc4"),
   "auto": rgb("#ffcbc4"),
@@ -19,41 +22,67 @@
   "angle": rgb("#e7d9ff"),
   "relative-length": rgb("#e7d9ff"),
   "fraction": rgb("#e7d9ff"),
-  "symbol": rgb("#eff0f3"),
-  "array": rgb("#eff0f3"),
-  "dictionary": rgb("#eff0f3"),
-  "arguments": rgb("#eff0f3"),
-  "selector": rgb("#eff0f3"),
-  "module": rgb("#eff0f3"),
-  "stroke": rgb("#eff0f3"),
+  "symbol": default-type-color,
+  "array": default-type-color,
+  "dictionary": default-type-color,
+  "arguments": default-type-color,
+  "selector": default-type-color,
+  "module": default-type-color,
+  "stroke": default-type-color,
   "function": rgb("#f9dfff"),
+  "color": gradient-for-color-types,
+  "gradient": gradient-for-color-types,
 )
 
-#let get-type-color(type) = type-colors.at(type, default: rgb("#eff0f3"))
+
+#let type-colors-dark = {
+  let k = (:)
+  let darkify(clr) = clr.darken(30%).saturate(30%)
+  for (key, value) in type-colors {
+    if type(value) == color {
+      value = darkify(value)
+    } else if type(value) == gradient {
+      let map = value.stops().map(((clr, stop)) => (darkify(clr), stop))
+      value = value.kind()(..map)
+    }
+    k.insert(key, value)
+  }
+  k
+}
+
+
 
 
 #let show-outline(module-doc, style-args: (:)) = {
   let prefix = module-doc.label-prefix
-  let items = ()
-  for fn in module-doc.functions {
-    items.push(link(label(prefix + fn.name + "()"), fn.name + "()"))
+  if module-doc.functions.len() > 0 {
+    list(..module-doc.functions.map(fn => link(label(prefix + fn.name + "()"), fn.name + "()")))
   }
-  list(..items)
+    
+  if module-doc.variables.len() > 0 {
+    text([Variables:], weight: "bold")
+    list(..module-doc.variables.map(var => link(label(prefix + var.name + ""), var.name + "()")))
+  }
 }
 
 // Create beautiful, colored type box
-#let show-type(type) = { 
+#let show-type(type, style-args: (:)) = { 
   h(2pt)
-  box(outset: 2pt, fill: get-type-color(type), radius: 2pt, raw(type))
+  let clrs = style-args.type-colors
+  if clrs == auto { 
+    clrs = type-colors
+  }
+  let clr = clrs.at(type, default: clrs.at("default", default: default-type-color))
+  box(outset: 2pt, fill: clr, radius: 2pt, raw(type))
   h(2pt)
 }
 
 
 
-#let show-parameter-list(fn, display-type-function) = {
+#let show-parameter-list(fn, style-args: (:)) = {
   pad(x: 10pt, {
     set text(font: "Cascadia Mono", size: 0.85em, weight: 340)
-    text(fn.name, fill: fn-color)
+    text(fn.name, fill: function-name-color)
     "("
     let inline-args = fn.args.len() < 2
     if not inline-args { "\n  " }
@@ -61,7 +90,7 @@
     for (arg-name, info) in fn.args {
       let types 
       if "types" in info {
-        types = ": " + info.types.map(x => display-type-function(x)).join(" ")
+        types = ": " + info.types.map(x => show-type(x, style-args: style-args)).join(" ")
       }
       items.push(arg-name + types)
     }
@@ -69,7 +98,7 @@
     if not inline-args { "\n" } + ")"
     if fn.return-types != none {
       " -> " 
-      fn.return-types.map(x => display-type-function(x)).join(" ")
+      fn.return-types.map(x => show-type(x, style-args: style-args)).join(" ")
     }
   })
 }
@@ -82,13 +111,12 @@
   show-default: false, 
   default: none, 
 ) = block(
-  inset: 10pt, fill: luma(98%), width: 100%,
+  inset: 10pt, fill: rgb("ddd3"), width: 100%,
   breakable: style-args.break-param-descriptions,
   [
-    // #text(weight: "bold", size: 1.1em, name) 
     #box(heading(level: style-args.first-heading-level + 3, name))
     #h(.5cm) 
-    #types.map(x => (style-args.style.show-type)(x)).join([ #text("or",size:.6em) ])
+    #types.map(x => (style-args.style.show-type)(x, style-args: style-args)).join([ #text("or",size:.6em) ])
   
     #content
     #if show-default [ #parbreak() Default: #raw(lang: "typc", default) ]
@@ -108,7 +136,7 @@
 
   block(breakable: style-args.break-param-descriptions, {
     heading("Parameters", level: style-args.first-heading-level + 2)
-    (style-args.style.show-parameter-list)(fn, style-args.style.show-type)
+    (style-args.style.show-parameter-list)(fn, style-args: style-args)
   })
 
   for (name, info) in fn.args {
@@ -174,7 +202,7 @@
     mode = "markup"
   }
   set text(size: .9em)
-          
+        
   let output = [#eval(code.text, mode: mode, scope: scope + inherited-scope)]
   
   let spacing = .5em
@@ -215,11 +243,11 @@
               width: output-size.width * output-scale-factor, 
               height: output-size.height * output-scale-factor, 
               scale(origin: top + left, scale-output, output)
-                          )
+            )
           )
         )
       ))
-            let height = if dir.axis() == "vertical" { auto } 
+      let height = if dir.axis() == "vertical" { auto } 
         else { measure(arrangement(width: size.width), style).height }
       arrangement(height: height)
     })
