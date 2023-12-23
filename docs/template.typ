@@ -1,3 +1,5 @@
+#import "@preview/codly:0.1.0": *
+
 // The project function defines how your document looks.
 // It takes your content and some metadata and formats it.
 // Go ahead and customize it to your liking!
@@ -21,6 +23,7 @@
 
   // show link: set text(fill: purple.darken(30%))
   show link: set text(fill: rgb("#1e8f6f"))
+  show link: underline
   
   v(4em)
 
@@ -66,5 +69,46 @@
   set par(justify: true)
   v(10em)
 
+  
+  show: codly-init.with()
+  codly(
+    languages: (
+      tyap: (name: "typ", icon: none, color: rgb("#239DAE")),
+    ),
+  )
+  show raw.where(block: true): set text(size: .95em)
+  show raw.where(block: true): it => pad(x: 4%, it)
+
   body
+}
+
+
+#let file-code(filename, code) = pad(x: 4%, block(
+  width: 100%, 
+  fill: rgb("#239DAE").lighten(80%),
+  inset: 1pt,
+  stroke: rgb("#239DAE") + 1pt,
+  radius: 3pt,
+  {
+    block(align(right, text(raw(filename))), width: 100%, inset: 5pt)
+    v(1pt, weak: true)
+    move(dx: -1pt, line(length: 100% + 2pt, stroke: 1pt + rgb("#239DAE")))
+        v(1pt, weak: true)
+    pad(x: -4.3%, code)
+  }
+))
+
+
+#let tidy-output-figure(output) = {
+  set text(size: .8em)
+  disable-codly()
+  figure(align(left, block(
+    width: 80%,
+    stroke: 0.5pt + luma(200), 
+    inset: 20pt, 
+    breakable: false,
+    radius: 10pt,
+    output
+  )))
+  codly()
 }
