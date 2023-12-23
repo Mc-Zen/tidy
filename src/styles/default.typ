@@ -132,7 +132,7 @@
 ) = {
   [
     #heading(var.name, level: style-args.first-heading-level + 1)
-    #label(style-args.label-prefix + var.name + "()")
+    #label(style-args.label-prefix + var.name)
   ]
   
   eval-docstring(var.description, style-args)
@@ -169,7 +169,7 @@
   let code = code
   let mode = "code"
   if not code.has("lang") {
-    code = raw(code.text, lang: "typc", block: code.block)
+    code = raw(code.text, lang: "typc", block: true)
   } else if code.lang == "typ" {
     mode = "markup"
   }

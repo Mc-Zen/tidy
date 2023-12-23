@@ -111,7 +111,7 @@
       set text(font: "Cascadia Mono", size: 0.85em, weight: 340)
       text(var.name, fill: fn-color)
     })
-    #label(style-args.label-prefix + var.name + "()")
+    #label(style-args.label-prefix + var.name)
   ])
   pad(x: 0em, eval-docstring(var.description, style-args))
 
@@ -136,7 +136,7 @@
   let code = code
   let mode = "code"
   if not code.has("lang") {
-    code = raw(code.text, lang: "typc", block: code.block)
+    code = raw(code.text, lang: "typc", block: true)
   } else if code.lang == "typ" {
     mode = "markup"
   }
