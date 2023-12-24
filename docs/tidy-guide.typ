@@ -122,6 +122,8 @@ It is even possible to add *entire modules* to the scope which makes rendering e
 
 #pagebreak()
 
+Note, that we use the predefined function `example()` here to show the code as well as the rendered output of some demo usage of our function. The `example()` function is treated more in-detail in @preview-examples.
+
 We can now parse the module and pass the module `wiggly` through the `scope` parameter:
 ```typ
 #import "wiggly.typ" // don't import something specific from the module!
@@ -132,7 +134,6 @@ We can now parse the module and pass the module `wiggly` through the `scope` par
   scope: (wiggly: wiggly)
 )
 ```
-
 
 #{
   import "/examples/wiggly.typ"
@@ -146,6 +147,32 @@ We can now parse the module and pass the module `wiggly` through the `scope` par
 }
 
 #pagebreak()
+
+
+
+
+
+
+
+
+= Preview Examples <preview-examples>
+
+As we saw in the previous section, it is possible with *tidy* to add examples to a docstring and preview it along with its output. 
+
+The function `example()` is available in every docstring and has some bells and whistles which are showcased with the following `example-demo.typ` module which contains a function for highlighting text with gradients:
+
+// #file-code("example-demo.typ", raw(lang: "typ", block: true, read("/examples/example-demo.typ")))
+
+#{  
+  import "/examples/example-demo.typ"
+  
+  let module = tidy.parse-module(
+    read("/examples/example-demo.typ"), 
+    scope: (example-demo: example-demo)
+  )
+  tidy-output-figure(tidy.show-module(module, show-outline: false))
+}
+
 
 
 = Customizing the Style
