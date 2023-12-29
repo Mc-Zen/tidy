@@ -40,19 +40,25 @@
 
 = Introduction
 
-Feed *tidy* your in-code documented source files and get beautiful documentation of all your functions printed out. Enjoy features like type annotations, links to other documented functions and arbitrary formatting within function and parameter descriptions. Let's get started.
-
+You can easily feed *tidy* your in-code documented source files and get beautiful documentation of all your functions and variables printed out. // Enjoy features like type annotations, links to other documented definitions and arbitrary formatting within function and parameter descriptions. Let's get started.
+The main features are:
+#pad(5%, [
+  - Type annotations,
+  - Seamless cross references,
+  - Rendering code examples (see @preview-examples), and
+  - Docstring testing (see @docstring-testing).
+])
 First, we import *tidy*. 
 #raw(block: true, lang: "typ", import-statement)
 
-We now assume we have a Typst module called `repeater.typ`, containing a definition for a function named `something()`. 
+We now assume we have a Typst module called `repeater.typ`, containing a definition for a function named `repeat()`. 
 
-*Example of some documented source code:*
+// *Example of some documented source code:*
 
 #let example-code = read("/examples/repeater.typ")
 #file-code("repeater.typ", raw(block: true, lang: "typ", example-code))
 
-You can document your functions similar to javadoc by prepending a block of `///` comments. Each line needs to start with three slashes `///` (whitespace is allowed at the beginning of the line). Parameters of the function can be documented by listing them as 
+A *function* is documented similar to javadoc by prepending a block of `///` comments. Each line needs to start with three slashes `///` (whitespace is allowed at the beginning of the line). _Parameters_ of the function can be documented by listing them as 
 #show raw.where(lang: "markspace"): it => {
   show " ": box(inset: (x: 0.1pt), box(
     fill: red.lighten(70%), 
@@ -67,9 +73,11 @@ You can document your functions similar to javadoc by prepending a block of `///
 ```
 Following this exact form is important (see also the spaces marked in red) since this allows to distinguish the parameter list from ordinary markup lists in the function description or in parameter descriptions. For example, another space in front of the `-` could be added to markup lists if necessary. 
 
-The possible types for each parameter are given in parentheses and after a colon `:`, the parameter description follows. Indicating a type is mandatory (you may want to pick `any` in some cases). An optional return type can be annotated by ending with a line that contains `->` followed by the return type(s). 
+The possible types for each parameter are given in parentheses and after a colon `:`, the parameter description follows. Indicating a type is mandatory (you may want to pick `any` in some cases). An optional _return type_ can be annotated by ending with a line that contains `->` followed by the return type(s). 
 
-In front of the parameter list, a function description can be put. Both function and parameter descriptions may span multiple lines and can contain any Typst code (see @user-defined-symbols on how to use images, user-defined variables and functions in the docstring). 
+In front of the parameter list, a _function description_ can be put. Both function and parameter descriptions may span multiple lines and can contain any Typst code (see @user-defined-symbols on how to use images, user-defined variables and functions in the docstring). 
+
+*Variables* are documented just in the same way (lacking the option to specify parameters). A definition is recognized as a variable if the identifier (variable/function name) is not followed by an opening parenthesis. The `->` syntax which also specifies the return type for functions can be used to define the type of a variable. 
 
 Calling #ref-fn("parse-module()") will read out the documentation of the given string. We can then invoke #ref-fn("show-module()") on the result.
 
@@ -78,18 +86,17 @@ Calling #ref-fn("parse-module()") will read out the documentation of the given s
 #tidy.show-module(docs)
 ```
 
+This will produce the following output. 
 #tidy-output-figure(
-  tidy.show-module(tidy.parse-module(example-code, name: "Repeater"))
+  tidy.show-module(tidy.parse-module(example-code, name: "Repeater"), style: tidy.styles.default)
 )
 
 
 Cool, he?
 
-By default, an outline for all functions is displayed at the top. This behaviour can be turned off with the parameter `show-outline` of #ref-fn("show-module()"). 
+By default, an outline for all definitions is displayed at the top. This behaviour can be turned off with the parameter `show-outline` of #ref-fn("show-module()"). 
 
-There is another nice little feature: in the docstring, you can reference other functions with the extra syntax `@@other-function()`. This will automatically create a link that when clicked in the PDF will lead you to the documentation of that function. 
-
-Variables are documented just in the same way (lacking the option to specify parameters or return types). A definition is recognized as a variable if the identifier (variable/function name) is not followed by an opening parenthesis. 
+There is another nice little feature: in the docstring, you can cross-reference other definitions with the extra syntax `@@repeat()` or `@@awful-pi`. This will automatically create a link that when clicked in the PDF will lead you to the documentation of that definition. 
 
 Of course, everything happens instantaneously, so you can see the live result while writing the docs for your package. Keep your code documented!
 
@@ -97,12 +104,12 @@ Of course, everything happens instantaneously, so you can see the live result wh
 
 
 #pagebreak()
-= Accessing User-Defined Symbols <user-defined-symbols>
+= Accessing user-defined symbols <user-defined-symbols>
 
 
-This package uses the Typst function #raw(lang: "typc", "eval()") to process function and parameter descriptions in order to enable arbitrary Typst markup in them. Since #raw(lang: "typc", "eval()") does not allow access to the filesystem and evaluates the content in a context where no user-defined variables or functions are available, it is not possible to directly call #raw(lang: "typ", "#import"), #raw(lang: "typ", "#image") or functions that you define in your code. 
+This package uses the Typst function #raw(lang: "typc", "eval()") to process function and parameter descriptions in order to enable arbitrary Typst markup within those. Since #raw(lang: "typc", "eval()") does not allow access to the filesystem and evaluates the content in a context where no user-defined variables or functions are available, it is not possible to directly call #raw(lang: "typ", "#import"), #raw(lang: "typ", "#image") or functions that you define in your code. 
 
-Nevertheless, definitions can be made accessible by passing them to #ref-fn("parse-module()") through the optional `scope` parameter in form of a dictionary: 
+Nevertheless, definitions can be made accessible with *tidy* by passing them to #ref-fn("parse-module()") through the optional `scope` parameter in form of a dictionary: 
 ```typ
 #let make-square(width) = rect(width: width, height: width)
 #tidy.parse-module(
@@ -135,6 +142,8 @@ We can now parse the module and pass the module `wiggly` through the `scope` par
 )
 ```
 
+In the output, the preview of the code examples is shown next to it.
+
 #{
   import "/examples/wiggly.typ"
   
@@ -155,15 +164,15 @@ We can now parse the module and pass the module `wiggly` through the `scope` par
 
 
 
-= Preview Examples <preview-examples>
+= Preview examples <preview-examples>
 
 As we saw in the previous section, it is possible with *tidy* to add examples to a docstring and preview it along with its output. 
-
-The function `example()` is available in every docstring and has some bells and whistles which are showcased with the following `example-demo.typ` module which contains a function for highlighting text with gradients:
+The function `example()` is available in every docstring and has some bells and whistles which are showcased with the following `example-demo.typ` module which contains a function for highlighting text with gradients (seems not very advisable due to the poor readability):
 
 // #file-code("example-demo.typ", raw(lang: "typ", block: true, read("/examples/example-demo.typ")))
 
 #{  
+  set text(size: .89em)
   import "/examples/example-demo.typ"
   
   let module = tidy.parse-module(
@@ -175,7 +184,9 @@ The function `example()` is available in every docstring and has some bells and 
 
 
 
-= Customizing the Style
+
+
+= Customizing the style
 
 There are multiple ways to customize the output style. You can
 - pick a different predefined style,
@@ -191,19 +202,46 @@ A different predefined style can be selected by passing a style to the `style` p
 )
 ```
 
-You can use show rules to customize the document style before calling #ref-fn("show-module()"). Setting any text and paragraph attributes works just out of the box. Furthermore, heading styles can be set to affect the appearance of the module name (relative heading level 1), function names (relative heading level 2) and the word *Parameters* (relative heading level 3), all relative to what is set with the parameter `first-heading-level` of #ref-fn("show-module()"). 
+You can use show rules to customize the document style before calling #ref-fn("show-module()"). Setting any text and paragraph attributes works just out of the box. Furthermore, heading styles can be set to affect the appearance of the module name (relative heading level 1), function or variable names (relative heading level 2) and the word *Parameters* (relative heading level 3), all relative to what is set with the parameter `first-heading-level` of #ref-fn("show-module()"). 
 
 
 
 Finally, if that is not enough, you can design a completely new style. Examples of styles can be found in the folder `src/styles/` in the #link("https://github.com/Mc-Zen/tidy", "GitHub Repository"). 
 
 
+== Customizing Colors (mainly for the `default` style)
+
+The colors used by a style (especially the color in which types are shown) can be set through the option `colors` of #ref-fn("show-module()"). It expects a dictionary with colors as values. Possible keys are all type names as well as `signature-func-name` which sets the color of the function name as shown in a function signature. 
+
+The `default` theme defines a color scheme `colors-dark` along with the default `colors` which adjusts the plain colors for better readability on a dark background. 
 
 
+```typ
+#tidy.show-module(
+  docs, 
+  colors: tidy.styles.default.colors-dark
+)
+```
+#{ 
+  import "/examples/example-demo.typ"
+  
+  set box(fill: luma(20))
+  set text(fill: luma(240))
+  
+  let module = tidy.parse-module(
+    ```
+    /// Produces space. 
+    /// - amount (length):
+    #let space(amount)
+    ```.text, 
+  )
+  tidy-output-figure(tidy.show-module(module, show-outline: false, colors: tidy.styles.default.colors-dark, style: tidy.styles.default))
+  
+}
 
 
 #pagebreak()
-= Docstring testing
+= Docstring testing <docstring-testing>
 
 Tidy supports small-scale docstring tests that are executed automatically and throw appropriate error messages when a test fails. 
 
@@ -239,10 +277,15 @@ As alternative to using `test()`, the following dedicated shorthand syntax can b
 
 When using the shorthand syntax, the error message even shows the line number of the failed test in the corresponding module. 
 
-A few test assertation functions are available to improve readability, simplicity and error messages. Currently, these are `eq(a, b)` for equality tests, `ne(a, b)` for inequality tests and `approx(a, b, eps: 1e-10)` for floating point comparisons. These assertation helper functions are always available within docstring tests (with both `test()` and `>>>` syntax)
+A few test assertation functions are available to improve readability, simplicity and error messages. Currently, these are `eq(a, b)` for equality tests, `ne(a, b)` for inequality tests and `approx(a, b, eps: 1e-10)` for floating point comparisons. These assertation helper functions are always available within docstring tests (with both `test()` and `>>>` syntax). 
+
+
+
+
+
 
 #pagebreak()
-= Function Documentation
+= Function documentation
 
 Let us now "self-document" this package:
 

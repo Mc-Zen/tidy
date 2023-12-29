@@ -70,7 +70,7 @@
   v(10em)
 
   
-  show: codly-init.with()
+  show: codly-init
   codly(
     languages: (
       tyap: (name: "typ", icon: none, color: rgb("#239DAE")),
@@ -102,13 +102,15 @@
 #let tidy-output-figure(output) = {
   set text(size: .8em)
   disable-codly()
-  figure(align(left, block(
+  figure(align(left, box(
     width: 80%,
     stroke: 0.5pt + luma(200), 
     inset: 20pt, 
-    breakable: false,
     radius: 10pt,
-    output
+    block(
+      breakable: false,
+      output
+    )
   )))
   codly()
 }
