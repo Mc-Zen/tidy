@@ -71,3 +71,27 @@ A full example on how to use this module for your own package (maybe even consis
 <h3 align="center">
   <img alt="Tidy example output" src="docs/images/my-module-docs.svg" style="max-width: 100%; padding: 10px 10px; box-shadow: 1pt 1pt 10pt 0pt #AAAAAA; border-radius: 4pt; box-sizing: border-box; background: white">
 </h3>
+
+
+## Changelog
+
+### v0.2.0
+- New features:
+  - Add executable examples to docstrings. 
+  - Documentation for variables (as well as functions). 
+  - Docstring tests. 
+  - Rainbow-colored types `color` and `gradient`. 
+Improvements:
+  - Allow customization of cross-references through `show-reference()`. 
+  - Allow customization of spacing between functions through styles. 
+  - Allow color customization (especially for the `default` theme). 
+- Fixes:
+  - Empty parameter descriptions are omitted (if the corresponding option is set). 
+  - Trim newline characters from parameter descriptions. 
+- ⚠️ Breaking changes:
+  - (only concerning custom styles) The style functions `show-outline()`, `show-parameter-list`, and `show-type()` now take `style-args` arguments as well. 
+  - Before, cross-references for functions using the `@@` syntax could omit the function parentheses. Now this is not possible anymore, since such references refer to variables now. 
+
+### v0.1.0
+
+Initial Release
