@@ -19,6 +19,7 @@
   scope: (:),
   ratio: 1,
   scale-preview: auto,
+  mode: "code",
   inherited-scope: (:),
   code-block: block,
   preview-block: block,
@@ -26,12 +27,11 @@
   ..options
 ) = layout(size => style(styles => {
   let code = code
-  let mode = "code"
-  if not code.has("lang") {
-    code = raw(code.text, lang: "typc", block: true)
-  } else if code.lang == "typ" {
+  let lang = if code.has("lang") { code.lang } else { "typc" }
+  if lang == "typ" {
     mode = "markup"
   }
+  code = raw(code.text, lang: lang, block: true)
         
   let preview = [#eval(code.text, mode: mode, scope: scope + inherited-scope)]
   
@@ -61,7 +61,7 @@
     scale-preview
   }
 
-  set par(hanging-indent: 0pt)
+  set par(hanging-indent: 0pt) // this messes up some stuff in case someone sets it
 
   // We first measure this thing (code + preview) to find out which of the two has
   // the larger height. Then we can just set the height for both boxes. 
