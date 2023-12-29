@@ -17,7 +17,7 @@
 }
 
 // Create beautiful, colored type box
-#let show-type(type) = { 
+#let show-type(type, style-args: (:)) = { 
   h(2pt)
   box(outset: 2pt, fill: get-type-color(type), radius: 2pt, raw(type))
   h(2pt)
@@ -106,21 +106,22 @@
 ) = {
   set par(justify: false, hanging-indent: 1em, first-line-indent: 0em)
 
-  block(breakable: style-args.break-param-descriptions, [
-    #block(fill: rgb("#d8dbed"), width: 100%, inset: (x: 0.5em, y: 0.7em), {
-      set text(font: "Cascadia Mono", size: 0.85em, weight: 340)
-      text(var.name, fill: fn-color)
-    })
-    #label(style-args.label-prefix + var.name)
-  ])
+  let type = if "type" not in var { none } 
+      else { show-type(var.type, style-args: style-args) }
+      
+  block(breakable: style-args.break-param-descriptions, fill: rgb("#d8dbed"), width: 100%, inset: (x: 0.5em, y: 0.7em),
+    stack(dir: ltr, spacing: 1.2em,
+      [
+        #set text(font: "Cascadia Mono", size: 0.85em, weight: 340)
+        #text(var.name, fill: fn-color)
+        #label(style-args.label-prefix + var.name)
+      ],
+      type
+    )
+  )
   pad(x: 0em, eval-docstring(var.description, style-args))
 
   v(4em, weak: true)
-}
-
-
-#let show-reference(label, name, style-args: none) = {
-  link(label, raw(name))
 }
 
 

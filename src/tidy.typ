@@ -76,7 +76,7 @@
 /// This displays all (documented) functions in the module.
 ///
 /// - module-doc (dictionary): Module documentation information as returned by 
-///           @@parse-module. 
+///           @@parse-module(). 
 /// - first-heading-level (integer): Level for the module heading. Function 
 ///           names are created as second-level headings and the "Parameters" 
 ///           heading is two levels below the first heading level. 
@@ -98,7 +98,7 @@
 ///           `show-parameter-list` and `show-parameter-block` or a dictionary with
 ///           functions for the same keys. 
 /// - enable-tests (boolean): Whether to run docstring tests. 
-/// - type-colors (auto, dictionary): Give a dictionary for file colors. 
+/// - colors (auto, dictionary): Give a dictionary for type and colors and other colors. If set to auto, the style will select its default color set. 
 /// -> content
 #let show-module(
   module-doc, 
@@ -110,7 +110,7 @@
   show-outline: true,
   sort-functions: auto,
   enable-tests: true,
-  type-colors: auto
+  colors: auto
 ) = {
   let label-prefix = module-doc.label-prefix
   if sort-functions == auto { 
@@ -128,7 +128,7 @@
     first-heading-level: first-heading-level, 
     break-param-descriptions: break-param-descriptions, 
     omit-empty-param-descriptions: omit-empty-param-descriptions,
-    type-colors: type-colors
+    colors: colors
   )
   
   

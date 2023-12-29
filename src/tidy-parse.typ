@@ -242,11 +242,11 @@
     let arg-match = line.match(argument-documentation-matcher)
     if arg-match == none {
       let trimmed-line = line.trim().trim("/")
-      if not started-args { fn-desc += trimmed-line + "\n"}
-      else { // Return type:
-        if trimmed-line.trim().starts-with("->") {
-          return-types = trimmed-line.trim().slice(2).split(",").map(x => x.trim())
-        } else {
+      if trimmed-line.trim().starts-with("->") {
+        return-types = trimmed-line.trim().slice(2).split(",").map(x => x.trim())
+      } else {
+        if not started-args { fn-desc += trimmed-line + "\n"}
+        else { 
           documented-args.last().desc += "\n" + trimmed-line 
         }
       }
@@ -267,12 +267,16 @@
 
   let first-line-number = count-occurences(source-code, "\n", end: match.start) + 1
 
-  let (var-desc, _, _) = parse-description-and-documented-args(docstring, parse-info, first-line-number: first-line-number)
+  let (var-desc, _, return-types) = parse-description-and-documented-args(docstring, parse-info, first-line-number: first-line-number)
 
-  return (
+  let var-specs = (
     name: var-name, 
     description: var-desc, 
   )
+  if return-types != none and return-types.len() > 0 {
+    var-specs.type = return-types.first()
+  }
+  return var-specs
 }
 
 /// Parse a function docstring that has been located in the source code with 

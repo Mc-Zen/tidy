@@ -9,11 +9,10 @@
 ///
 /// - text (string): Source code.
 /// - info (dictionary): 
-#let process-function-references(text, info) = {
+#let process-references(text, info) = {
   return text.replace(reference-matcher, match => {
-    let target = match.captures.at(0).trim(")").trim("(")
-    // return "#link(label(\"" + info.label-prefix + target + "()\"))[tidy-ref-" + target + "()]"
-    return "#(tidy.show-reference)(label(\"" + info.label-prefix + target + "()\"), \"" + target + "()\")"
+    let target = match.captures.at(0)
+    return "#(tidy.show-reference)(label(\"" + info.label-prefix + target + "\"), \"" + target + "\")"
   })
 }
 
@@ -28,7 +27,7 @@
 ///        processing and evaluation scope. 
 #let eval-docstring(docstring, info) = {
   let scope = info.scope
-  let content = process-function-references(docstring.trim(), info)
+  let content = process-references(docstring.trim(), info)
   eval(content, mode: "markup", scope: scope)
 }
 
@@ -39,6 +38,7 @@
 
   import "styles.typ"
   let show-example = styles.default.show-example
+  let show-variable = styles.default.show-variable
   
   let style-functions = style 
   if type(style) == "module" {
@@ -51,6 +51,7 @@
       show-parameter-block: show-parameter-block,
       show-reference: show-reference,
       show-example: show-example,
+      show-variable: show-variable,
     )
   }
   return style-functions
