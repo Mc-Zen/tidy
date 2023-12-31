@@ -84,18 +84,24 @@
     #label(style-args.label-prefix + fn.name + "()")
   ])
   pad(x: 0em, eval-docstring(fn.description, style-args))
-  [*Parameters:*]
+
+  let parameter-block
 
   for (name, info) in fn.args {
     let types = info.at("types", default: ())
     let description = info.at("description", default: "")
     if description == "" and style-args.omit-empty-param-descriptions { continue }
-    (style-args.style.show-parameter-block)(
+    parameter-block += (style-args.style.show-parameter-block)(
       name, types, eval-docstring(description, style-args), 
       style-args,
       show-default: "default" in info, 
       default: info.at("default", default: none),
     )
+  }
+  
+  if parameter-block != none {
+    [*Parameters:*]
+    parameter-block
   }
   v(4em, weak: true)
 }
