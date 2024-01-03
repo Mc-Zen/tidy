@@ -15,7 +15,7 @@
   abstract: [
     *tidy* is a package that generates documentation directly in #link("https://typst.app/", [Typst])  for your Typst modules. It parses docstring comments similar to javadoc and co. and can be used to easily build a reference section for each module. 
   ],
-  date: "December 22, 2023",
+  date: datetime.today().display("[month repr:long] [day], [year]"),
   version: version,
   url: "https://github.com/Mc-Zen/tidy"
 )
