@@ -296,7 +296,7 @@ When using the shorthand syntax, the error message even shows the line number of
 
 A few test assertation functions are available to improve readability, simplicity and error messages. Currently, these are `eq(a, b)` for equality tests, `ne(a, b)` for inequality tests and `approx(a, b, eps: 1e-10)` for floating point comparisons. These assertation helper functions are always available within docstring tests (with both `test()` and `>>>` syntax). 
 
-
+Docstring tests can be disabled by passing `enable-tests: false` to #ref-fn("show-module()"). 
 
 
 
