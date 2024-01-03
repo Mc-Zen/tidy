@@ -6,13 +6,14 @@
 
 **tidy** is a package that generates documentation directly in [Typst](https://typst.app/) for your Typst modules. It parses docstring comments similar to javadoc and co. and can be used to easily build a beautiful reference section for the parsed module.  
 
-Within the docstring you may use any Typst syntax - so markup, equations and even figures are no problem!
+Within the docstring you may use (almost) any Typst syntax − so markup, equations and even figures are no problem!
 
 Features:
 - **Customizable** output styles. 
 - Call your own module's code within the docstring, e.g., to **render examples**. 
 - **Annotate types** of parameters and return values.
 - Automatically read off default values for named parameters.
+- Docstring tests. 
 
 
 The [guide](./docs/tidy-guide.pdf) describes the usage of this module and defines the format for the docstrings. 
@@ -20,37 +21,35 @@ The [guide](./docs/tidy-guide.pdf) describes the usage of this module and define
 ## Usage
 
 Using `tidy` is as simple as writing some docstrings and calling:
-```java
-#import "@preview/tidy:0.1.0"
-#{
-    let module = tidy.parse-module(read("my-module.typ"))
-    tidy.show-module(module, style: tidy.styles.default)
-}
+```typ
+#import "@preview/tidy:0.2.0"
+#let docs = tidy.parse-module(read("my-module.typ"))
+#tidy.show-module(docs, style: tidy.styles.default)
 ```
 
-The available predefined styles are currenty `tidy.styles.default` and `tidy.styles.minimal`. Custom styles can be added (see the [guide](./docs/tidy-guide.pdf)). 
+The available predefined styles are currenty `tidy.styles.default` and `tidy.styles.minimal`. Custom styles can be added by hand (see the [guide](./docs/tidy-guide.pdf)). 
 
 Furthermore, it is possible to access user-defined functions and use images through the `scope` argument of `tidy.parse-module()`:
 
-```java
+```typ
 #{
     import "my-module.typ"
     let module = tidy.parse-module(read("my-module.typ"))
-    let an-image = image("img1.png")
+    let an-image = image("img.png")
     tidy.show-module(
         module,
         style: tidy.styles.default,
-        scope: (my-module: my-module, img1: an-image)
+        scope: (my-module: my-module, img: an-image)
     )
 }
 ```
-The docstrings in `my-module.typ` may now access the image with `#img1` and can call any function or variable from `my-module` in the style of `#my-module.my-function`. This makes rendering examples right in the docstrings as easy as a breeze!
+The docstrings in `my-module.typ` may now access the image with `#img` and can call any function or variable from `my-module` in the style of `#my-module.my-function`. This makes rendering examples right in the docstrings as easy as a breeze!
 
 ## Example
 
 A full example on how to use this module for your own package (maybe even consisting of multiple files) can be found at [examples](https://github.com/Mc-Zen/tidy/tree/main/examples).
 
-```java
+```typ
 /// This function does something. It always returns true.
 ///
 /// We can have *markdown* and 
@@ -81,7 +80,7 @@ A full example on how to use this module for your own package (maybe even consis
   - Documentation for variables (as well as functions). 
   - Docstring tests. 
   - Rainbow-colored types `color` and `gradient`. 
-Improvements:
+- Improvements:
   - Allow customization of cross-references through `show-reference()`. 
   - Allow customization of spacing between functions through styles. 
   - Allow color customization (especially for the `default` theme). 
@@ -89,9 +88,9 @@ Improvements:
   - Empty parameter descriptions are omitted (if the corresponding option is set). 
   - Trim newline characters from parameter descriptions. 
 - ⚠️ Breaking changes:
-  - (only concerning custom styles) The style functions `show-outline()`, `show-parameter-list`, and `show-type()` now take `style-args` arguments as well. 
   - Before, cross-references for functions using the `@@` syntax could omit the function parentheses. Now this is not possible anymore, since such references refer to variables now. 
+  - (only concerning custom styles) The style functions `show-outline()`, `show-parameter-list`, and `show-type()` now take `style-args` arguments as well. 
 
 ### v0.1.0
 
-Initial Release
+Initial Release.

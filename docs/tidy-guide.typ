@@ -42,12 +42,10 @@
 
 You can easily feed *tidy* your in-code documented source files and get beautiful documentation of all your functions and variables printed out. // Enjoy features like type annotations, links to other documented definitions and arbitrary formatting within function and parameter descriptions. Let's get started.
 The main features are:
-#pad(5%, [
-  - Type annotations,
-  - Seamless cross references,
-  - Rendering code examples (see @preview-examples), and
-  - Docstring testing (see @docstring-testing).
-])
+- Type annotations,
+- Seamless cross references,
+- Rendering code examples (see @preview-examples), and
+- Docstring testing (see @docstring-testing).
 First, we import *tidy*. 
 #raw(block: true, lang: "typ", import-statement)
 
@@ -215,16 +213,14 @@ The colors used by a style (especially the color in which types are shown) can b
 
 The `default` theme defines a color scheme `colors-dark` along with the default `colors` which adjusts the plain colors for better readability on a dark background. 
 
-
 ```typ
 #tidy.show-module(
   docs, 
   colors: tidy.styles.default.colors-dark
 )
 ```
+With a dark background and light text, these colors produce much better contrast than the default colors:
 #{ 
-  import "/examples/example-demo.typ"
-  
   set box(fill: luma(20))
   set text(fill: luma(240))
   
@@ -233,11 +229,32 @@ The `default` theme defines a color scheme `colors-dark` along with the default 
     /// Produces space. 
     /// - amount (length):
     #let space(amount)
-    ```.text, 
+    ```.text
   )
   tidy-output-figure(tidy.show-module(module, show-outline: false, colors: tidy.styles.default.colors-dark, style: tidy.styles.default))
-  
 }
+
+#pagebreak()
+
+== Predefined styles 
+Currently, the two predefined styles `tidy.styles.default` and `tidy-styles.minimal` are available.
+- `tidy.styles.default`: Loosely imitates the online documentation of Typst functions. 
+- `tidy.styles.minimal`: A very light and space-efficient theme that is oriented around simplicity. With this theme, the example from above looks like the following:
+#{
+  import "/examples/wiggly.typ"
+  
+  let module = tidy.parse-module(
+    read("/examples/wiggly.typ"), 
+    name: "wiggly",
+    scope: (wiggly: wiggly)
+  )
+  tidy-output-figure(tidy.show-module(module, show-outline: false, style: tidy.styles.minimal))
+}
+
+
+
+
+
 
 
 #pagebreak()
@@ -272,7 +289,7 @@ As alternative to using `test()`, the following dedicated shorthand syntax can b
 ```typ
 /// >>> my-square(2) == 4
 /// >>> my-square(4) == 16
-#let my-square(n) = n*n
+#let my-square(n) = n * n
 ```
 
 When using the shorthand syntax, the error message even shows the line number of the failed test in the corresponding module. 
@@ -291,6 +308,7 @@ Let us now "self-document" this package:
 
 #let style = tidy.styles.default
 #{
+  set heading(numbering: none)
   set text(size: 9pt)
   
   let module = tidy.parse-module(read("/src/tidy.typ"), name: "tidy", require-all-parameters: true)
