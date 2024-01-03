@@ -1,6 +1,7 @@
 
 /// Construct a complex number of the form
 ///  $ z= a + i b in CC. $
+///
 /// - real (float): Real part of the complex number. 
 /// - imag (float): Imaginary part of the complex number. 
 /// -> float
@@ -9,8 +10,9 @@
 }
 
 
-/// Construct a complex number from polar coordinates:
+/// Construct a complex number from polar coordinates: @@funny-sqrt()
 ///  $ z= r e^(i phi) in CC. $
+/// #image-polar
 /// - phi (float): Angle to the real axis. 
 /// - radius (float): Radius (euclidian distance to the origin). 
 /// -> float

@@ -1,0 +1,11 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+
+ <g>
+  <title>Layer 1</title>
+  <line stroke-width="4" stroke-linecap="undefined" stroke-linejoin="undefined" id="svg_1" y2="28.39008" x2="371.71202" y1="545.09601" x1="371.71202" stroke="#000" fill="none"/>
+  <line stroke="#000" stroke-width="4" stroke-linecap="undefined" stroke-linejoin="undefined" id="svg_2" y2="285.096" x2="625.87695" y1="285.096" x1="119.71202" fill="none"/>
+  <ellipse stroke-width="4" ry="216.00001" rx="216.00001" id="svg_4" cy="285.096" cx="371.71202" stroke="#000" fill="none"/>
+  <line stroke-width="4" stroke-linecap="undefined" stroke-linejoin="undefined" id="svg_6" y2="123.09599" x2="512.71203" y1="285.096" x1="371.71202" stroke="#000" fill="none"/>
+  <text font-style="italic" font-weight="normal" xml:space="preserve" text-anchor="start" font-family="Noto Sans JP" font-size="44" stroke-width="0" id="svg_7" y="269.096" x="417.71202" stroke="#000" fill="#000000">ϑ</text>
+ </g>
+</svg>
