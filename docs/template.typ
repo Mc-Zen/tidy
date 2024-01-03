@@ -19,7 +19,9 @@
   set text(font: "Linux Libertine", lang: "en")
   
   show heading.where(level: 1): it => block(smallcaps(it), below: 1em)
-  set heading(numbering: (..args) => if args.pos().len() == 1 { numbering("I", ..args) })
+  // set heading(numbering: (..args) => if args.pos().len() == 1 { numbering("I", ..args) })
+  set heading(numbering: "I.a")
+  show list: pad.with(x: 5%)
 
   // show link: set text(fill: purple.darken(30%))
   show link: set text(fill: rgb("#1e8f6f"))
@@ -100,6 +102,7 @@
 
 
 #let tidy-output-figure(output) = {
+  set heading(numbering: none)
   set text(size: .8em)
   disable-codly()
   figure(align(left, box(

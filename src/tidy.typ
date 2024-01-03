@@ -4,6 +4,7 @@
 #import "styles.typ"
 #import "tidy-parse.typ"
 #import "utilities.typ"
+#import "show-example.typ"
 #import "testing.typ"
 
 

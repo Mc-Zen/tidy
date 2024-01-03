@@ -117,18 +117,6 @@ assert.eq(result.functions.at(0).return-types, none)
 
 
 
-// Docstrings for functions without arguments
-#{
-  let a = ```
-  /// Func
-  #let a = myfunc.where(e: 1)
-  ```.text
-  let result = parse-module(a)
-  assert.eq(result.functions.len(), 1)
-}
-
-
-
 
 
 

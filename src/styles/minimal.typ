@@ -43,8 +43,7 @@
     items.join( if inline-args {", "} else { ",\n  "})
     if not inline-args { "\n" } + ")"
     if fn.return-types != none {
-      " -> " 
-      fn.return-types.map(x => display-type-function(x)).join(" ")
+      box[~-> #fn.return-types.map(x => display-type-function(x)).join(" ")]
     }
   })
 }
