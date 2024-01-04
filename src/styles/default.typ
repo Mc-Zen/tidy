@@ -57,13 +57,20 @@
 
 #let show-outline(module-doc, style-args: (:)) = {
   let prefix = module-doc.label-prefix
+  let gen-entry(name) = {
+    if style-args.enable-cross-references {
+      link(label(prefix + name), name)
+    } else {
+      name
+    }
+  }
   if module-doc.functions.len() > 0 {
-    list(..module-doc.functions.map(fn => link(label(prefix + fn.name + "()"), fn.name + "()")))
+    list(..module-doc.functions.map(fn => gen-entry(fn.name + "()")))
   }
     
   if module-doc.variables.len() > 0 {
     text([Variables:], weight: "bold")
-    list(..module-doc.variables.map(var => link(label(prefix + var.name + ""), var.name + "()")))
+    list(..module-doc.variables.map(var => gen-entry(var.name)))
   }
 }
 
@@ -85,7 +92,11 @@
     let inline-args = fn.args.len() < 2
     if not inline-args { "\n  " }
     let items = ()
+    let args = fn.args
     for (arg-name, info) in fn.args {
+      if style-args.omit-private-parameters and arg-name.starts-with("_") { 
+        continue
+      }
       let types 
       if "types" in info {
         types = ": " + info.types.map(x => show-type(x, style-args: style-args)).join(" ")
@@ -128,9 +139,11 @@
 
   if style-args.colors == auto { style-args.colors = colors }
 
-  [
+  if style-args.enable-cross-references [
     #heading(fn.name, level: style-args.first-heading-level + 1)
     #label(style-args.label-prefix + fn.name + "()")
+  ] else [
+    #heading(fn.name, level: style-args.first-heading-level + 1)
   ]
   
   eval-docstring(fn.description, style-args)
@@ -141,6 +154,9 @@
   })
 
   for (name, info) in fn.args {
+    if style-args.omit-private-parameters and name.starts-with("_") { 
+      continue
+    }
     let types = info.at("types", default: ())
     let description = info.at("description", default: "")
     if description == "" and style-args.omit-empty-param-descriptions { continue }
@@ -164,9 +180,11 @@
       else { show-type(var.type, style-args: style-args) }
 
   stack(dir: ltr, spacing: 1.2em,
-    [
+    if style-args.enable-cross-references [
       #heading(var.name, level: style-args.first-heading-level + 1)
       #label(style-args.label-prefix + var.name)
+    ] else [
+      #heading(var.name, level: style-args.first-heading-level + 1)
     ],
     type
   )

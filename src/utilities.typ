@@ -12,7 +12,11 @@
 #let process-references(text, info) = {
   return text.replace(reference-matcher, match => {
     let target = match.captures.at(0)
-    return "#(tidy.show-reference)(label(\"" + info.label-prefix + target + "\"), \"" + target + "\")"
+    if info.enable-cross-references {
+      return "#(tidy.show-reference)(label(\"" + info.label-prefix + target + "\"), \"" + target + "\")"
+    } else {
+      return target
+    }
   })
 }
 

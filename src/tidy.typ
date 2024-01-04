@@ -87,6 +87,10 @@
 ///           description blocks.
 /// - omit-empty-param-descriptions (boolean): Whether to omit description blocks
 ///           for parameters with empty description. 
+/// - omit-private-definitions (boolean): Whether to omit functions and variables
+///           starting with an underscore. 
+/// - omit-private-parameters (boolean): Whether to omit named function arguments 
+///           starting with an underscore. 
 /// - show-outline (function): Whether to output an outline of all functions in 
 ///           the module at the beginning.
 /// - sort-functions (auto, none, function): Function to use to sort the function  
@@ -99,7 +103,9 @@
 ///           `show-parameter-list` and `show-parameter-block` or a dictionary with
 ///           functions for the same keys. 
 /// - enable-tests (boolean): Whether to run docstring tests. 
-/// - colors (auto, dictionary): Give a dictionary for type and colors and other colors. If set to auto, the style will select its default color set. 
+/// - enable-cross-references (boolean): Whether to enable links for cross-references. 
+/// - colors (auto, dictionary): Give a dictionary for type and colors and other colors. 
+///          If set to auto, the style will select its default color set. 
 /// -> content
 #let show-module(
   module-doc, 
@@ -108,9 +114,12 @@
   show-module-name: true,
   break-param-descriptions: false,
   omit-empty-param-descriptions: true,
+  omit-private-definitions: false,
+  omit-private-parameters: false,
   show-outline: true,
   sort-functions: auto,
   enable-tests: true,
+  enable-cross-references: true,
   colors: auto
 ) = {
   let label-prefix = module-doc.label-prefix
@@ -118,6 +127,12 @@
     module-doc.functions = module-doc.functions.sorted(key: x => x.name) 
   } else if type(sort-functions) == "function" { 
     module-doc.functions = module-doc.functions.sorted(key: sort-functions) 
+  }
+
+  if omit-private-definitions {
+    let filter = x => not x.name.starts-with("_")
+    module-doc.functions = module-doc.functions.filter(filter)
+    module-doc.variables = module-doc.variables.filter(filter)
   }
 
   
@@ -129,7 +144,9 @@
     first-heading-level: first-heading-level, 
     break-param-descriptions: break-param-descriptions, 
     omit-empty-param-descriptions: omit-empty-param-descriptions,
-    colors: colors
+    omit-private-parameters: omit-private-parameters,
+    colors: colors,
+    enable-cross-references: enable-cross-references
   )
   
   

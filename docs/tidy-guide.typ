@@ -96,9 +96,13 @@ By default, an outline for all definitions is displayed at the top. This behavio
 
 There is another nice little feature: in the docstring, you can cross-reference other definitions with the extra syntax `@@repeat()` or `@@awful-pi`. This will automatically create a link that when clicked in the PDF will lead you to the documentation of that definition. 
 
+
 Of course, everything happens instantaneously, so you can see the live result while writing the docs for your package. Keep your code documented!
 
 
+= More options
+
+Sometimes you want to document "private" functions and variables but omit them in the public documentation. In order to hide all definitions starting with an underscore, you may set `omit-private-definitions` to `true` in the call to #ref-fn("show-module()"). Similarly, "implementation parameters" to otherwise public functions occur once in a while. These are then used internally by the library. In order to conceal such parameters which may lead to confusion with dedicated documentation readers, you can name them with a leading underscore and set `omit-private-parameters` to `true` as well. 
 
 
 #pagebreak()
@@ -201,8 +205,6 @@ A different predefined style can be selected by passing a style to the `style` p
 ```
 
 You can use show rules to customize the document style before calling #ref-fn("show-module()"). Setting any text and paragraph attributes works just out of the box. Furthermore, heading styles can be set to affect the appearance of the module name (relative heading level 1), function or variable names (relative heading level 2) and the word *Parameters* (relative heading level 3), all relative to what is set with the parameter `first-heading-level` of #ref-fn("show-module()"). 
-
-
 
 Finally, if that is not enough, you can design a completely new style. Examples of styles can be found in the folder `src/styles/` in the #link("https://github.com/Mc-Zen/tidy", "GitHub Repository"). 
 
@@ -317,5 +319,7 @@ Let us now "self-document" this package:
     style: style,
     show-outline: true, 
     sort-functions: auto, 
+    omit-private-parameters: true,
+    omit-private-definitions: true
   )
 }
