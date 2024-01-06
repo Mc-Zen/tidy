@@ -51,14 +51,15 @@
 
   let available-preview-width = preview-width - 2 * (preview-outer-padding + preview-inner-padding)
 
-
-  let preview-size = measure(preview, styles)
+  let preview-size
+  let scale-preview = scale-preview
   
-    
-  let scale-preview = if scale-preview == auto {
-    calc.min(1, available-preview-width / preview-size.width) * 100%
+  if scale-preview == auto {
+    preview-size = measure(preview, styles)
+    assert(preview-size.width != 0pt, message: "The code example has a relative width. Please set `scale-preview` to a fixed ratio, e.g., `100%`")
+    scale-preview = calc.min(1, available-preview-width / preview-size.width) * 100%
   } else {
-    scale-preview
+    preview-size = measure(block(preview, width: available-preview-width / (scale-preview / 100%)), styles)
   }
 
   set par(hanging-indent: 0pt) // this messes up some stuff in case someone sets it
