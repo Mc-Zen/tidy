@@ -131,7 +131,7 @@
     #types.map(x => (style-args.style.show-type)(x, style-args: style-args)).join([ #text("or",size:.6em) ])
   
     #content
-    #if show-default [ #parbreak() Default: #raw(lang: "typc", default) ]
+    #if show-default [ #parbreak() #style-args.local-names.default: #raw(lang: "typc", default) ]
   ]
 )
 
@@ -152,7 +152,7 @@
   eval-docstring(fn.description, style-args)
 
   block(breakable: style-args.break-param-descriptions, {
-    heading("Parameters", level: style-args.first-heading-level + 2)
+    heading(style-args.local-names.parameters, level: style-args.first-heading-level + 2)
     (style-args.style.show-parameter-list)(fn, style-args: style-args)
   })
 

@@ -106,6 +106,7 @@
 /// - enable-cross-references (boolean): Whether to enable links for cross-references. 
 /// - colors (auto, dictionary): Give a dictionary for type and colors and other colors. 
 ///          If set to auto, the style will select its default color set. 
+/// - local-names (dictionary): Language-specific names for strings used in the output. Currently, these are `parameters` and `default`. You can for example use: `local-names: (parameters: [Paramètres], default: [défault])`
 /// -> content
 #let show-module(
   module-doc, 
@@ -120,7 +121,8 @@
   sort-functions: auto,
   enable-tests: true,
   enable-cross-references: true,
-  colors: auto
+  colors: auto,
+  local-names: (parameters: [Parameters], default: [Default])
 ) = {
   let label-prefix = module-doc.label-prefix
   if sort-functions == auto { 
@@ -146,7 +148,8 @@
     omit-empty-param-descriptions: omit-empty-param-descriptions,
     omit-private-parameters: omit-private-parameters,
     colors: colors,
-    enable-cross-references: enable-cross-references
+    enable-cross-references: enable-cross-references,
+    local-names: local-names,
   )
   
   

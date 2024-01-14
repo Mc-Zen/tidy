@@ -119,7 +119,7 @@
   }
   
   if parameter-block != none {
-    [*Parameters:*]
+    [*#style-args.local-names.parameters:*]
     parameter-block
   }
   v(4em, weak: true)
