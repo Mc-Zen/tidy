@@ -322,7 +322,7 @@
     } else {
       assert(
         false, 
-        message: "The parameter \"" + arg.name + "\" does not appear in the argument list of the function \"" + fn-name + "\""
+        message: "The parameter `" + arg.name + "` does not appear in the argument list of the function `" + fn-name + "`"
       )
     }
   }
@@ -330,7 +330,7 @@
     for arg in args {
       assert(
         documented-args.find(x => x.name == arg.at(0)) != none, 
-        message: "The parameter \"" + arg.at(0) + "\" of the function \"" + fn-name + "\" is not documented. "
+        message: "The parameter `" + arg.at(0) + "` of the function `" + fn-name + "` is not documented. "
       )
     }
   }
