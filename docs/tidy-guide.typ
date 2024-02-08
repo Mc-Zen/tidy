@@ -313,7 +313,7 @@ Let us now "self-document" this package:
   set heading(numbering: none)
   set text(size: 9pt)
   
-  let module = tidy.parse-module(read("/src/tidy.typ"), name: "tidy", require-all-parameters: true)
+  let module = tidy.parse-module(read("/src/show-module.typ") + read("/src/parse-module.typ"), name: "tidy", require-all-parameters: true)
   tidy.show-module(
     module, 
     style: style,
