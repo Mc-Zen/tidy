@@ -25,7 +25,7 @@
     let components = clr.components()
     clr = rgb(..components.slice(0, -1), 60%)
   }
-  box(outset: 2pt, fill: clr, radius: 2pt, raw(type-name))
+  box(outset: 2pt, fill: clr, radius: 2pt, raw(type-name, lang: none))
   h(2pt)
 }
 
@@ -65,12 +65,15 @@
   breakable: style-args.break-param-descriptions,
   [ 
     #[
-      #raw(name) 
+      #raw(name, lang: none) 
     ]
-    (#h(-.2em)
-    #types.map(x => (style-args.style.show-type)(x, style-args: style-args)).join([ #text("or",size:.6em) ])
-    #if show-default [\= #raw(lang: "typc", default) ]
-    #h(-.2em)) --
+    #if types != () [
+      (#h(-.2em)
+      #types.map(x => (style-args.style.show-type)(x, style-args: style-args)).join([ #text("or",size:.6em) ])
+      #if show-default [\= #raw(lang: "typc", default) ]
+      #h(-.2em))
+    ]
+    --
     #content
     
   ]
@@ -83,7 +86,7 @@
   if style-args.colors == auto { style-args.colors = default.colors }
   set par(justify: false, hanging-indent: 1em, first-line-indent: 0em)
 
-  block(breakable: style-args.break-param-descriptions, 
+  block(breakable: style-args.break-param-descriptions, fill: rgb("#d8dbed44"), 
   if style-args.enable-cross-references [
     #(style-args.style.show-parameter-list)(fn, style-args)
     #label(style-args.label-prefix + fn.name + "()")
@@ -110,7 +113,7 @@
     [*Parameters:*]
     parameter-block
   }
-  v(4em, weak: true)
+  v(2em, weak: true)
 }
 
 
@@ -138,12 +141,12 @@
   )
   pad(x: 0em, eval-docstring(var.description, style-args))
 
-  v(4em, weak: true)
+  v(2em, weak: true)
 }
 
 
 #let show-reference(label, name, style-args: none) = {
-  link(label, raw(name))
+  link(label, raw(name, lang: none))
 }
 
 #import "../show-example.typ": show-example as show-ex

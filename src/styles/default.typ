@@ -81,7 +81,7 @@
 #let show-type(type, style-args: (:)) = { 
   h(2pt)
   let clr = style-args.colors.at(type, default: style-args.colors.at("default", default: default-type-color))
-  box(outset: 2pt, fill: clr, radius: 2pt, raw(type))
+  box(outset: 2pt, fill: clr, radius: 2pt, raw(type, lang: none))
   h(2pt)
 }
 
@@ -198,7 +198,7 @@
 
 
 #let show-reference(label, name, style-args: none) = {
-  link(label, raw(name))
+  link(label, raw(name, lang: none))
 }
 
 

@@ -29,7 +29,7 @@
 // Create beautiful, colored type box
 #let show-type(type, style-args: (:)) = { 
   h(2pt)
-  box(outset: 2pt, fill: get-type-color(type), radius: 2pt, raw(type))
+  box(outset: 2pt, fill: get-type-color(type), radius: 2pt, raw(type, lang: none))
   h(2pt)
 }
 
@@ -74,7 +74,7 @@
   [ 
     #[
       #set text(fill: fn-color)
-      #raw(name) 
+      #raw(name, lang: none) 
     ]
     (#h(-.2em)
     #types.map(x => (style-args.style.show-type)(x)).join([ #text("or",size:.6em) ])
@@ -154,7 +154,7 @@
 
 
 #let show-reference(label, name, style-args: none) = {
-  link(label, raw(name))
+  link(label, raw(name, lang: none))
 }
 
 #import "../show-example.typ": show-example as show-ex
