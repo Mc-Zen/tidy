@@ -29,12 +29,15 @@
 ///       functions are documented and fail if some are not. 
 /// - scope (dictionary): A dictionary of definitions that are then available 
 ///       in all function and parameter descriptions. 
+/// - preamble (string): Code to prepend to all code snippets shown with `#example()`. 
+///       This can for instance be used to import something from the scope. 
 #let parse-module(
   content, 
   name: "", 
   label-prefix: auto,
   require-all-parameters: false,
-  scope: (:)
+  scope: (:),
+  preamble: ""
 ) = {
   if label-prefix == auto { label-prefix = name }
   
@@ -60,6 +63,7 @@
     functions: function-docs, 
     variables: variable-docs, 
     label-prefix: label-prefix,
-    scope: scope
+    scope: scope,
+    preamble: preamble
   )
 }

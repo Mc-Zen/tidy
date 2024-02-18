@@ -1,13 +1,13 @@
 /// Draw a sine function with $n$ periods into a rectangle of given size.
 ///
 /// *Example:*
-/// #example(`wiggly.draw-sine(1cm, 0.5cm, 2)`)
+/// #example(`draw-sine(1cm, 0.5cm, 2)`)
 ///
 /// - height (length): Width of bounding rectangle.
 /// - width (length): Height of bounding rectangle.
 /// - periods (integer, float): Number of periods to draw. 
 ///      Example with many periods: 
-///      #example(`wiggly.draw-sine(4cm, 1.3cm, 10)`)
+///      #example(`draw-sine(4cm, 1.3cm, 10)`)
 /// -> content
 #let draw-sine(width, height, periods) = box(width: width, height: height, {
   let resolution = 100

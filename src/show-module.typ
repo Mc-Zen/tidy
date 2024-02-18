@@ -87,7 +87,8 @@
   let eval-scope = (
     // Predefined functions that may be called by the user in docstring code
     example: style-functions.show-example.with(
-      inherited-scope: module-doc.scope
+      inherited-scope: module-doc.scope,
+      preamble: module-doc.preamble
     ),
     test: testing.test.with(
       inherited-scope: testing.assertations + module-doc.scope, 

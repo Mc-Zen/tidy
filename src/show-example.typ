@@ -17,6 +17,7 @@
   code, 
   dir: ltr,
   scope: (:),
+  preamble: "",
   ratio: 1,
   scale-preview: auto,
   mode: "code",
@@ -36,7 +37,7 @@
     code = raw(code.text, lang: lang, block: true)
   }
         
-  let preview = [#eval(code.text, mode: mode, scope: scope + inherited-scope)]
+  let preview = [#eval(preamble + code.text, mode: mode, scope: scope + inherited-scope)]
   
   let preview-outer-padding = 5pt
   let preview-inner-padding = 5pt

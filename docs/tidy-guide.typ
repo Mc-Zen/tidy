@@ -120,14 +120,15 @@ It is even possible to add *entire modules* to the scope which makes rendering e
 
 Note, that we use the predefined function `example()` here to show the code as well as the rendered output of some demo usage of our function. The `example()` function is treated more in-detail in @preview-examples.
 
-We can now parse the module and pass the module `wiggly` through the `scope` parameter:
+We can now parse the module and pass the module `wiggly` through the `scope` parameter. Furthermore, we apply another trick: by specifying a `preamble`, we can add code to run before each example. Here we use this feature to import everything from the module `wiggly`. This way, we can directly write `draw-sine(...)` in the example (instead of `wiggly.draw-sine(...)`):
 ```typ
 #import "wiggly.typ" // don't import something specific from the module!
 
 #let docs = tidy.parse-module(
   read("wiggly.typ"), 
   name: "wiggly",
-  scope: (wiggly: wiggly)
+  scope: (wiggly: wiggly),
+  preamble: "import wiggly: *;"
 )
 ```
 
@@ -135,11 +136,12 @@ In the output, the preview of the code examples is shown next to it.
 
 #{
   import "/examples/wiggly.typ"
-  
+
   let module = tidy.parse-module(
     read("/examples/wiggly.typ"), 
     name: "wiggly",
-    scope: (wiggly: wiggly)
+    scope: (wiggly: wiggly),
+    preamble: "import wiggly: draw-sine;"
   )
   tidy-output-figure(tidy.show-module(module, show-outline: false))
 }
@@ -168,8 +170,9 @@ The function `example()` is available in every docstring and has some bells and 
     read("/examples/example-demo.typ"), 
     scope: (example-demo: example-demo)
   )
-  tidy-output-figure(tidy.show-module(module, show-outline: false))
+  tidy-output-figure(tidy.show-module(module, show-outline: false, break-param-descriptions: true))
 }
+
 
 
 
@@ -235,7 +238,8 @@ Currently, the two predefined styles `tidy.styles.default` and `tidy-styles.mini
   let module = tidy.parse-module(
     read("/examples/wiggly.typ"), 
     name: "wiggly",
-    scope: (wiggly: wiggly)
+    scope: (wiggly: wiggly),
+    preamble: "import wiggly: *;"
   )
   tidy-output-figure(tidy.show-module(module, show-outline: false, style: tidy.styles.minimal))
 }
