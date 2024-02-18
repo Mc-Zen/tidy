@@ -80,10 +80,12 @@
   )
   show raw.where(block: true): set text(size: .95em)
   show raw.where(block: true): it => pad(x: 4%, it)
+  show raw.where(block: false): it => box(inset: (x: 3pt), outset: (y: 3pt), radius: 40%, fill: luma(235), it)
 
   body
 }
 
+#let ref-fn(name) = link(label("tidy" + name), raw(name))
 
 #let file-code(filename, code) = pad(x: 4%, block(
   width: 100%, 

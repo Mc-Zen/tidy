@@ -21,20 +21,6 @@
 )
 
 
-// #show heading: set text(size: 1.2em)
-// #show heading.where(level: 4): set text(size: .7em)
-#let ref-fn(name) = link(label("tidy" + name), raw(name))
-
-#show raw.where(block: false): it => box(inset: (x: 3pt), outset: (y: 3pt), radius: 40%, fill: luma(235), it)
-// #show raw.where(block: true): it => pad(x: 2%, block(
-//   width: 100%, 
-//   fill: gray.lighten(90%),
-//   inset: (x: 10pt, y: 4pt),
-//   outset: (y: 3pt),
-//   radius: 2pt,
-//   it
-// ))
-
 #pad(x: 10%, outline(depth: 1))
 #pagebreak()
 
@@ -44,8 +30,9 @@ You can easily feed *tidy* your in-code documented source files and get beautifu
 The main features are:
 - Type annotations,
 - Seamless cross references,
-- Rendering code examples (see @preview-examples), and
-- Docstring testing (see @docstring-testing).
+- Rendering code examples (see @preview-examples),
+- help command generation (see @help-command), and 
+- Docstring testing (see @docstring-testing). 
 First, we import *tidy*. 
 #raw(block: true, lang: "typ", import-statement)
 
@@ -256,8 +243,80 @@ Currently, the two predefined styles `tidy.styles.default` and `tidy-styles.mini
 
 
 
+#pagebreak()
+= Help command <help-command>
+With *tidy*, you can easily add a `help` command to your package. This allows the users of your package to call #raw(lang: "typ", "#your-package.help(\"foo\")") to get the docs for the specified definition printed right in their document. This makes reading up on options and discovering features in your package effortless. After the desired information has been gathered, it's no more than deleting a line of document source code to make the docs vanish into the hidden realms of repositories once again!
 
 
+/*
+The feature that will make using *your* package attractive. 
+Without leaving the editor
+
+The usage and ease of access for typst packages is about to be revolutionized!
+*/
+
+This feature supports:
+- function and variable definitions,
+- definitions defined in nested submodules, e.g., #raw(lang: "typ", "#your-package.help(\"sub.bar.foo\")")
+- asking only for the parameter description of a function, e.g., #raw(lang: "typ", "#your-package.help(\"foo(param1)\")")
+- lazy evaluation of docstring processing (even loading of `tidy` can be made lazy). _Don't pay for what you don't use!_
+
+
+== Setup
+
+If you have already documented your code, adding such a help function will require only little further effort in implementation. In your root library file, add some code of the following kind:
+#raw(block: true, lang: "typ", ```
+#let help(name) = {
+```.text + "\n  " + import-statement.slice(1) + "\n" + 
+```
+  let namespace = (
+    ".": read.with("/src/my-package.typ")
+  )
+  tidy.generate-help(namespace: namespace, package-name: "tidy")(name)
+}
+```.text)
+First, we set up a `namespace` dictionary that reflects the way that definitions can be accessed by a user. Note that due to import statements that import _from_ a file, this may not reflect the actual file structure of your repository. Take care to provide `read.with()` objects with the filename prepended instead of directly calling `read()`. This allows *tidy* to only lazily read the source files upon a help request from the end user.  
+
+As a more elaborate example, let us look at some library root file for a maths package called `heymath`. 
+#file-code("heymath.typ", ```typ
+#import "vec.typ": vec-add, vec-subtract // import definitions into root
+#import "matrix.typ"                     // submodule "matrix"
+
+/// ...
+#let pi-squared = 9.86960440108935861883
+```)
+Our `namespace` dictionary could then look like this:
+```typc
+let namespace = (
+  ".": (read.with("/heymath.typ"), read.with("/vec.typ"))
+  "matrix": read.with("/matrix.typ")
+  "matrix.solve": read.with("/solve.typ")
+)
+```
+Since the symbols from `vec.typ` are imported directly into the library (and are accessible through `heymath.vec-add()` and `heymath.vec-subtract()`), we add this file to the root together with the main library file. Both files will be internally concatenated for docstring processing. The content of `matrix.typ`, however, can only be accessed through `heymath.matrix.` (by the user) and so we place `matrix.typ` at the key `matrix`. 
+For nested submodules, write out the complete name "path" for the key. As an example, we have added `matrix.solve` -- a module that would be imported within `matrix.typ` -- to the code sample above. 
+// Note that the dictionary may be arbitrarily nested, i.e., values may again be dictionaries containing a `"."` entry for the root and optionally more entries and so on. 
+
+== Output customization (for end-users)
+
+The default style for help output should work more or less for light and dark documents but is otherwise not very customizable. This is intended to be changed when user-defined types are available in Typst because these would provide the ideal interface for such customization. Until then, I do not deem it much sense to provide a temporary solution that need
+
+== Notes about optimization (for package developers)
+
+When set up in the form as shown above, the package `tidy` is only imported when a user calls `help` for the first time and not at all if the feature is not used _(don't pay for what you don't use)_. The files themselves are also only read when a definition from a specific submodule in the "namespace" is requested. In the case of _extremely_ long code files, it _could_ make sense to separate the documentation from the implementation by adding "documentation files" that only contain a _declaration_ plus docstring for each definition -- with the body left empty. 
+```typ
+/// - inputs (array): The inputs for the algorithm. 
+/// - parameters (none, dictionary): Some parameters. 
+#let my-really-long-algorithm(inputs, parameters: none) = { }
+```
+
+The advantage is that the source code is not as crowded with (sometimes very long) docstrings and that docstring parsing may get faster. On the downside, there is an increased maintenance overhead due to the need of synchronizing the actual file and the documentation file (especially when the interface of a function changes). 
+
+
+
+
+== Ideas
+- search feature (may even search all docstrings!)
 
 #pagebreak()
 = Docstring testing <docstring-testing>
@@ -313,7 +372,15 @@ Let us now "self-document" this package:
   set heading(numbering: none)
   set text(size: 9pt)
   
-  let module = tidy.parse-module(read("/src/show-module.typ") + read("/src/parse-module.typ"), name: "tidy", require-all-parameters: true)
+  let module = tidy.parse-module(
+    (
+      read("/src/show-module.typ"),
+      read("/src/parse-module.typ"),
+      read("/src/helping.typ")
+    ).join("\n"),
+    name: "tidy", 
+    require-all-parameters: true
+  )
   tidy.show-module(
     module, 
     style: style,
@@ -323,3 +390,9 @@ Let us now "self-document" this package:
     omit-private-definitions: true
   )
 }
+
+= End
+
+#tidy.help("show-module()")
+#tidy.help("parse-module()")
+#tidy.help("parse-module(label-prefix)")
