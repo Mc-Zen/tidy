@@ -299,7 +299,6 @@ let namespace = (
 ```
 Since the symbols from `vec.typ` are imported directly into the library (and are accessible through `heymath.vec-add()` and `heymath.vec-subtract()`), we add this file to the root together with the main library file. Both files will be internally concatenated for docstring processing. The content of `matrix.typ`, however, can only be accessed through `heymath.matrix.` (by the user) and so we place `matrix.typ` at the key `matrix`. 
 For nested submodules, write out the complete name "path" for the key. As an example, we have added `matrix.solve` -- a module that would be imported within `matrix.typ` -- to the code sample above. 
-// Note that the dictionary may be arbitrarily nested, i.e., values may again be dictionaries containing a `"."` entry for the root and optionally more entries and so on. 
 
 == Output customization (for end-users)
 

@@ -8,10 +8,10 @@
 #import "show-example.typ"
 #import "parse-module.typ": parse-module
 #import "show-module.typ": show-module
-#import "helping.typ": generate-help
+#import "helping.typ" as helping: generate-help
 
 
-#let help = {
+#let help(name) = {
   let namespace = (
     ".": (
       read.with("/src/parse-module.typ"), 
@@ -19,5 +19,5 @@
       read.with("/src/helping.typ"),
     )
   )
-  generate-help(namespace: namespace, package-name: "tidy")
+  generate-help(namespace: namespace, package-name: "tidy")(name)
 }
