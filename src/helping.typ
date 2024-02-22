@@ -27,7 +27,7 @@
   if search == "" { return help-box(block[_empty search string_]) }
   let search-names = "n" in searching
   let search-descriptions = "d" in searching
-  let search-arguments = "a" in searching
+  let search-parameters = "p" in searching
 
   let search-argument-dict(args) = {
     if search in args { return true }
@@ -38,7 +38,7 @@
   }
 
   let filter = definition => {
-    (search-names and search in definition.name) or         (search-descriptions and "description" in definition and search in definition.description) or (search-arguments and "args" in definition and search-argument-dict(definition.args)) 
+    (search-names and search in definition.name) or         (search-descriptions and "description" in definition and search in definition.description) or (search-parameters and "args" in definition and search-argument-dict(definition.args)) 
   }
   
   let definitions = ()
@@ -176,33 +176,40 @@
 }
 
 
-/// Prints references directly into your document while typsting. This allows
-/// one to easily check the usage and documentation of a function or variable. 
+/// Generates a `help` function for your package that allows the user to
+/// prints references directly into their document while typing. This allows
+/// them to easily check the usage and documentation of a function or variable. 
 ///
-/// - namespace (dictionary): This dictionary should represent the namespace of the package in a tree structure, containing `read.with()` objects at the leafs. 
-/// - style (dictionary): a
-/// - onerror (function): a
-/// - package-name (string): a
-///   Example
-///   ```typc
-///   (
-///     ".": read.with("/src/lib.typ"),
-///     "utility": read.with("/src/utility.typ"),
-///     "testing": (
-///       ".": (read.with("/src/testing1.typ"), read.with("/src/testing2.typ")),
-///       "advanced": read.with("/src/testing/advanced.typ"),
-///     )
-///   )
-///   ```
-///  Each definition in your package should be accessible through this dictionary in the same way as 
-///  in your entrypoint file. I.e., all symbols that are in scope when importing `*` from your 
-///  package are to be put in the root directory `"."`. If your entrypoint file imports some other file
-///  `utility.typ` (without importing any definitions specifically), then it is inserting into the 
-///  dictionary at `"utility"` and so on. 
-///  
-///  By providing instances of `read()` with the filename prepended, you allow tidy to read the files 
-///  that are not part of the tidy package but at the same time enable lazy evaluation of the files, 
-///  i.e., a file is only opened when a definition from this file is requested through `help()`. 
+/// - namespace (dictionary): This dictionary should reflect the "namespace" of the package
+///        in a flat dictionary and contain `read.with()` instances for the respective code 
+///        files. 
+///        Imagine importing everything from a package, `#import "mypack.typ": *`. How a 
+///        symbol is accessible now determines how the dictionary should be built. 
+///        We start with a root key, `(".": read.with("lib.typ"))`. If `lib.typ` imports 
+///        symbols from other files _into_ its scope, these files should be added to the
+///        root along with `lib.typ` by passing an array: 
+///        ```typ
+///        (
+///          ".": (read.with("lib.typ"), read.with("more.typ")),
+///          "testing": read.with("testing.typ")
+///        )
+///        ```
+///        Here, we already show another case: let `testing.typ` be imported in `lib.typ`
+///        but without `*`, so that the symbols are accessed via `testing.`. We therefore 
+///        add these under a new key. Nested files should be added with multiple 
+///        dots, e.g., `"testing.float."`. 
+///        
+///        By providing instances of `read()` with the filename prepended, you allow tidy 
+///        to read the files that are not part of the tidy package but at the same time
+///        enable lazy evaluation of the files, i.e., a file is only opened when a 
+///        definition from this file is requested through `help()`. 
+/// - style (dictionary): A tidy style that is used for showing parts of the documentation
+///        in the help box. It is recommended to leave this at the `help` style which is 
+///        particularly designed for this purpose. Please post an issue if you have problems
+///        or suggestions regarding this style. 
+/// - package-name (string): The name of the package. This is required to give helpful
+///   error messages when a symbol cannot be found. 
+/// - onerror (function): What to do with errors. By default, an assertation is failed. 
 #let generate-help(
   namespace: (".": () => ""), 
   package-name: "",
@@ -234,7 +241,7 @@
   let help-function = (
     ..args, 
     search: none, 
-    searching: "nda", 
+    searching: "ndp", // Enable search of: name, descriptions, parameters 
     style: style
   ) => {
     if search == none {

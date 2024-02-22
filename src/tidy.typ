@@ -11,7 +11,7 @@
 #import "helping.typ" as helping: generate-help
 
 
-#let help(name) = {
+#let help(..args) = {
   let namespace = (
     ".": (
       read.with("/src/parse-module.typ"), 
@@ -19,5 +19,5 @@
       read.with("/src/helping.typ"),
     )
   )
-  generate-help(namespace: namespace, package-name: "tidy")(name)
+  generate-help(namespace: namespace, package-name: "tidy")(..args)
 }
