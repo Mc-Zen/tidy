@@ -7,4 +7,4 @@ license = "MIT"
 exclude = ["/docs/*"]
 description = "Documentation generator for Typst code in Typst."
 homepage = "https://github.com/Mc-Zen/tidy"
-repository = "httmps://github.com/Mc-Zen/tidy"
+repository = "https://github.com/Mc-Zen/tidy"
