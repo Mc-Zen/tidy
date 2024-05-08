@@ -2,34 +2,70 @@
 # Tidy
 *Keep it tidy.*
 
-<!-- [![Tests](https://github.com/Mc-Zen/tidy/actions/workflows/run_tests.yml/badge.svg)](https://github.com/Mc-Zen/tidy/actions/workflows/run_tests.yml) -->
+<p>
+  <a href="https://typst.app/docs/packages/">
+    <img alt="Typst Package" src="https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2FMc-Zen%2Ftidy%2Fmain%2Ftypst.toml&query=%24.package.version&prefix=v&logo=typst&label=package&color=239DAD"/>
+  </a>
+  <!-- <a href="https://github.com/Mc-Zen/tidy/actions/workflows/run_tests.yml">
+    <img alt="Test Status" src="https://github.com/Mc-Zen/tidy/actions/workflows/run_tests.yml/badge.svg"/>
+  </a> -->
+  <a href="https://github.com/Mc-Zen/tidy/blob/main/LICENSE">
+    <img alt="MIT License" src="https://img.shields.io/badge/license-MIT-blue"/>
+  </a>
+  <a href="https://raw.githubusercontent.com/Mc-Zen/tidy/main/docs/tidy-guide.pdf" target="_blank">
+    <img alt="Typst Package" src="https://img.shields.io/badge/manual-.pdf-purple"/>
+  </a>
+</p>
 
-**tidy** is a package that generates documentation directly in [Typst](https://typst.app/) for your Typst modules. It parses docstring comments similar to javadoc and co. and can be used to easily build a beautiful reference section for the parsed module.  
-
-Within the docstring you may use (almost) any Typst syntax − so markup, equations and even figures are no problem!
+**tidy** is a package that generates documentation directly in [Typst](https://typst.app/) for your Typst modules. It parses docstring comments similar to javadoc and co. and can be used to easily build a beautiful reference section for the parsed module.  Within the docstring you may use (almost) any Typst syntax − so markup, equations and even figures are no problem!
 
 Features:
 - **Customizable** output styles. 
 - Call your own module's code within the docstring, e.g., to **render examples**. 
 - **Annotate types** of parameters and return values.
 - Automatically read off default values for named parameters.
+- **Help** feature for your package. 
 - Docstring tests. 
 
 
-The [guide](./docs/tidy-guide.pdf) describes the usage of this module and defines the format for the docstrings. 
+The [guide](./docs/tidy-guide.pdf) fully describes the usage of this module and defines the format for the docstrings. 
 
 ## Usage
 
 Using `tidy` is as simple as writing some docstrings and calling:
 ```typ
 #import "@preview/tidy:0.2.0"
+
 #let docs = tidy.parse-module(read("my-module.typ"))
 #tidy.show-module(docs, style: tidy.styles.default)
 ```
 
-The available predefined styles are currenty `tidy.styles.default` and `tidy.styles.minimal`. Custom styles can be added by hand (see the [guide](./docs/tidy-guide.pdf)). 
+The available predefined styles are currenty `tidy.styles.default` and `tidy.styles.minimal`. Custom styles can be added by hand (take a look at the [guide](./docs/tidy-guide.pdf)). 
 
-Furthermore, it is possible to access user-defined functions and use images through the `scope` argument of `tidy.parse-module()`:
+## Example
+
+A full example on how to use this module for your own package (maybe even consisting of multiple files) can be found at [examples](https://github.com/Mc-Zen/tidy/tree/main/examples).
+
+```typ
+/// This function computes the cardinal sine, $sinc(x)=sin(x)/x$. 
+///
+/// #example(`#sinc(0)`, mode: "markup")
+///
+/// - x (int, float): The argument for the cardinal sine function. 
+/// -> float
+#let sinc(x) = if x == 0 {1} else {calc.sin(x) / x}
+```
+
+**tidy** turns this into:
+
+<h3 align="center">
+  <img alt="Tidy example output" src="docs/images/sincx-docs.svg" style="max-width: 100%; padding: 10px 10px; box-shadow: 1pt 1pt 10pt 0pt #AAAAAA; border-radius: 4pt; box-sizing: border-box; background: white">
+</h3>
+
+
+## Access user-defined functions and images
+
+The code in the docstrings is evaluated via `eval()`. In order to access user-defined functions and images, you can make use of the `scope` argument of `tidy.parse-module()`:
 
 ```typ
 #{
@@ -43,36 +79,23 @@ Furthermore, it is possible to access user-defined functions and use images thro
     )
 }
 ```
-The docstrings in `my-module.typ` may now access the image with `#img` and can call any function or variable from `my-module` in the style of `#my-module.my-function`. This makes rendering examples right in the docstrings as easy as a breeze!
-
-## Example
-
-A full example on how to use this module for your own package (maybe even consisting of multiple files) can be found at [examples](https://github.com/Mc-Zen/tidy/tree/main/examples).
-
-```typ
-/// This function does something. It always returns true.
-///
-/// We can have *markdown* and 
-/// even $m^a t_h$ here. A list? No problem:
-///  - Item one 
-///  - Item two 
-/// 
-/// - param1 (string): This is param1.
-/// - param2 (content, length): This is param2.
-///           Yes, it really is. 
-/// - ..options (any): Optional options. 
-/// -> boolean, none
-#let something(param1, param2: 3pt, ..options) = { return true }
-```
-
-**tidy** turns this into:
-
-<h3 align="center">
-  <img alt="Tidy example output" src="docs/images/my-module-docs.svg" style="max-width: 100%; padding: 10px 10px; box-shadow: 1pt 1pt 10pt 0pt #AAAAAA; border-radius: 4pt; box-sizing: border-box; background: white">
-</h3>
+The docstrings in `my-module.typ` may now access the image with `#img` and can call any function or variable from `my-module` in the style of `#my-module.my-function()`. This makes rendering examples right in the docstrings as easy as a breeze!
 
 
 ## Changelog
+
+### v0.3.0
+- New features:
+  - Help feature. 
+  - `preamble` option for examples (e.g., to add `import` statements). 
+  - more options for `show-module`: `omit-private-definitions`, `omit-private-parameters`, `enable-cross-references`, `local-names` (for configuring language-specific strings). 
+- Improvements:
+  - Allow using `show-example()` as standalone. 
+  - Updated type names that changed with Typst 0.8.0, e.g., integer -> int. 
+- Fixes:
+  - allow examples with ratio widths if `scale-preview` is not `auto`.
+  - `show-outline`
+  - explicitly use `raw(lang: none)` for types and function names. 
 
 ### v0.2.0
 - New features:
