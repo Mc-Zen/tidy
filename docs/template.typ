@@ -75,13 +75,13 @@
   show: codly-init
   codly(
     languages: (
-      tyap: (name: "typ", icon: none, color: rgb("#239DAE")),
+      // typ: (name: "typ", icon: none, color: rgb("#239DAE")),
     ),
   )
   show raw.where(block: true): set text(size: .95em)
   show raw.where(block: true): it => pad(x: 4%, it)
-  show raw.where(block: false): it => box(inset: (x: 3pt), outset: (y: 3pt), radius: 40%, fill: luma(235), it)
-
+  show raw.where(block: false, lang: "typ").or(raw.where(lang: "notnone")): it => box(inset: (x: 3pt), outset: (y: 3pt), radius: 40%, fill: luma(235), it)
+  set raw(lang: "notnone")
   body
 }
 

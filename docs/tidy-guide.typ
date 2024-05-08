@@ -320,7 +320,7 @@ For nested submodules, write out the complete name "path" for the key. As an exa
 
 == Searching
 
-It is also possible to search the package documentation via the search argument of the help function: \ #raw(lang: "typ", "#tidy.help(search: \"module\")")
+It is also possible to search the package documentation via the search argument of the help function: \ #raw(lang: "typ", "#tidy.help(search: \"module\")"). This feature is even more experimental. 
 #{
   set text(size: .8em)
   pad(x: 5%,
@@ -423,9 +423,3 @@ Let us now "self-document" this package:
     omit-private-definitions: true
   )
 }
-
-= End
-
-#tidy.help("show-module()")
-#tidy.help("parse-module()")
-#tidy.help("parse-module(label-prefix)")
