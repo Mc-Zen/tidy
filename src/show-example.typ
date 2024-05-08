@@ -28,11 +28,14 @@
   ..options
 ) = {
   set raw(block: true)
-  set raw(lang: "typc")
   let lang = if code.has("lang") { code.lang } else { "typc" }
   if lang == "typ" {
     mode = "markup"
   }
+  if mode == "markup" and not code.has("lang") { 
+    lang = "typ" 
+  }
+  set raw(lang: lang)
   if code.has("block") and code.block == false {
     code = raw(code.text, lang: lang, block: true)
   }
