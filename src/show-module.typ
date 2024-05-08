@@ -54,7 +54,7 @@
   enable-cross-references: true,
   colors: auto,
   local-names: (parameters: [Parameters], default: [Default])
-) = {
+) = block({
   let label-prefix = module-doc.label-prefix
   if sort-functions == auto { 
     module-doc.functions = module-doc.functions.sorted(key: x => x.name) 
@@ -122,6 +122,6 @@
   for (index, fn) in module-doc.variables.enumerate() {
     (style-functions.show-variable)(fn, style-args)
   }
-}
+})
 
 
