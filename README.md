@@ -2,20 +2,10 @@
 # Tidy
 *Keep it tidy.*
 
-<p>
-  <a href="https://typst.app/docs/packages/">
-    <img alt="Typst Package" src="https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2FMc-Zen%2Ftidy%2Fmain%2Ftypst.toml&query=%24.package.version&prefix=v&logo=typst&label=package&color=239DAD"/>
-  </a>
-  <!-- <a href="https://github.com/Mc-Zen/tidy/actions/workflows/run_tests.yml">
-    <img alt="Test Status" src="https://github.com/Mc-Zen/tidy/actions/workflows/run_tests.yml/badge.svg"/>
-  </a> -->
-  <a href="https://github.com/Mc-Zen/tidy/blob/main/LICENSE">
-    <img alt="MIT License" src="https://img.shields.io/badge/license-MIT-blue"/>
-  </a>
-  <a href="https://raw.githubusercontent.com/Mc-Zen/tidy/main/docs/tidy-guide.pdf" target="_blank">
-    <img alt="Typst Package" src="https://img.shields.io/badge/manual-.pdf-purple"/>
-  </a>
-</p>
+[![Typst Package](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2FMc-Zen%2Ftidy%2Fmain%2Ftypst.toml&query=%24.package.version&prefix=v&logo=typst&label=package&color=239DAD)](https://typst.app/universe/package/tidy)
+[![MIT License](https://img.shields.io/badge/license-MIT-blue)](https://github.com/Mc-Zen/tidy/blob/main/LICENSE)
+[![User Manual](https://img.shields.io/badge/manual-.pdf-purple)](https://raw.githubusercontent.com/Mc-Zen/tidy/main/docs/tidy-guide.pdf)
+
 
 **tidy** is a package that generates documentation directly in [Typst](https://typst.app/) for your Typst modules. It parses docstring comments similar to javadoc and co. and can be used to easily build a beautiful reference section for the parsed module.  Within the docstring you may use (almost) any Typst syntax − so markup, equations and even figures are no problem!
 
@@ -34,7 +24,7 @@ The [guide](./docs/tidy-guide.pdf) fully describes the usage of this module and 
 
 Using `tidy` is as simple as writing some docstrings and calling:
 ```typ
-#import "@preview/tidy:0.2.0"
+#import "@preview/tidy:0.3.0"
 
 #let docs = tidy.parse-module(read("my-module.typ"))
 #tidy.show-module(docs, style: tidy.styles.default)

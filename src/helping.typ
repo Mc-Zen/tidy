@@ -209,7 +209,7 @@
 ///        or suggestions regarding this style. 
 /// - package-name (string): The name of the package. This is required to give helpful
 ///   error messages when a symbol cannot be found. 
-/// - onerror (function): What to do with errors. By default, an assertation is failed. 
+/// - onerror (function): What to do with errors. By default, an assertion is failed (the document panics). 
 #let generate-help(
   namespace: (".": () => ""), 
   package-name: "",

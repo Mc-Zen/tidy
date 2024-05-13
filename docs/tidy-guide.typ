@@ -423,25 +423,3 @@ Let us now "self-document" this package:
     omit-private-definitions: true
   )
 }
-
-= End
-
-#tidy.help("show-module()")
-#tidy.help("parse-module()")
-#tidy.help("parse-module(label-prefix)")
-
-
-
-#pagebreak()
-#disable-codly()
-
-#import "/examples/sincx.typ" 
-
-#let docs = tidy.parse-module(
-  read("/examples/sincx.typ"), 
-  scope: (sincx: sincx),
-  preamble: "#import sincx: *;"
-)
-
-#set heading(numbering: none)
-#block(width: 10cm, tidy.show-module(docs, show-outline: false))
