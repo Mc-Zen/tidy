@@ -4,7 +4,7 @@
 
 [![Typst Package](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2FMc-Zen%2Ftidy%2Fmain%2Ftypst.toml&query=%24.package.version&prefix=v&logo=typst&label=package&color=239DAD)](https://typst.app/universe/package/tidy)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue)](https://github.com/Mc-Zen/tidy/blob/main/LICENSE)
-[![User Manual](https://img.shields.io/badge/manual-.pdf-purple)](https://raw.githubusercontent.com/Mc-Zen/tidy/main/docs/tidy-guide.pdf)
+[![User Manual](https://img.shields.io/badge/manual-.pdf-purple)][guide]
 
 
 **tidy** is a package that generates documentation directly in [Typst](https://typst.app/) for your Typst modules. It parses docstring comments similar to javadoc and co. and can be used to easily build a beautiful reference section for the parsed module.  Within the docstring you may use (almost) any Typst syntax − so markup, equations and even figures are no problem!
@@ -18,7 +18,7 @@ Features:
 - [Docstring tests](#docstring-tests). 
 
 
-The [guide](./docs/tidy-guide.pdf) fully describes the usage of this module and defines the format for the docstrings. 
+The [guide][guide] fully describes the usage of this module and defines the format for the docstrings. 
 
 ## Usage
 
@@ -30,7 +30,7 @@ Using `tidy` is as simple as writing some docstrings and calling:
 #tidy.show-module(docs, style: tidy.styles.default)
 ```
 
-The available predefined styles are currenty `tidy.styles.default` and `tidy.styles.minimal`. Custom styles can be added by hand (take a look at the [guide](./docs/tidy-guide.pdf)). 
+The available predefined styles are currenty `tidy.styles.default` and `tidy.styles.minimal`. Custom styles can be added by hand (take a look at the [guide][guide]). 
 
 ## Example
 
@@ -81,7 +81,7 @@ With **tidy**, you can add a help command to you package that allows users to ob
 #mypackage.help("func(param1)") // print only parameter description of param1
 ```
 
-This will print the documentation of `func` directly into the document — no need to look it up in a manual. Read up in the [guide](./docs/tidy-guide.pdf) for setup instructions. 
+This will print the documentation of `func` directly into the document — no need to look it up in a manual. Read up in the [guide][guide] for setup instructions. 
 
 ## Docstring tests
 It is possible to add simple docstring tests — assertions that will be run when the documentation is generated. This is useful if you want to keep small tests and documentation in one place. 
@@ -136,3 +136,5 @@ A few test assertion functions are available to improve readability, simplicity,
 ### v0.1.0
 
 Initial Release.
+
+[guide]: https://github.com/Mc-Zen/tidy/releases/download/v0.3.0/tidy-guide.pdf
