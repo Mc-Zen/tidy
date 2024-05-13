@@ -21,11 +21,11 @@
 
 Features:
 - **Customizable** output styles. 
-- Call your own module's code within the docstring, e.g., to **render examples**. 
+- Automatically [**render code examples**](#example). 
 - **Annotate types** of parameters and return values.
 - Automatically read off default values for named parameters.
-- **Help** feature for your package. 
-- Docstring tests. 
+- [**Help** feature](#generate-a-help-command-for-you-package) for your package. 
+- [Docstring tests](#docstring-tests). 
 
 
 The [guide](./docs/tidy-guide.pdf) fully describes the usage of this module and defines the format for the docstrings. 
@@ -80,6 +80,35 @@ The code in the docstrings is evaluated via `eval()`. In order to access user-de
 }
 ```
 The docstrings in `my-module.typ` may now access the image with `#img` and can call any function or variable from `my-module` in the style of `#my-module.my-function()`. This makes rendering examples right in the docstrings as easy as a breeze!
+
+## Generate a help command for you package
+With **tidy**, you can add a help command to you package that allows users to obtain the documentation of a specific definition or parameter right in the document. This is similar to CLI-style help commands. If you have already written docstrings for your package, it is quite low-effort to add this feature. Once set up, the end-user can use it like this:
+
+```typ
+// happily coding, but how do I use this one complex function again?
+
+#mypackage.help("func")
+#mypackage.help("func(param1)") // print only parameter description of param1
+```
+
+This will print the documentation of `func` directly into the document — no need to look it up in a manual. Read up in the [guide](./docs/tidy-guide.pdf) for setup instructions. 
+
+## Docstring tests
+It is possible to add simple docstring tests — assertions that will be run when the documentation is generated. This is useful if you want to keep small tests and documentation in one place. 
+```typ
+/// #test(
+///   `num.my-square(2) == 4`,
+///   `num.my-square(4) == 16`,
+/// )
+#let my-square(n) = n * n
+```
+With the short-hand syntax, a unfulfilled assertion will even print the line number of the failed test:
+```typ
+/// >>> my-square(2) == 4
+/// >>> my-square(4) == 16
+#let my-square(n) = n * n
+```
+A few test assertion functions are available to improve readability, simplicity, and error messages. Currently, these are `eq(a, b)` for equality tests, `ne(a, b)` for inequality tests and `approx(a, b, eps: 1e-10)` for floating point comparisons. These assertion helper functions are always available within docstring tests (with both `test()` and `>>>` syntax). 
 
 
 ## Changelog
