@@ -10,32 +10,37 @@
 /// - code (raw): Raw object holding the example code. 
 /// - scope (dictionary): Additional definitions to make available for the evaluated 
 ///          example code.
+/// - dir (direction): Direction for laying out the code and preview boxes. 
+/// - preamble (str): Code to prepend to the snippet. This can for example be used to configure imports. 
+/// - ratio (int): Configures the ratio of the widths of the code and preview boxes. 
 /// - scale-preview (auto, ratio): How much to rescale the preview. If set to auto, the the preview is scaled to fit the box. 
 /// - inherited-scope (dictionary): Definitions that are made available to the entire parsed
 ///          module. This parameter is only used internally.
+/// - code-block (function): The code is passed to this function. Use this to customize how the code is shown. 
+/// - preview-block (function): The preview is passed to this function. Use this to customize how the preview is shown. 
+/// - col-spacing (length): Spacing between the code and preview boxes. 
 #let show-example(
   code, 
-  dir: ltr,
   scope: (:),
+  dir: ltr,
   preamble: "",
   ratio: 1,
   scale-preview: auto,
-  mode: "code",
+  mode: auto,
   inherited-scope: (:),
   code-block: block,
   preview-block: block,
   col-spacing: 5pt,
   ..options
 ) = {
-  set raw(block: true)
   let lang = if code.has("lang") { code.lang } else { "typc" }
-  if lang == "typ" {
-    mode = "markup"
+  if mode == auto {
+    if lang == "typ" { mode = "markup" }
+    else { mode = "code" }
   }
   if mode == "markup" and not code.has("lang") { 
     lang = "typ" 
   }
-  set raw(lang: lang)
   if code.has("block") and code.block == false {
     code = raw(code.text, lang: lang, block: true)
   }
@@ -60,10 +65,10 @@
     
   
     let available-preview-width = preview-width - 2 * (preview-outer-padding + preview-inner-padding)
-  
+
     let preview-size
     let scale-preview = scale-preview
-    
+
     if scale-preview == auto {
       preview-size = measure(preview, styles)
       assert(preview-size.width != 0pt, message: "The code example has a relative width. Please set `scale-preview` to a fixed ratio, e.g., `100%`")
@@ -71,10 +76,10 @@
     } else {
       preview-size = measure(block(preview, width: available-preview-width / (scale-preview / 100%)), styles)
     }
-  
+
     set par(hanging-indent: 0pt) // this messes up some stuff in case someone sets it
 
-  
+
     // We first measure this thing (code + preview) to find out which of the two has
     // the larger height. Then we can just set the height for both boxes. 
     let arrangement(width: 100%, height: auto) = block(width: width, inset: 0pt, stack(dir: dir, spacing: col-spacing,
@@ -84,6 +89,7 @@
         inset: 5pt, 
         {
           set text(size: .9em)
+          set raw(block: true)
           code
         }
       ),
