@@ -19,7 +19,7 @@
 /// #example(`funny-math.funny-sqrt(12)`)
 ///
 ///
-/// - x (float, integer): Argument to take the square root of. For $x=0$, the result is $0$:
+/// - x (float, int): Argument to take the square root of. For $x=0$, the result is $0$:
 ///      #example(`funny-math.funny-sqrt(0)`)
 /// -> float
 #let funny-sqrt(x) = { calc.sqrt(x) }

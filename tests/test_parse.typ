@@ -23,9 +23,9 @@
 
 // Test argument-documentation-matcher
 #{
-  let matches = "   \t\n\t  /// - my-arg1 (string, content): desc".matches(argument-documentation-matcher)
+  let matches = "   \t\n\t  /// - my-arg1 (str, content): desc".matches(argument-documentation-matcher)
   assert.eq(matches.len(), 1)
-  assert.eq(matches.at(0).captures, ("my-arg1","string, content", "desc"))
+  assert.eq(matches.at(0).captures, ("my-arg1","str, content", "desc"))
 
   // multiline argument description
   let matches = "/// - arg (type): desc\n\tasd\n-3$234$".matches(argument-documentation-matcher)
@@ -92,11 +92,11 @@ assert.eq(result.functions.at(0).return-types, none)
 #{
   let a = ```
   /// Func
-  /// - p1 (string): a param $a$
+  /// - p1 (str): a param $a$
   /// - p2 (boolean, function): a param $b$
   ///        Oh yes
-  /// - p3 (string): 
-  /// -> content, integer
+  /// - p3 (str): 
+  /// -> content, int
   #let a(p1, p2: 2, p3: (), p4: ("entries": ())) = {}
   ```.text
   let result = parse-module(a)
@@ -106,12 +106,12 @@ assert.eq(result.functions.at(0).return-types, none)
   assert.eq(f0.name, "a")
   assert.eq(eval-string(f0.description), [Func])
   assert.eq(f0.args.len(), 4)
-  assert.eq(f0.args.p1.types, ("string",))
+  assert.eq(f0.args.p1.types, ("str",))
   assert.eq(eval-string(f0.args.p1.description), [a param $a$])
   assert.eq(f0.args.p2.default, "2")
   assert.eq(eval-string(f0.args.p2.description), [a param $b$ Oh yes])
   assert.eq(f0.args.p2.types, ("boolean", "function"))
-  assert.eq(f0.return-types, ("content", "integer"))
+  assert.eq(f0.return-types, ("content", "int"))
 }
 
 

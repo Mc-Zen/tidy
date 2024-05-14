@@ -207,7 +207,7 @@
 ///        in the help box. It is recommended to leave this at the `help` style which is 
 ///        particularly designed for this purpose. Please post an issue if you have problems
 ///        or suggestions regarding this style. 
-/// - package-name (string): The name of the package. This is required to give helpful
+/// - package-name (str): The name of the package. This is required to give helpful
 ///   error messages when a symbol cannot be found. 
 /// - onerror (function): What to do with errors. By default, an assertion is failed (the document panics). 
 #let generate-help(

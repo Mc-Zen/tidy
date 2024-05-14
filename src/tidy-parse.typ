@@ -4,7 +4,7 @@
 // 
 // // This function does something
 // //
-// // param1 (string): This is param1
+// // param1 (str): This is param1
 // // param2 (content, length): This is param2.
 // //           Yes, it really is. 
 // #let something(param1, param2) = {
@@ -31,7 +31,7 @@
 // Matches the function name (any Typst identifier)
 
 
-// Matches an argument documentation of the form `/// - myparameter (string)`. 
+// Matches an argument documentation of the form `/// - myparameter (str)`. 
 #let argument-documentation-matcher = regex(`[^\S\r\n]*/{3} - ([.\w\d\-_]+) \(([\w\d\-_ ,]+)\): ?(.*)`.text)
 
 
@@ -82,8 +82,8 @@
 ///  - commented out code (`//` or `/**/`)
 ///  - raw strings with #raw("``") syntax that contain `"` or `(` or `)`
 ///
-/// - text (string): String to parse. 
-/// - index (integer): Position of the opening parenthesis of the argument list. 
+/// - text (str): String to parse. 
+/// - index (int): Position of the opening parenthesis of the argument list. 
 /// -> array
 #let parse-argument-list(text, index) = {
   if text.len() <= index or text.at(index) != "(" { return none }
@@ -165,8 +165,8 @@
 /// ) 
 /// ```)
 ///
-/// - text (string): String to parse. 
-/// - index (integer): Index where the argument list starts. This index should 
+/// - text (str): String to parse. 
+/// - index (int): Index where the argument list starts. This index should 
 ///        point to the character *next* to the function name, i.e., to the 
 ///        opening brace `(` of the argument list if there is one (note, that 
 ///        function aliases for example produced by `myfunc.where(arg1: 3)` do 
@@ -207,11 +207,11 @@
 
 /// Count the occurences of a single character in a string
 /// 
-/// - string (string): String to investigate.
-/// - char (string): Character to count. The string needs to be of length 1. 
-/// - start (integer): Start index.
+/// - string (str): String to investigate.
+/// - char (str): Character to count. The string needs to be of length 1. 
+/// - start (int): Start index.
 /// - end (end): Start index. If `-1`, the entire string is searched. 
-/// -> integer
+/// -> int
 #let count-occurences(string, char, start: 0, end: -1) = {
   let count = 0
   if end == -1 { end = string.len() }
@@ -283,21 +283,21 @@
 /// given match. 
 /// 
 /// The return value is a dictionary with the keys
-/// - `name` (string): the function name.
+/// - `name` (str): the function name.
 /// - `description` (content): the function description.
 /// - `args`: A dictionary containing the argument list. 
-/// - `return-types` (array(string)): A list of possible return types. 
+/// - `return-types` (array(str)): A list of possible return types. 
 ///
 /// The entries of the argument list dictionary are
-/// - `default` (string): the default value for the argument.
+/// - `default` (str): the default value for the argument.
 /// - `description` (content): the argument description.
-/// - `types` (array(string)): A list of possible argument types. 
+/// - `types` (array(str)): A list of possible argument types. 
 /// Every entry is optional and the dictionary also contains any non-documented 
 /// arguments. 
 ///
 ///
 ///
-/// - source-code (string): The source code containing some documented Typst code. 
+/// - source-code (str): The source code containing some documented Typst code. 
 /// - match (match): A regex match that matches a documentation string. The first 
 ///   capture group should hold the entire, raw docstring and the second capture 
 ///   the function name (excluding the opening parenthesis of the argument list

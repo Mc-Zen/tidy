@@ -1,6 +1,6 @@
 /// Repeats content a specified number of times. 
 /// - body (content): The content to repeat. 
-/// - num (integer):  Number of times to repeat the content. 
+/// - num (int):  Number of times to repeat the content. 
 /// - separator (content): Optional separator between repetitions 
 ///                        of the content. 
 /// -> content

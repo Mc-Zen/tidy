@@ -21,15 +21,15 @@
 /// 
 /// See @@show-module() for outputting the results of this function.
 ///
-/// - content (string): Content of `.typ` file to analyze for docstrings.
-/// - name (string): The name for the module. 
-/// - label-prefix (auto, string): The label-prefix for internal function 
+/// - content (str): Content of `.typ` file to analyze for docstrings.
+/// - name (str): The name for the module. 
+/// - label-prefix (auto, str): The label-prefix for internal function 
 ///       references. If `auto`, the label-prefix name will be the module name. 
 /// - require-all-parameters (boolean): Require that all parameters of a 
 ///       functions are documented and fail if some are not. 
 /// - scope (dictionary): A dictionary of definitions that are then available 
 ///       in all function and parameter descriptions. 
-/// - preamble (string): Code to prepend to all code snippets shown with `#example()`. 
+/// - preamble (str): Code to prepend to all code snippets shown with `#example()`. 
 ///       This can for instance be used to import something from the scope. 
 #let parse-module(
   content, 

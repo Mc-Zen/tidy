@@ -9,7 +9,7 @@
 ///
 /// - module-doc (dictionary): Module documentation information as returned by 
 ///           @@parse-module(). 
-/// - first-heading-level (integer): Level for the module heading. Function 
+/// - first-heading-level (int): Level for the module heading. Function 
 ///           names are created as second-level headings and the "Parameters" 
 ///           heading is two levels below the first heading level. 
 /// - show-module-name (boolean): Whether to output the name of the module at 
