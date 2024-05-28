@@ -7,7 +7,7 @@
 /// description) and process docstring cross-references (starting with `@@`), 
 /// turning them into links. 
 ///
-/// - text (string): Source code.
+/// - text (str): Source code.
 /// - info (dictionary): 
 #let process-references(text, info) = {
   return text.replace(reference-matcher, match => {
@@ -26,7 +26,7 @@
 /// while processing cross-references (@@...) and providing the scope to the 
 /// evaluation context. 
 ///
-/// - docstring (string): Docstring to evaluate. 
+/// - docstring (str): Docstring to evaluate. 
 /// - info (dictionary): Object holding information for cross-reference 
 ///        processing and evaluation scope. 
 #let eval-docstring(docstring, info) = {
