@@ -136,7 +136,7 @@
     previous-char = c
   }
   if brace-level > 0 { return none }
-  return (arg-strings, count-processed-chars)
+  return (args: arg-strings, count: count-processed-chars)
 }
 
 /// This is similar to @@parse-argument-list but focuses on parameter lists 
@@ -175,7 +175,7 @@
 #let parse-parameter-list(text, index) = {
   let result = parse-argument-list(text, index)
   if result == none { return none }
-  let (arg-strings, count) = result
+  let (args: arg-strings, count) = result
   let args = (:)
   for arg in arg-strings {
     if arg.len() == 1 {
@@ -184,24 +184,24 @@
       args.insert(arg.at(0), (default: arg.at(1)))
     }
   }
-  return args
+  return (args: args, count: count)
 }
 
 
 // Take the result of `parse-argument-list()` and retrieve a list of positional
 // and named arguments, respectively. The values are `eval()`ed. 
-#let parse-arg-strings(args) = {
-  let positional-args = ()
-  let named-args = (:)
-  for arg in args {
-    if arg.len() == 1 {
-      positional-args.push(eval(arg.at(0)))
-    } else {
-      named-args.insert(arg.at(0), eval(arg.at(1)))
-    }
-  }
-  return (positional-args, named-args)
-}
+// #let parse-arg-strings(args) = {
+//   let positional-args = ()
+//   let named-args = (:)
+//   for arg in args {
+//     if arg.len() == 1 {
+//       positional-args.push(eval(arg.at(0)))
+//     } else {
+//       named-args.insert(arg.at(0), eval(arg.at(1)))
+//     }
+//   }
+//   return (pos: positional-args, named: named-args)
+// }
 
 
 
@@ -258,25 +258,47 @@
       documented-args.push((name: param-name, types: param-types, desc: param-desc))
     }
   }
-  return (fn-desc, documented-args, return-types)
+  return (
+    description: fn-desc, 
+    args: documented-args, 
+    return-types: return-types
+  )
 }
 
 #let parse-variable-docstring(source-code, match, parse-info) = {
   let docstring = match.captures.at(0)
-  let var-name = match.captures.at(1)
+  let name = match.captures.at(1)
 
   let first-line-number = count-occurences(source-code, "\n", end: match.start) + 1
 
-  let (var-desc, _, return-types) = parse-description-and-documented-args(docstring, parse-info, first-line-number: first-line-number)
+  let (description, return-types) = parse-description-and-documented-args(docstring, parse-info, first-line-number: first-line-number)
 
   let var-specs = (
-    name: var-name, 
-    description: var-desc, 
+    name: name, 
+    description: description, 
   )
   if return-types != none and return-types.len() > 0 {
     var-specs.type = return-types.first()
   }
   return var-specs
+}
+
+#let curry-matcher = regex(" *= *([.\w\d\-_]+)\.with\(")
+
+#let parse-curried-function(source-code, index) = {
+  // let docstring = match.captures.at(0)
+  // let var-name = match.captures.at(1)
+  let line-end = source-code.slice(index).position("\n")
+  let k = (line-end, source-code.slice(index))
+  if line-end == none { line-end = source-code.len() }
+  else {line-end += index }
+  let rest = source-code.slice(index, line-end)
+
+  let match = rest.match(curry-matcher)
+  if match == none { return none }
+
+  let (args, count) = parse-parameter-list(source-code, match.end + index - 1)
+  return (name: match.captures.first(), args: args)
 }
 
 /// Parse a function docstring that has been located in the source code with 
@@ -310,10 +332,12 @@
 
   let first-line-number = count-occurences(source-code, "\n", end: match.start) + 1
 
-  let (fn-desc, documented-args, return-types) = parse-description-and-documented-args(docstring, parse-info, first-line-number: first-line-number)
+  let (description, args: documented-args, return-types) = parse-description-and-documented-args(docstring, parse-info, first-line-number: first-line-number)
 
   
-  let args = parse-parameter-list(source-code, match.end)
+  let (args, count) = parse-parameter-list(source-code, match.end)
+
+  let parent = parse-curried-function(source-code, match.end + count)
   
   for arg in documented-args {
     if arg.name in args {
@@ -336,8 +360,9 @@
   }
   return (
     name: fn-name, 
-    description: fn-desc, 
+    description: description, 
     args: args, 
-    return-types: return-types
+    return-types: return-types,
+    parent: parent
   )
 }
