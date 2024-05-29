@@ -4,6 +4,17 @@
 
 #let eval-string(string) = eval-docstring(string, (scope: (:)))
 
+
+#{
+  let code = ```
+  /// - alpha (str):
+  /// - beta (length):
+  // / - ..children (any):
+  #let z(alpha, beta: 2pt, ..children) = {}
+  ```
+  let k = parse-module(code.text)
+}
+
 // Test reference-matcher
 #{
   let matches = " @@func".matches(reference-matcher)
@@ -171,4 +182,17 @@ assert.eq(result.functions.at(0).return-types, none)
   let f2 = result.functions.at(1)
   assert.eq(f1.parent.name, "asd")
   assert.eq(f2.parent.name, "asg")
+}
+
+// module docstrings
+#{
+  let code = ```
+  /// This is a module
+  /// 
+  /// 
+
+  a
+  ```
+
+  let result = parse-module(code.text)
 }
