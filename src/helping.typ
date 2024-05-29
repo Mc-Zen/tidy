@@ -132,7 +132,11 @@
     
       // Show the docs
       if param-name not in definition-doc.args {
-        return onerror("The function `" + definition-name + "` has no parameter `" + param-name + "`")
+        if ".." + param-name in definition-doc.args {
+          param-name = ".." + param-name 
+        } else {
+          return onerror("The function `" + definition-name + "` has no parameter `" + param-name + "`")
+        }
       }
       let info = definition-doc.args.at(param-name)
       let types = info.at("types", default: ())
