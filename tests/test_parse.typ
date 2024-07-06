@@ -170,11 +170,11 @@ assert.eq(result.functions.at(0).return-types, none)
 // Curried functions
 #{
   let code = ```
-  ///
-  #let f()=asd.with(a: 0, b: 1pt + red)
+  /// asd 
+  #let asg = asd.with(a: 0, b: 1pt + red)
   
   ///
-  #let g()  =  asg.with()
+  #let g =  asg.with()
   ```
 
   let result = parse-module(code.text)

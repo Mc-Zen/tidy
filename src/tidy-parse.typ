@@ -368,8 +368,6 @@
   if sink != none { args.insert(sink, (:)) }
   
 
-  let parent = parse-curried-function(source-code, match.end + count)
-  
   for arg in documented-args {
     if arg.name in args {
       args.at(arg.name).description = arg.desc.trim("\n")
@@ -393,7 +391,6 @@
     name: fn-name, 
     description: description, 
     args: args, 
-    return-types: return-types,
-    parent: parent
+    return-types: return-types
   )
 }

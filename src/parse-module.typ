@@ -51,10 +51,19 @@
   let variable-docs = ()
 
   for match in matches {
-    if content.len() <= match.end or content.at(match.end) != "(" {
-      variable-docs.push(tidy-parse.parse-variable-docstring(content, match, parse-info))
+    
+    if content.len() <= match.end or content.at(match.end) != "("  {
+      let parent-info = tidy-parse.parse-curried-function(content, match.end)
+      let doc = tidy-parse.parse-variable-docstring(content, match, parse-info)
+      if parent-info == none {
+        variable-docs.push(doc)
+      } else {
+        doc.parent = parent-info
+        function-docs.push(doc)
+      }
     } else {
-      function-docs.push(tidy-parse.parse-function-docstring(content, match, parse-info))
+      let function-doc = tidy-parse.parse-function-docstring(content, match, parse-info)
+      function-docs.push(function-doc)
     }
   }
   
