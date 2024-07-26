@@ -170,18 +170,29 @@ assert.eq(result.functions.at(0).return-types, none)
 // Curried functions
 #{
   let code = ```
-  /// asd 
-  #let asg = asd.with(a: 0, b: 1pt + red)
-  
-  ///
-  #let g =  asg.with()
+/// - foo (content): Something.
+/// - bar (boolean): A boolean.
+/// -> content
+#let myfunc(foo, bar: false) = strong(foo)
+
+/// My curried function.
+/// -> content
+#let curried = myfunc.with(bar: true, 2)
   ```
 
   let result = parse-module(code.text)
-  let f1 = result.functions.first()
+  let f1 = result.functions.at(0)
   let f2 = result.functions.at(1)
-  assert.eq(f1.parent.name, "asd")
-  assert.eq(f2.parent.name, "asg")
+  assert.eq(f1.name, "myfunc")
+  assert.eq(f2.parent.name, "myfunc")
+  assert.eq(f2.parent.pos, ("2",))
+  assert.eq(f2.parent.named, (bar: "true"))
+  assert.eq(f2.args.len(), 1)
+  assert.eq(f2.args.bar, (
+    default: "true",
+    description: "A boolean.",
+    types: ("boolean",),
+  ))
 }
 
 // module docstrings
