@@ -199,11 +199,10 @@ assert.eq(result.functions.at(0).return-types, none)
 #{
   let code = ```
   /// This is a module
-  /// 
-  /// 
 
   a
   ```
 
   let result = parse-module(code.text)
+  assert.eq(result.description, "This is a module")
 }
