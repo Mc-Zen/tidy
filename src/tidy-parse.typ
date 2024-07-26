@@ -36,21 +36,21 @@
 
 
 
+#let split-once(string, delimiter) ={
+  let pos = string.position(delimiter)
+  if pos == none { return string }
+  (string.slice(0, pos), string.slice(pos + 1))
+}
 
 /// #set raw(lang: "typc")
 /// Parse a Typst argument list either at
 ///  - call site, e.g., `f("Timbuktu", value: 23)` or at
 ///  - declaration, e.g. `let f(place, value: 0)`.
 ///
-/// This function returns a tuple `(args, count-processed-chars)` where
+/// This function returns a dictionary `(pos, named, count-processed-chars)` where
 /// `count-processed-chars` is the number of processed characters, i.e., the
-/// length of the argument list and `args` is a list with an entry for each 
-/// argument. 
+/// length of the argument list and `pos` and `named` contain the arguments. 
 /// 
-/// The entries are lists with either one item if the argument is positional
-/// or two items if the argument is named. In this case, the first item holds
-/// the name, the second the value. Names as well as values are returned as 
-/// strings. 
 /// 
 /// This function returns `none`, if the argument list is not properly closed. 
 /// Note, that valid Typst code is expected. 
@@ -64,13 +64,12 @@
 /// and index `9` (which points to the opening parenthesis) yields the result 
 /// ```
 ///   (
-///     (
-///       ("p1",),
-///       ("p2", "3pt"),
-///       ("p3", "()"),
-///       ("p4", "(entries: ())"),
-///       ("p5",),
-///     ),
+///     pos: ("p1", "p5"),
+///     named: (
+///       p2: "3pt", 
+///       p3: "()", 
+///       p4: "(entries: ())"
+///     )
 ///     44,
 ///   )
 /// ```
@@ -84,15 +83,19 @@
 ///
 /// - text (str): String to parse. 
 /// - index (int): Position of the opening parenthesis of the argument list. 
-/// -> array
+/// -> dictionary
 #let parse-argument-list(text, index) = {
   if text.len() <= index or text.at(index) != "(" { return none }
   if text.len() <= index or text.at(index) != "(" { return ((:), 0) }
   index += 1
   let brace-level = 1
   let literal-mode = none // Whether in ".."
-  let arg-strings = ()
-  let current-arg = ""
+  
+  let positional = ()
+  let named = (:)
+  let sink
+  
+  let arg = ""
   let is-named = false // Whether current argument is a named arg
   
   let previous-char = none
@@ -100,8 +103,7 @@
 
   let maybe-split-argument(arg, is-named) = {
       if is-named {
-        let colon-pos = arg.position(":")
-        return (arg.slice(0, colon-pos).trim(), arg.slice(colon-pos + 1).trim())
+        return split-once(arg, ":").map(str.trim)
       } else {
         return (arg.trim(),)
       }
@@ -117,8 +119,15 @@
       if c == "(" { brace-level += 1 }
       else if c == ")" { brace-level -= 1 }
       else if c == "," and brace-level == 1 {
-        arg-strings.push(maybe-split-argument(current-arg, is-named))
-        current-arg = ""
+        if is-named {
+          let (name, value) = split-once(arg, ":").map(str.trim)
+          named.insert(name, value)
+        } else {
+          arg = arg.trim()
+          if arg.starts-with("..") { sink = arg }
+          else { positional.push(arg) }
+        }
+        arg = ""
         ignore-char = true
         is-named = false
       } else if c == ":" and brace-level == 1 {
@@ -127,16 +136,28 @@
     }
     count-processed-chars += 1
     if brace-level == 0 {
-      if current-arg.trim().len() > 0 {
-        arg-strings.push(maybe-split-argument(current-arg, is-named))
+      if arg.trim().len() > 0 {
+        if is-named {
+          let (name, value) = split-once(arg, ":").map(str.trim)
+          named.insert(name, value)
+        } else {
+          arg = arg.trim()
+          if arg.starts-with("..") { sink = arg }
+          else { positional.push(arg) }
+        }
       }
       break
     }
-    if not ignore-char { current-arg += c }
+    if not ignore-char { arg += c }
     previous-char = c
   }
   if brace-level > 0 { return none }
-  return (arg-strings, count-processed-chars)
+  return (
+    pos: positional, 
+    named: named, 
+    sink: sink,
+    count: count-processed-chars
+  )
 }
 
 /// This is similar to @@parse-argument-list but focuses on parameter lists 
@@ -175,7 +196,7 @@
 #let parse-parameter-list(text, index) = {
   let result = parse-argument-list(text, index)
   if result == none { return none }
-  let (arg-strings, count) = result
+  let (pos, named, count) = result
   let args = (:)
   for arg in arg-strings {
     if arg.len() == 1 {
@@ -184,24 +205,24 @@
       args.insert(arg.at(0), (default: arg.at(1)))
     }
   }
-  return args
+  return (args: args, count: count)
 }
 
 
 // Take the result of `parse-argument-list()` and retrieve a list of positional
 // and named arguments, respectively. The values are `eval()`ed. 
-#let parse-arg-strings(args) = {
-  let positional-args = ()
-  let named-args = (:)
-  for arg in args {
-    if arg.len() == 1 {
-      positional-args.push(eval(arg.at(0)))
-    } else {
-      named-args.insert(arg.at(0), eval(arg.at(1)))
-    }
-  }
-  return (positional-args, named-args)
-}
+// #let parse-arg-strings(args) = {
+//   let positional-args = ()
+//   let named-args = (:)
+//   for arg in args {
+//     if arg.len() == 1 {
+//       positional-args.push(eval(arg.at(0)))
+//     } else {
+//       named-args.insert(arg.at(0), eval(arg.at(1)))
+//     }
+//   }
+//   return (pos: positional-args, named: named-args)
+// }
 
 
 
@@ -258,25 +279,51 @@
       documented-args.push((name: param-name, types: param-types, desc: param-desc))
     }
   }
-  return (fn-desc, documented-args, return-types)
+  return (
+    description: fn-desc, 
+    args: documented-args, 
+    return-types: return-types
+  )
 }
 
 #let parse-variable-docstring(source-code, match, parse-info) = {
   let docstring = match.captures.at(0)
-  let var-name = match.captures.at(1)
+  let name = match.captures.at(1)
 
   let first-line-number = count-occurences(source-code, "\n", end: match.start) + 1
 
-  let (var-desc, _, return-types) = parse-description-and-documented-args(docstring, parse-info, first-line-number: first-line-number)
+  let (description, return-types) = parse-description-and-documented-args(docstring, parse-info, first-line-number: first-line-number)
 
   let var-specs = (
-    name: var-name, 
-    description: var-desc, 
+    name: name, 
+    description: description, 
   )
   if return-types != none and return-types.len() > 0 {
     var-specs.type = return-types.first()
   }
   return var-specs
+}
+
+#let curry-matcher = regex(" *= *([.\w\d\-_]+)\.with\(")
+
+#let parse-curried-function(source-code, index) = {
+  // let docstring = match.captures.at(0)
+  // let var-name = match.captures.at(1)
+  let line-end = source-code.slice(index).position("\n")
+  let k = (line-end, source-code.slice(index))
+  if line-end == none { line-end = source-code.len() }
+  else {line-end += index }
+  let rest = source-code.slice(index, line-end)
+
+  let match = rest.match(curry-matcher)
+  if match == none { return none }
+
+  let (pos, named, count) = parse-argument-list(source-code, match.end + index - 1)
+  return (
+    name: match.captures.first(), 
+    pos: pos, 
+    named: named
+  )
 }
 
 /// Parse a function docstring that has been located in the source code with 
@@ -310,11 +357,17 @@
 
   let first-line-number = count-occurences(source-code, "\n", end: match.start) + 1
 
-  let (fn-desc, documented-args, return-types) = parse-description-and-documented-args(docstring, parse-info, first-line-number: first-line-number)
+  let (description, args: documented-args, return-types) = parse-description-and-documented-args(docstring, parse-info, first-line-number: first-line-number)
 
   
-  let args = parse-parameter-list(source-code, match.end)
+  // let (args, count) = parse-parameter-list(source-code, match.end)
+  let (pos, named, sink, count) = parse-argument-list(source-code, match.end)
+  let args = (:)
+  for arg in pos { args.insert(arg, (:)) }
+  for (arg, value) in named { args.insert(arg, (default: value)) }
+  if sink != none { args.insert(sink, (:)) }
   
+
   for arg in documented-args {
     if arg.name in args {
       args.at(arg.name).description = arg.desc.trim("\n")
@@ -336,7 +389,7 @@
   }
   return (
     name: fn-name, 
-    description: fn-desc, 
+    description: description, 
     args: args, 
     return-types: return-types
   )
