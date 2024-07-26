@@ -195,15 +195,16 @@ assert.eq(result.functions.at(0).return-types, none)
   ))
 }
 
-// module docstrings
+// module description
 #{
   let code = ```
+  // License
+
   /// This is a module
-  /// 
-  /// 
 
   a
   ```
 
   let result = parse-module(code.text)
+  assert.eq(result.description, "This is a module")
 }

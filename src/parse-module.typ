@@ -84,6 +84,8 @@
     label-prefix: label-prefix,
     require-all-parameters: require-all-parameters,
   )
+
+  let module-docstring = tidy-parse.parse-module-docstring(content, parse-info)
   
   let matches = content.matches(tidy-parse.docstring-matcher)
   let function-docs = ()
@@ -117,6 +119,7 @@
   
   return (
     name: name,
+    description: module-docstring,
     functions: function-docs, 
     variables: variable-docs, 
     label-prefix: label-prefix,

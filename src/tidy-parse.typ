@@ -367,7 +367,7 @@
   for (arg, value) in named { args.insert(arg, (default: value)) }
   if sink != none { args.insert(sink, (:)) }
   
-
+  
   for arg in documented-args {
     if arg.name in args {
       args.at(arg.name).description = arg.desc.trim("\n")
@@ -393,4 +393,14 @@
     args: args, 
     return-types: return-types
   )
+}
+
+
+#let module-docstring-matcher = regex(`(?m)^((?:[^\S\r\n]*///.*\n)+)\n`.text)
+
+#let parse-module-docstring(source-code, parse-info) = {
+  let match = source-code.match(module-docstring-matcher)
+  if match == none { return none }
+  let desc = parse-description-and-documented-args(match.captures.first(), parse-info, first-line-number: 0) 
+  return desc.description.trim()
 }
