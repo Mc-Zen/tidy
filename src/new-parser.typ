@@ -160,31 +160,6 @@
 #let definition-name-regex = regex(`#?let (\w[\w\d\-_]*)\s*(\(?)`.text)
 
 
-
-#let process-parameters(parameters) = {
-  let processed-params = ()
-  
-  for param in parameters {
-    
-    let (args: param-parts,) = parse-argument-list(param.arg)
-    for param-parts in param-parts {
-      let (description, types) = parse-description-and-types(param.desc-lines, label-prefix: "")
-      let param-info = (
-        name: param-parts.first(),
-        description: description,
-      )
-      if param-parts.len() == 2 {
-        param-info.default = param-parts.last()
-      } 
-      if types != none {
-        param-info.types = types
-      }
-      processed-params.push(param-info)
-    }
-  }
-  processed-params
-}
-
 #let process-parameters(parameters) = {
   let processed-params = ()
   
@@ -226,6 +201,41 @@
 }
 
 
+#let parameter-parser(state, line) = {
+  if line.starts-with("///") {
+    state.unmatched-description.push(line.slice(3))
+  } else {
+    state.unfinished-param += trim-trailing-comments(line)
+
+    let (args, brace-level) = parse-argument-list(state.unfinished-param)
+    if brace-level == -1 { // parentheses are already closed on this line
+      state.state = "finished"
+    }
+    if args.len() > 0 and (state.unfinished-param.ends-with(",") or state.state == "finished") {
+      state.params.push((name: args.first(), desc-lines: state.unmatched-description))
+      state.unmatched-description = ()
+      state.params += args.slice(1).map(arg => (name: arg, desc-lines: ()))
+      state.unfinished-param = ""
+    }
+  }
+  return state
+}
+
+#{
+  let state = (
+    state: "idle", 
+    params: (), 
+    unmatched-description: (),
+    unfinished-param: ""
+  )
+  let lines = ("/// asd", "named: 3,", "/// -> int", "pos", ")").rev()
+  let lines = ("/// asd", "named: (", "fill: white, ", "cap: \"butt\")", ")").rev()
+  while state.state == "running" and lines.len() > 0 {
+    state = parameter-parser(state, lines.pop())
+  }
+  let kstate = state
+}
+
 
 
 #let parse(src) = {
@@ -235,43 +245,48 @@
   let definitions = ()
   
 
-  let empty-arg = (arg: "", desc-lines: ())
-
   // Parser state
   let name = none
-  let is-collecting-args = false
   let found-code = false // are we still looking for a potential module description?
   let args = ()
   let desc-lines = ()
 
   
+  let param-parser-default = (
+    state: "idle", 
+    params: (), 
+    unmatched-description: (),
+    unfinished-param: ""
+  )
+  let param-parser = param-parser-default
+  let finished-definition = false
+  
   for line in lines {
+    if param-parser.state == "finished" {
+      args = param-parser.params
+      finished-definition = true
+      param-parser = param-parser-default
+    }
+    if param-parser.state == "running" {
+      param-parser = parameter-parser(param-parser, line)
+      if param-parser.state == "running" { continue }
+    } 
+
+    if finished-definition {
+      if name != none {
+        definitions.push((name: name, description: desc-lines, args: args))
+      }
+      desc-lines = ()
+      name = none
+      finished-definition = false
+    }
+
+    
     if line.starts-with("///") { // is a doc-comment line
-      
-      line = line.slice(3)
-      if is-collecting-args { args.last().desc-lines.push(line) } 
-      else                  { desc-lines.push(line) }
-      
-      continue
-      
+      desc-lines.push(line.slice(3))
     } else if desc-lines != () { 
       // look for something to attach the doc-comment to 
       // (a parameter or a definition)
-      
-      if is-collecting-args {
-        args.last().arg += trim-trailing-comments(line) 
-        let (brace-level,) = parse-argument-list(args.last().arg)
-        
-        if brace-level == -1 {
-          is-collecting-args = false
-          args.push(empty-arg)
-        }
-        if args.last().arg.ends-with(",") {
-          args.push(empty-arg)
-        }
-        continue
-        
-      }
       
       line = line.trim("#")
       if line.starts-with("let ") and name == none {
@@ -281,16 +296,12 @@
         if match != none {
           name = match.captures.first()
           if match.captures.at(1) != "" { // it's a function
-            args = (empty-arg, )
-            args.last().arg = line.slice(match.end)
-            let (brace-level,) = parse-argument-list(args.last().arg)
-            if brace-level != -1 { // parentheses are already closed on this line
-              is-collecting-args = true
-            }
+            param-parser.state = "running"
+            param-parser = parameter-parser(param-parser, line.slice(match.end))
           } else { // it's a variable
             args = none
+            finished-definition = true
           }
-          continue
         }
         
       } else { // neither /// nor (#)let
@@ -301,19 +312,6 @@
         }
       }
     }
-    if name != none {
-      definitions.push(
-        (name: name, description: desc-lines, args: args)
-      )
-    }
-    desc-lines = ()
-    name = none
-  }
-  
-  if name != none {
-    definitions.push(
-      (name: name, description: desc-lines, args: args)
-    )
   }
 
   definitions = definitions.map(process-definition)
@@ -321,5 +319,23 @@
     description: module-description,
     functions: definitions.filter(x => "args" in x),
     variables: definitions.filter(x => "args" not in x),
+  )
+}
+#{
+  
+  let src = ```
+  ///Description
+  let func() = { 34 }
+  ```.text
+
+  assert.eq(
+    parse(src).functions,
+    (
+      (
+        name: "func",
+        description: "Description",
+        args: ()
+      ),
+    )
   )
 }
