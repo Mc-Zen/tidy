@@ -22,7 +22,7 @@
 ///           starting with an underscore. 
 /// - omit-private-parameters (boolean): Whether to omit named function arguments 
 ///           starting with an underscore. 
-/// - show-outline (function): Whether to output an outline of all functions in 
+/// - show-outline (boolean): Whether to output an outline of all functions in 
 ///           the module at the beginning.
 /// - sort-functions (auto, none, function): Function to use to sort the function  
 ///           documentations. With `auto`, they are sorted alphabetically by 
