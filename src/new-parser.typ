@@ -188,14 +188,16 @@
 // )
 
 #let process-definition(definition) = {
+  let (description, types) = parse-description-and-types(definition.description, label-prefix: "")
+
   if definition.args == none {
     definition.remove("args")
+    definition.type = types.first()
   } else {
+    if types != none {
+      definition.return-types = types
+    }
     definition.args = process-parameters(definition.args)
-  }
-  let (description, types) = parse-description-and-types(definition.description, label-prefix: "")
-  if types != none {
-    definition.types = types
   }
   definition.description = description
   definition
