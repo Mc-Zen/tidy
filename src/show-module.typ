@@ -7,52 +7,74 @@
 /// Show given module in the given style.
 /// This displays all (documented) functions in the module.
 ///
-/// - module-doc (dictionary): Module documentation information as returned by 
-///           @@parse-module(). 
-/// - first-heading-level (int): Level for the module heading. Function 
-///           names are created as second-level headings and the "Parameters" 
-///           heading is two levels below the first heading level. 
-/// - show-module-name (boolean): Whether to output the name of the module at 
-///           the top. 
-/// - break-param-descriptions (boolean): Whether to allow breaking of parameter 
-///           description blocks.
-/// - omit-empty-param-descriptions (boolean): Whether to omit description blocks
-///           for parameters with empty description. 
-/// - omit-private-definitions (boolean): Whether to omit functions and variables
-///           starting with an underscore. 
-/// - omit-private-parameters (boolean): Whether to omit named function arguments 
-///           starting with an underscore. 
-/// - show-outline (boolean): Whether to output an outline of all functions in 
-///           the module at the beginning.
-/// - sort-functions (auto, none, function): Function to use to sort the function  
-///           documentations. With `auto`, they are sorted alphabetically by 
-///           name and with `none` they are not sorted. Otherwise a function can 
-///           be passed that each function documentation object is passed to and 
-///           that should return some key to sort the functions by.
-/// - style (module, dictionary): The output style to use. This can be a module 
-///           defining the functions `show-outline`, `show-type`, `show-function`, 
-///           `show-parameter-list` and `show-parameter-block` or a dictionary with
-///           functions for the same keys. 
-/// - enable-tests (boolean): Whether to run docstring tests. 
-/// - enable-cross-references (boolean): Whether to enable links for cross-references. 
-/// - colors (auto, dictionary): Give a dictionary for type and colors and other colors. 
-///          If set to auto, the style will select its default color set. 
-/// - local-names (dictionary): Language-specific names for strings used in the output. Currently, these are `parameters` and `default`. You can for example use: `local-names: (parameters: [Paramètres], default: [défault])`
 /// -> content
 #let show-module(
+  
+  /// Module documentation information as returned by @@parse-module(). 
+  /// -> dictionary
   module-doc, 
+
+  /// The output style to use. This can be a module 
+  /// defining the functions `show-outline`, `show-type`, `show-function`, 
+  /// `show-parameter-list` and `show-parameter-block` or a dictionary with
+  /// functions for the same keys.
+  ///  -> module | dictionary
   style: styles.default,
+
+  /// Level for the module heading. Function names are created as second-level
+  /// headings and the "Parameters" heading is two levels below the first 
+  /// heading level.  
+  /// -> int
   first-heading-level: 2,
+
+  /// Whether to output the name of the module at the top.  
+  /// -> boolean
   show-module-name: true,
+
+  /// Whether to allow breaking of parameter description blocks. 
+  /// -> boolean
   break-param-descriptions: false,
+
+  /// Whether to omit description blocks for parameters with empty description. 
+  /// -> boolean
   omit-empty-param-descriptions: true,
+
+  /// Whether to omit functions and variables starting with an underscore. 
+  /// -> boolean
   omit-private-definitions: false,
+
+  /// Whether to omit named function arguments starting with an underscore. 
+  /// -> boolean
   omit-private-parameters: false,
+
+  /// Whether to output an outline of all functions in the module at the beginning. 
+  /// -> boolean
   show-outline: true,
+
+  /// Function to use to sort the function documentations. With `auto`, they are 
+  /// sorted alphabetically by name and with `none` they are not sorted. Otherwise 
+  /// a function can be passed that each function documentation object is passed to 
+  /// and that should return some key to sort the functions by. 
+  /// -> auto | none | function
   sort-functions: auto,
+
+  /// Whether to run docstring tests. 
+  /// -> boolean
   enable-tests: true,
+
+  /// Whether to enable links for cross-references. If set to auto, the style 
+  /// will select its default color set. 
+  /// -> boolean
   enable-cross-references: true,
+
+  /// Give a dictionary for type and colors and other colors. 
+  /// -> auto | dictionary
   colors: auto,
+
+  /// Language-specific names for strings used in the output. Currently, these 
+  /// are `parameters` and `default`. You can for example use: 
+  /// `local-names: (parameters: [Paramètres], default: [défault])`.
+  /// -> dictionary
   local-names: (parameters: [Parameters], default: [Default])
 ) = block({
   let label-prefix = module-doc.label-prefix

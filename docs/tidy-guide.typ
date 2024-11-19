@@ -1,5 +1,6 @@
 #import "template.typ": *
 #import "/src/tidy.typ"
+#include "/tests/parser/test.typ"
 #include "/tests/test_tidy.typ" // ensure that tests pass
 
 #let version = toml("/typst.toml").package.version
@@ -43,28 +44,38 @@ We now assume we have a Typst module called `repeater.typ`, containing a definit
 #let example-code = read("/examples/repeater.typ")
 #file-code("repeater.typ", raw(block: true, lang: "typ", example-code))
 
-A *function* is documented similar to javadoc by prepending a block of `///` comments. Each line needs to start with three slashes `///` (whitespace is allowed at the beginning of the line). _Parameters_ of the function can be documented by listing them as 
-#show raw.where(lang: "markspace"): it => {
-  show " ": box(inset: (x: 0.1pt), box(
-    fill: red.lighten(70%), 
-    width: .7em, height: .8em,
-    radius: 1pt,
-    outset: (bottom: 3pt, top: 1pt),
-  ))
-  it
-}
-```markspace
-/// - parameter-name (type): ...
-```
-Following this exact form is important (see also the spaces marked in red) since this allows to distinguish the parameter list from ordinary markup lists in the function description or in parameter descriptions. For example, another space in front of the `-` could be added to markup lists if necessary. 
+Tidy uses `///` doc-comments for documentation. 
+A function or variable can be provided with a *description* by placing a doc-comment just before the definition. 
 
-The possible types for each parameter are given in parentheses and after a colon `:`, the parameter description follows. Indicating a type is mandatory (you may want to pick `any` in some cases). An optional _return type_ can be annotated by ending with a line that contains `->` followed by the return type(s). 
+Until type annotations are natively available in Typst, a return type can be annotated with the `->` syntax in the last line of the description. If more there is more than one possible return type, they can be given separated by the pipe `|` operator, e.g., `-> int, float`. 
 
-In front of the parameter list, a _function description_ can be put. Both function and parameter descriptions may span multiple lines and can contain any Typst code (see @user-defined-symbols on how to use images, user-defined variables and functions in the docstring). 
+Function arguments are documented in the same way. 
+All descriptions are parsed as Typst markup. See @user-defined-symbols on how to add images or examples to a description. 
 
-*Variables* are documented just in the same way (lacking the option to specify parameters). A definition is recognized as a variable if the identifier (variable/function name) is not followed by an opening parenthesis. The `->` syntax which also specifies the return type for functions can be used to define the type of a variable. 
 
-Calling #ref-fn("parse-module()") will read out the documentation of the given string. We can then invoke #ref-fn("show-module()") on the result.
+// A *function* is documented vi 
+// similar to javadoc by prepending a block of `///` comments. Each line needs to start with three slashes `///` (whitespace is allowed at the beginning of the line). _Parameters_ of the function can be documented by listing them as 
+// #show raw.where(lang: "markspace"): it => {
+//   show " ": box(inset: (x: 0.1pt), box(
+//     fill: red.lighten(70%), 
+//     width: .7em, height: .8em,
+//     radius: 1pt,
+//     outset: (bottom: 3pt, top: 1pt),
+//   ))
+//   it
+// }
+// ```markspace
+// /// - parameter-name (type): ...
+// ```
+// Following this exact form is important (see also the spaces marked in red) since this allows to distinguish the parameter list from ordinary markup lists in the function description or in parameter descriptions. For example, another space in front of the `-` could be added to markup lists if necessary. 
+
+// The possible types for each parameter are given in parentheses and after a colon `:`, the parameter description follows. Indicating a type is mandatory (you may want to pick `any` in some cases). An optional _return type_ can be annotated by ending with a line that contains `->` followed by the return type(s). 
+
+// In front of the parameter list, a _function description_ can be put. 
+
+// *Variables* are documented just in the same way (lacking the option to specify parameters). A definition is recognized as a variable if the identifier (variable/function name) is not followed by an opening parenthesis. The `->` syntax which also specifies the return type for functions can be used to define the type of a variable. 
+
+Calling #ref-fn("parse-module()") will read out the documentation of the given string. We can then invoke #ref-fn("show-module()") on the returned docs object. The actual output depends on the utilized style template, see @customizing. 
 
 ```typ
 #let docs = tidy.parse-module(read("docs.typ"), name: "Repeater")
@@ -73,7 +84,7 @@ Calling #ref-fn("parse-module()") will read out the documentation of the given s
 
 This will produce the following output. 
 #tidy-output-figure(
-  tidy.show-module(tidy.parse-module(example-code, name: "Repeater"), style: tidy.styles.default)
+  tidy.show-module(tidy.parse-module(example-code, name: "Repeater", old-parser: false), style: tidy.styles.default)
 )
 
 
@@ -141,7 +152,8 @@ In the output, the preview of the code examples is shown next to it.
     read("/examples/wiggly.typ"), 
     name: "wiggly",
     scope: (wiggly: wiggly),
-    preamble: "import wiggly: draw-sine;"
+    preamble: "import wiggly: draw-sine;", 
+    old-parser: false
   )
   tidy-output-figure(tidy.show-module(module, show-outline: false))
 }
@@ -168,7 +180,8 @@ The function `example()` is available in every docstring and has some bells and 
   
   let module = tidy.parse-module(
     read("/examples/example-demo.typ"), 
-    scope: (example-demo: example-demo)
+    scope: (example-demo: example-demo),
+    old-parser: false
   )
   tidy-output-figure(tidy.show-module(module, show-outline: false, break-param-descriptions: true))
 }
@@ -178,7 +191,7 @@ The function `example()` is available in every docstring and has some bells and 
 
 
 
-= Customizing the style
+= Customizing the style <customizing>
 
 There are multiple ways to customize the output style. You can
 - pick a different predefined style,
@@ -219,9 +232,12 @@ With a dark background and light text, these colors produce much better contrast
   let module = tidy.parse-module(
     ```
     /// Produces space. 
-    /// - amount (length):
-    #let space(amount)
-    ```.text
+    #let space(
+      /// -> length
+      amount
+    )
+    ```.text,
+    old-parser: false
   )
   tidy-output-figure(tidy.show-module(module, show-outline: false, colors: tidy.styles.default.colors-dark, style: tidy.styles.default))
 }
@@ -239,7 +255,8 @@ Currently, the two predefined styles `tidy.styles.default` and `tidy-styles.mini
     read("/examples/wiggly.typ"), 
     name: "wiggly",
     scope: (wiggly: wiggly),
-    preamble: "import wiggly: *;"
+    preamble: "import wiggly: *;",
+    old-parser: false
   )
   tidy-output-figure(tidy.show-module(module, show-outline: false, style: tidy.styles.minimal))
 }
@@ -342,9 +359,12 @@ The default style for help output should work more or less for light and dark do
 
 When set up in the form as shown above, the package `tidy` is only imported when a user calls `help` for the first time and not at all if the feature is not used _(don't pay for what you don't use)_. The files themselves are also only read when a definition from a specific submodule in the "namespace" is requested. In the case of _extremely_ long code files, it _could_ make sense to separate the documentation from the implementation by adding "documentation files" that only contain a _declaration_ plus docstring for each definition -- with the body left empty. 
 ```typ
-/// - inputs (array): The inputs for the algorithm. 
-/// - parameters (none, dictionary): Some parameters. 
-#let my-really-long-algorithm(inputs, parameters: none) = { }
+#let my-really-long-algorithm(
+  /// The inputs for the algorithm. -> array
+  inputs, 
+  /// Some parameters. -> none | dictionary
+  parameters: none
+  ) = { }
 ```
 
 The advantage is that the source code is not as crowded with (sometimes very long) docstrings and that docstring parsing may get faster. On the downside, there is an increased maintenance overhead due to the need of synchronizing the actual file and the documentation file (especially when the interface of a function changes). 
@@ -412,7 +432,8 @@ Let us now "self-document" this package:
       read("/src/helping.typ")
     ).join("\n"),
     name: "tidy", 
-    require-all-parameters: true
+    require-all-parameters: true, 
+    old-parser: false
   )
   tidy.show-module(
     module, 

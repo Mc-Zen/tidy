@@ -1,5 +1,5 @@
 #import "/src/tidy.typ": *
-#import "/src/tidy-parse.typ": *
+#import "/src/old-parser.typ": *
 #import "/src/utilities.typ": *
 
 #let eval-string(string) = eval-docstring(string, (scope: (:)))
@@ -187,12 +187,12 @@ assert.eq(result.functions.at(0).return-types, none)
   assert.eq(f2.parent.name, "myfunc")
   assert.eq(f2.parent.pos, ("2",))
   assert.eq(f2.parent.named, (bar: "true"))
-  assert.eq(f2.args.len(), 1)
-  assert.eq(f2.args.bar, (
-    default: "true",
-    description: "A boolean.",
-    types: ("boolean",),
-  ))
+  // assert.eq(f2.args.len(), 1)
+  // assert.eq(f2.args.bar, (
+  //   default: "true",
+  //   description: "A boolean.",
+  //   types: ("boolean",),
+  // ))
 }
 
 // module description

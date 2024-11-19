@@ -1,4 +1,4 @@
-#import "@preview/codly:0.1.0": *
+#import "@preview/codly:1.0.0": codly-init, no-codly, codly
 
 // The project function defines how your document looks.
 // It takes your content and some metadata and formats it.
@@ -16,7 +16,6 @@
   // Set the document's basic properties.
   set document(author: authors, title: title)
   set page(numbering: "1", number-align: center)
-  set text(font: "Linux Libertine", lang: "en")
   
   show heading.where(level: 1): it => block(smallcaps(it), below: 1em)
   // set heading(numbering: (..args) => if args.pos().len() == 1 { numbering("I", ..args) })
@@ -72,12 +71,16 @@
   v(10em)
 
   
-  show: codly-init
-  codly(
-    languages: (
-      // typ: (name: "typ", icon: none, color: rgb("#239DAE")),
-    ),
+  show: codly-init.with(
   )
+  codly(
+    fill: white
+  )
+  // codly(
+  //   languages: (:
+  //     // typ: (name: "typ", icon: none, color: rgb("#239DAE")),
+  //   ),
+  // )
   show raw.where(block: true): set text(size: .95em)
   show raw.where(block: true): it => pad(x: 4%, it)
   show raw.where(block: false, lang: "typ").or(raw.where(lang: "notnone")): it => box(inset: (x: 3pt), outset: (y: 3pt), radius: 40%, fill: luma(235), it)
@@ -103,10 +106,9 @@
 ))
 
 
-#let tidy-output-figure(output) = {
+#let tidy-output-figure(output) = no-codly({
   set heading(numbering: none)
   set text(size: .8em)
-  disable-codly()
   figure(align(left, box(
     width: 80%,
     stroke: 0.5pt + luma(200), 
@@ -117,5 +119,4 @@
       output
     )
   )))
-  codly()
-}
+})
