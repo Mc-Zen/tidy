@@ -1,10 +1,13 @@
 /// Repeats content a specified number of times. 
-/// - body (content): The content to repeat. 
-/// - num (int):  Number of times to repeat the content. 
-/// - separator (content): Optional separator between repetitions 
-///                        of the content. 
 /// -> content
-#let repeat(body, num, separator: []) = ((body,)*num).join(separator)
+#let repeat(
+  /// The content to repeat. -> content
+  body, 
+  ///  Number of times to repeat the content. -> int
+  num, 
+  /// Optional separator between repetitions of the content. -> content
+  separator: []
+) = ((body,)*num).join(separator)
 
 /// An awfully bad approximation of pi. 
 /// -> float

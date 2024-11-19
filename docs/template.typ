@@ -16,7 +16,6 @@
   // Set the document's basic properties.
   set document(author: authors, title: title)
   set page(numbering: "1", number-align: center)
-  set text(font: "Linux Libertine", lang: "en")
   
   show heading.where(level: 1): it => block(smallcaps(it), below: 1em)
   // set heading(numbering: (..args) => if args.pos().len() == 1 { numbering("I", ..args) })

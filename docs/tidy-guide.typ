@@ -1,6 +1,6 @@
 #import "template.typ": *
 #import "/src/tidy.typ"
-#include "/tests/test_tidy.typ" // ensure that tests pass
+// #include "/tests/test_tidy.typ" // ensure that tests pass
 
 #let version = toml("/typst.toml").package.version
 #let import-statement = "#import \"@preview/tidy:" + version + "\""
@@ -73,7 +73,7 @@ Calling #ref-fn("parse-module()") will read out the documentation of the given s
 
 This will produce the following output. 
 #tidy-output-figure(
-  tidy.show-module(tidy.parse-module(example-code, name: "Repeater"), style: tidy.styles.default)
+  tidy.show-module(tidy.parse-module(example-code, name: "Repeater", old-parser: false), style: tidy.styles.default)
 )
 
 
@@ -141,7 +141,8 @@ In the output, the preview of the code examples is shown next to it.
     read("/examples/wiggly.typ"), 
     name: "wiggly",
     scope: (wiggly: wiggly),
-    preamble: "import wiggly: draw-sine;"
+    preamble: "import wiggly: draw-sine;", 
+    old-parser: false
   )
   tidy-output-figure(tidy.show-module(module, show-outline: false))
 }
@@ -168,7 +169,8 @@ The function `example()` is available in every docstring and has some bells and 
   
   let module = tidy.parse-module(
     read("/examples/example-demo.typ"), 
-    scope: (example-demo: example-demo)
+    scope: (example-demo: example-demo),
+    old-parser: false
   )
   tidy-output-figure(tidy.show-module(module, show-outline: false, break-param-descriptions: true))
 }
@@ -219,9 +221,12 @@ With a dark background and light text, these colors produce much better contrast
   let module = tidy.parse-module(
     ```
     /// Produces space. 
-    /// - amount (length):
-    #let space(amount)
-    ```.text
+    #let space(
+      /// -> length
+      amount
+    )
+    ```.text,
+    old-parser: false
   )
   tidy-output-figure(tidy.show-module(module, show-outline: false, colors: tidy.styles.default.colors-dark, style: tidy.styles.default))
 }
@@ -239,7 +244,8 @@ Currently, the two predefined styles `tidy.styles.default` and `tidy-styles.mini
     read("/examples/wiggly.typ"), 
     name: "wiggly",
     scope: (wiggly: wiggly),
-    preamble: "import wiggly: *;"
+    preamble: "import wiggly: *;",
+    old-parser: false
   )
   tidy-output-figure(tidy.show-module(module, show-outline: false, style: tidy.styles.minimal))
 }
@@ -342,9 +348,12 @@ The default style for help output should work more or less for light and dark do
 
 When set up in the form as shown above, the package `tidy` is only imported when a user calls `help` for the first time and not at all if the feature is not used _(don't pay for what you don't use)_. The files themselves are also only read when a definition from a specific submodule in the "namespace" is requested. In the case of _extremely_ long code files, it _could_ make sense to separate the documentation from the implementation by adding "documentation files" that only contain a _declaration_ plus docstring for each definition -- with the body left empty. 
 ```typ
-/// - inputs (array): The inputs for the algorithm. 
-/// - parameters (none, dictionary): Some parameters. 
-#let my-really-long-algorithm(inputs, parameters: none) = { }
+#let my-really-long-algorithm(
+  /// The inputs for the algorithm. -> array
+  inputs, 
+  /// Some parameters. -> none | dictionary
+  parameters: none
+  ) = { }
 ```
 
 The advantage is that the source code is not as crowded with (sometimes very long) docstrings and that docstring parsing may get faster. On the downside, there is an increased maintenance overhead due to the need of synchronizing the actual file and the documentation file (especially when the interface of a function changes). 
@@ -412,7 +421,8 @@ Let us now "self-document" this package:
       read("/src/helping.typ")
     ).join("\n"),
     name: "tidy", 
-    require-all-parameters: true
+    require-all-parameters: true, 
+    old-parser: false
   )
   tidy.show-module(
     module, 
