@@ -1,6 +1,7 @@
 #import "template.typ": *
 #import "/src/tidy.typ"
-// #include "/tests/test_tidy.typ" // ensure that tests pass
+#include "/tests/parser/test.typ"
+#include "/tests/test_tidy.typ" // ensure that tests pass
 
 #let version = toml("/typst.toml").package.version
 #let import-statement = "#import \"@preview/tidy:" + version + "\""

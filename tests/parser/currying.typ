@@ -9,7 +9,13 @@
 #assert.eq(
   parse(src).functions,
   (
-    (name: "aey", description: "Doc", args: ((name: "x", description: ""),), curry-info: (name: "text")),
+    (
+      name: "aey", 
+      description: "Doc", 
+      args: (x: (description: ""),), 
+      curry-info: (name: "text"),
+      return-types: none
+    ),
   )
 )
 

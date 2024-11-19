@@ -19,9 +19,10 @@ let func(
       name: "func",
       description: "Description\n...",
       args: (
-        (name: "pos", description: "param pos", types: ("int", "none")),
-        (name: "named", description: "", default: "2", types: ("any",)),
-      )
+        pos: (description: "param pos", types: ("int", "none")),
+        named: (description: "", default: "2", types: ("any",)),
+      ),
+      return-types: none
     ),
   )
 )
@@ -44,9 +45,10 @@ let func(
       name: "func",
       description: "Description\n...",
       args: (
-        (name: "pos", description: "param pos", types: ("int", "array")),
-        (name: "named", description: "param named", default: "2", types: ("any",)),
-      )
+        pos: (description: "param pos", types: ("int", "array")),
+        named: (description: "param named", default: "2", types: ("any",)),
+      ),
+      return-types: none
     ),
   )
 )

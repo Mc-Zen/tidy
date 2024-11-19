@@ -14,7 +14,8 @@ let func(pos)
     (
       name: "func",
       description: "Description",
-      args: ((name: "pos", description: ""),)
+      args: (pos: (description: ""),), 
+      return-types: none
     ),
   )
 )
@@ -33,7 +34,8 @@ let func  (pos)
     (
       name: "func",
       description: "Description",
-      args: ((name: "pos", description: ""),)
+      args: (pos: (description: ""),),
+      return-types: none
     ),
   )
 )
@@ -52,7 +54,8 @@ let func(named: 2)
     (
       name: "func",
       description: "Description",
-      args: ((name: "named", description: "", default: "2"),)
+      args: (named: (description: "", default: "2"),),
+      return-types: none
     ),
   )
 )
@@ -77,8 +80,9 @@ let func(
       name: "func",
       description: "Description\n...",
       args: (
-        (name: "named", description: "", default: "(a: 12, b: (1+1))"),
-      )
+        named: (description: "", default: "(a: 12, b: (1+1))"),
+      ),
+      return-types: none
     ),
   )
 )

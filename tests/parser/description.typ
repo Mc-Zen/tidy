@@ -31,7 +31,8 @@ let func() = { 34 }
     (
       name: "func",
       description: "Description",
-      args: ()
+      args: (:),
+      return-types: none
     ),
   )
 )

@@ -17,12 +17,14 @@ let func1(named: 2)
     (
       name: "func",
       description: "Description",
-      args: ((name: "named", description: "", default: "2"),)
+      args: (named:(description: "", default: "2"),),
+      return-types: none
     ),
     (
       name: "func1",
       description: "Description",
-      args: ((name: "named", description: "", default: "2"),)
+      args: (named: (description: "", default: "2"),),
+      return-types: none
     ),
   )
 )
@@ -60,7 +62,7 @@ let func(
 #assert.eq(
   parse(src).functions,
   (
-    (name: "a", description: "Description", args: ()),
+    (name: "a", description: "Description", args: (:), return-types: none),
   )
 )
 
@@ -78,7 +80,7 @@ let func(
 #assert.eq(
   parse(src).functions,
   (
-    (name: "aey", description: "Doc", args: ((name: "x", description: ""),)),
+    (name: "aey", description: "Doc", args: (x: (description: ""),), return-types: none),
     // (name: "bey", description: "No Doc", args: ((name: "x", description: ""),)),
   )
 )
