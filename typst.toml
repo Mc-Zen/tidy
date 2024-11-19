@@ -6,7 +6,6 @@ authors = ["Mc-Zen <https://github.com/Mc-Zen>"]
 license = "MIT"
 description = "Documentation generator for Typst code in Typst."
 
-homepage = "https://github.com/Mc-Zen/tidy"
 repository = "https://github.com/Mc-Zen/tidy"
 categories = ["utility", "scripting", "model"]
 compiler = "0.6.0"
