@@ -88,7 +88,7 @@
   body
 }
 
-#let ref-fn(name) = link(label("tidy" + name), raw(name))
+#let ref-fn(name) = link(label("tidy-" + name), raw(name))
 
 #let file-code(filename, code) = pad(x: 4%, block(
   width: 100%, 

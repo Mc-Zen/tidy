@@ -3,6 +3,8 @@
 #import "testing.typ"
 
 
+#let def-state = state("tidy-definitions", (:))
+
 
 /// Show given module in the given style.
 /// This displays all (documented) functions in the module.
@@ -10,7 +12,7 @@
 /// -> content
 #let show-module(
   
-  /// Module documentation information as returned by @@parse-module(). 
+  /// Module documentation information as returned by @parse-module. 
   /// -> dictionary
   module-doc, 
 
@@ -27,7 +29,7 @@
   /// -> int
   first-heading-level: 2,
 
-  /// Whether to output the name of the module at the top.  
+  /// Whether to output the name of the module at the top. 
   /// -> boolean
   show-module-name: true,
 
@@ -126,6 +128,23 @@
 
   style-args.scope = eval-scope
   
+  def-state.update(x => {
+    x + module-doc.functions.map(x => (x.name, 1)).to-dict() + module-doc.variables.map(x => (x.name, 0)).to-dict()
+  })
+
+  show ref: it => {
+    let target = str(it.target)
+    if target.starts-with(label-prefix){ return it }
+    if not enable-cross-references {
+      return raw(target)
+    }
+    let defs = def-state.final()
+    if defs.at(target, default: none) == 1 {
+      target += "()"
+    }
+    (eval-scope.tidy.show-reference)(label(label-prefix + target), target)
+  }
+
 
   // Show the docs
   
