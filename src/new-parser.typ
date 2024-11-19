@@ -162,13 +162,13 @@
 
 
 #let process-parameters(parameters) = {
-  let processed-params = ()
+  let processed-params = (:)
   
   for param in parameters {
     let param-parts = param.name
     let (description, types) = parse-description-and-types(param.desc-lines, label-prefix: "")
     let param-info = (
-      name: param-parts.first(),
+      // name: param-parts.first(),
       description: description,
     )
     if param-parts.len() == 2 {
@@ -177,7 +177,7 @@
     if types != none {
       param-info.types = types
     }
-    processed-params.push(param-info)
+    processed-params.insert(param-parts.first(), param-info)
   }
   processed-params
 }
@@ -374,8 +374,8 @@
         name: "func",
         description: "Description",
         args: (
-          (name: "pos", description: ""),
-          (name: "named", description: "", default: "2"),
+          pos: (description: ""),
+          named: (description: "", default: "2"),
         )
       ),
     )
