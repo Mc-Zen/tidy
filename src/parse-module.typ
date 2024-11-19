@@ -1,4 +1,5 @@
-#import "tidy-parse.typ"
+#import "old-parser.typ"
+#import "new-parser.typ"
 #import "styles.typ"
 
 
@@ -39,6 +40,48 @@
 }
 
 
+#let old-parse(content, label-prefix: "", require-all-parameters: false, enable-curried-functions: true) = {
+  
+  let parse-info = (
+    label-prefix: label-prefix,
+    require-all-parameters: require-all-parameters,
+  )
+
+  let module-docstring = old-parser.parse-module-docstring(content, parse-info)
+  
+  let matches = content.matches(old-parser.docstring-matcher)
+  let function-docs = ()
+  let variable-docs = ()
+
+  for match in matches {
+    
+    if content.len() <= match.end or content.at(match.end) != "("  {
+      let doc = old-parser.parse-variable-docstring(content, match, parse-info)
+      if enable-curried-functions {
+        let parent-info = old-parser.parse-curried-function(content, match.end)
+        if parent-info == none {
+          variable-docs.push(doc)
+        } else {
+          doc.parent = parent-info
+          doc.remove("type")
+          function-docs.push(doc)
+        }
+      } else {
+        variable-docs.push(doc)
+      }
+    } else {
+      let function-doc = old-parser.parse-function-docstring(content, match, parse-info)
+      function-docs.push(function-doc)
+    }
+  }
+  return (
+    description: module-docstring,
+    functions: function-docs,
+    variables: variable-docs
+  )
+}
+
+
 /// Parse the docstrings of a typst module. This function returns a dictionary 
 /// with the keys
 /// - `name`: The module name as a string.
@@ -58,72 +101,60 @@
 /// - `default` (optional): Default value for this argument.
 /// 
 /// See @@show-module() for outputting the results of this function.
-///
-/// - content (str): Content of `.typ` file to analyze for docstrings.
-/// - name (str): The name for the module. 
-/// - label-prefix (auto, str): The label-prefix for internal function 
-///       references. If `auto`, the label-prefix name will be the module name. 
-/// - require-all-parameters (boolean): Require that all parameters of a 
-///       functions are documented and fail if some are not. 
-/// - scope (dictionary): A dictionary of definitions that are then available 
-///       in all function and parameter descriptions. 
-/// - preamble (str): Code to prepend to all code snippets shown with `#example()`. 
-///       This can for instance be used to import something from the scope. 
 #let parse-module(
+  
+  /// Content of `.typ` file to analyze for docstrings. 
+  /// -> str
   content, 
+
+  /// The name for the module. 
+  /// -> str
   name: "", 
+
+  /// The label-prefix for internal function references. If `auto`, the 
+  /// label-prefix name will be the module name. 
+  /// -> auto | str
   label-prefix: auto,
+
+  /// Require that all parameters of a functions are documented and fail
+  /// if some are not. 
+  /// -> boolean
   require-all-parameters: false,
+  
+  /// A dictionary of definitions that are then available in all function
+  /// and parameter descriptions. 
+  /// -> dictionary
   scope: (:),
+
+  /// Code to prepend to all code snippets shown with `#example()`. 
+  /// This can for instance be used to import something from the scope. 
+  /// -> str
   preamble: "",
-  enable-curried-functions: true
+
+  /// -> boolean
+  enable-curried-functions: true,
+
+  /// -> boolean
+  old-parser: true
 ) = {
   if label-prefix == auto { label-prefix = name }
   
-  let parse-info = (
-    label-prefix: label-prefix,
-    require-all-parameters: require-all-parameters,
-  )
-
-  let module-docstring = tidy-parse.parse-module-docstring(content, parse-info)
-  
-  let matches = content.matches(tidy-parse.docstring-matcher)
-  let function-docs = ()
-  let variable-docs = ()
-
-  for match in matches {
-    
-    if content.len() <= match.end or content.at(match.end) != "("  {
-      let doc = tidy-parse.parse-variable-docstring(content, match, parse-info)
-      if enable-curried-functions {
-        let parent-info = tidy-parse.parse-curried-function(content, match.end)
-        if parent-info == none {
-          variable-docs.push(doc)
-        } else {
-          doc.parent = parent-info
-          doc.remove("type")
-          function-docs.push(doc)
-        }
-      } else {
-        variable-docs.push(doc)
-      }
-    } else {
-      let function-doc = tidy-parse.parse-function-docstring(content, match, parse-info)
-      function-docs.push(function-doc)
-    }
-  }
-
-  if enable-curried-functions {
-    function-docs = resolve-parents(function-docs)
-  }
-  
-  return (
+  let docs = (
     name: name,
-    description: module-docstring,
-    functions: function-docs, 
-    variables: variable-docs, 
     label-prefix: label-prefix,
     scope: scope,
     preamble: preamble
   )
+  if old-parser {
+    docs += old-parse(content, require-all-parameters: require-all-parameters, label-prefix: label-prefix, enable-curried-functions: enable-curried-functions)
+  } else {
+    docs += new-parser.parse(content)
+  }
+  // TODO
+  // if enable-curried-functions {
+  //   function-docs = resolve-parents(function-docs)
+  // }
+
+  
+  return docs
 }

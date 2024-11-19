@@ -2,7 +2,7 @@
 
 
 #import "styles.typ"
-#import "tidy-parse.typ"
+#import "old-parser.typ" as tidy-parse
 #import "utilities.typ"
 #import "testing.typ"
 #import "show-example.typ"

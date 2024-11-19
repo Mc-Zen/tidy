@@ -1,5 +1,5 @@
 #import "/src/tidy.typ": *
-#import "/src/tidy-parse.typ": *
+#import "/src/old-parser.typ": *
 #import "/src/utilities.typ": *
 
 #let eval-string(string) = eval-docstring(string, (scope: (:)))

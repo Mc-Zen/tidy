@@ -15,15 +15,15 @@
   )
 }
 
-#let parse-namespace-modules(entry) = {
+#let parse-namespace-modules(entry, old-parser: false) = {
   // "Module" is made up of several files
   if type(entry) != array {
     entry = (entry,)
   }
-  parse-module(entry.map(x => x()).join("\n"))
+  parse-module(entry.map(x => x()).join("\n"), old-parser: old-parser)
 }
 
-#let search-docs(search, searching, namespace, style) = {
+#let search-docs(search, searching, namespace, style, old-parser: false) = {
   if search == "" { return help-box(block[_empty search string_]) }
   let search-names = "n" in searching
   let search-descriptions = "d" in searching
@@ -42,11 +42,11 @@
   }
   
   let definitions = ()
-  let module = parse-namespace-modules(namespace.at("."))
+  let module = parse-namespace-modules(namespace.at("."), old-parser: old-parser)
   let functions = ()
   let variables = ()
   for (name, modules) in namespace {
-    let module = parse-namespace-modules(modules)
+    let module = parse-namespace-modules(modules, old-parser: old-parser)
    
     functions += module.functions.filter(filter)
     variables += module.variables.filter(x => search in x.name or search in x.description)
@@ -183,42 +183,53 @@
 /// Generates a `help` function for your package that allows the user to
 /// prints references directly into their document while typing. This allows
 /// them to easily check the usage and documentation of a function or variable. 
-///
-/// - namespace (dictionary): This dictionary should reflect the "namespace" of the package
-///        in a flat dictionary and contain `read.with()` instances for the respective code 
-///        files. 
-///        Imagine importing everything from a package, `#import "mypack.typ": *`. How a 
-///        symbol is accessible now determines how the dictionary should be built. 
-///        We start with a root key, `(".": read.with("lib.typ"))`. If `lib.typ` imports 
-///        symbols from other files _into_ its scope, these files should be added to the
-///        root along with `lib.typ` by passing an array: 
-///        ```typ
-///        (
-///          ".": (read.with("lib.typ"), read.with("more.typ")),
-///          "testing": read.with("testing.typ")
-///        )
-///        ```
-///        Here, we already show another case: let `testing.typ` be imported in `lib.typ`
-///        but without `*`, so that the symbols are accessed via `testing.`. We therefore 
-///        add these under a new key. Nested files should be added with multiple 
-///        dots, e.g., `"testing.float."`. 
-///        
-///        By providing instances of `read()` with the filename prepended, you allow tidy 
-///        to read the files that are not part of the tidy package but at the same time
-///        enable lazy evaluation of the files, i.e., a file is only opened when a 
-///        definition from this file is requested through `help()`. 
-/// - style (dictionary): A tidy style that is used for showing parts of the documentation
-///        in the help box. It is recommended to leave this at the `help` style which is 
-///        particularly designed for this purpose. Please post an issue if you have problems
-///        or suggestions regarding this style. 
-/// - package-name (str): The name of the package. This is required to give helpful
-///   error messages when a symbol cannot be found. 
-/// - onerror (function): What to do with errors. By default, an assertion is failed (the document panics). 
 #let generate-help(
+  
+  /// This dictionary should reflect the "namespace" of the package
+  /// in a flat dictionary and contain `read.with()` instances for the respective code 
+  /// files. 
+  /// Imagine importing everything from a package, `#import "mypack.typ": *`. How a 
+  /// symbol is accessible now determines how the dictionary should be built. 
+  /// We start with a root key, `(".": read.with("lib.typ"))`. If `lib.typ` imports 
+  /// symbols from other files _into_ its scope, these files should be added to the
+  /// root along with `lib.typ` by passing an array: 
+  /// ```typ
+  /// (
+  ///   ".": (read.with("lib.typ"), read.with("more.typ")),
+  ///   "testing": read.with("testing.typ")
+  /// )
+  /// ```
+  /// Here, we already show another case: let `testing.typ` be imported in `lib.typ`
+  /// but without `*`, so that the symbols are accessed via `testing.`. We therefore 
+  /// add these under a new key. Nested files should be added with multiple 
+  /// dots, e.g., `"testing.float."`. 
+  /// 
+  /// By providing instances of `read()` with the filename prepended, you allow tidy 
+  /// to read the files that are not part of the tidy package but at the same time
+  /// enable lazy evaluation of the files, i.e., a file is only opened when a 
+  /// definition from this file is requested through `help()`. 
+  /// -> dictionary
   namespace: (".": () => ""), 
+
+  /// The name of the package. This is required to give helpful error messages when
+  ///  a symbol cannot be found. 
+  /// -> str
   package-name: "",
+
+  /// A tidy style that is used for showing parts of the documentation
+  /// in the help box. It is recommended to leave this at the `help` style which is 
+  /// particularly designed for this purpose. Please post an issue if you have problems
+  /// or suggestions regarding this style. 
+  /// -> dictionary
   style: styles.help,
-  onerror: msg => assert(false, message: msg)
+
+  /// What to do with errors. By default, an assertion is failed (the document panics). 
+  /// -> function
+  onerror: msg => assert(false, message: msg),
+
+  /// Whether to use the old parser. 
+  /// -> boolean
+  old-parser: false
 ) = {
 
   let validate-namespace-tree(namespace) = {
@@ -253,7 +264,7 @@
       let name = args.pos().first()
       help-box(get-docs(name, namespace, package-name, style, onerror: onerror))
     } else {
-      search-docs(search, searching, namespace, style)
+      search-docs(search, searching, namespace, style, old-parser: old-parser)
     }
   }
   help-function

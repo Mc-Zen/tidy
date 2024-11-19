@@ -194,9 +194,7 @@
     definition.remove("args")
     definition.type = types.first()
   } else {
-    if types != none {
-      definition.return-types = types
-    }
+    definition.return-types = types
     definition.args = process-parameters(definition.args)
   }
   definition.description = description
@@ -378,7 +376,8 @@
         args: (
           pos: (description: ""),
           named: (description: "", default: "2"),
-        )
+        ),
+        return-types: none
       ),
     )
   )

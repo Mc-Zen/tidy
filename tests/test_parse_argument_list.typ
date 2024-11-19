@@ -1,4 +1,4 @@
-#import "/src/tidy-parse.typ": *
+#import "/src/old-parser.typ": *
 
 
 //// General test

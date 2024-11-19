@@ -96,19 +96,19 @@
     if not inline-args { "\n  " }
     let items = ()
     let args = fn.args
-    for (arg-name, info) in fn.args {
-      if style-args.omit-private-parameters and arg-name.starts-with("_") { 
+    for (name, description) in fn.args {
+      if style-args.omit-private-parameters and name.starts-with("_") { 
         continue
       }
       let types 
-      if "types" in info {
-        types = ": " + info.types.map(x => show-type(x, style-args: style-args)).join(" ")
+      if "types" in description {
+        types = ": " + description.types.map(x => show-type(x, style-args: style-args)).join(" ")
       }
-      items.push(arg-name + types)
+      items.push(name + types)
     }
     items.join( if inline-args {", "} else { ",\n  "})
     if not inline-args { "\n" } + ")"
-    if fn.return-types != none {
+    if "return-types" in fn and fn.return-types != none {
       " -> " 
       fn.return-types.map(x => show-type(x, style-args: style-args)).join(" ")
     }
