@@ -5,10 +5,13 @@
 ///
 /// -> content
 #let draw-sine(
+
   /// Height of bounding rectangle. -> length
   width, 
+
   /// Width of bounding rectangle. -> length
   height, 
+  
   /// Number of periods to draw. 
   ///      Example with many periods: 
   ///      #example(`draw-sine(4cm, 1.3cm, 10)`)

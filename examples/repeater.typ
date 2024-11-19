@@ -3,8 +3,10 @@
 #let repeat(
   /// The content to repeat. -> content
   body, 
+
   ///  Number of times to repeat the content. -> int
   num, 
+  
   /// Optional separator between repetitions of the content. -> content
   separator: []
 ) = ((body,)*num).join(separator)
