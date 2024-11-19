@@ -70,25 +70,26 @@
   // if arg != "" { args.push(arg) }
   return (
     args: args,
-    brace-level: brace-level - 1
+    brace-level: brace-level - 1,
+    processed-chars: count-processed-chars - 1
   )
 }
 
 #assert.eq(
   parse-argument-list("text)"), 
-  (args: (("text",),), brace-level: -1)
+  (args: (("text",),), brace-level: -1, processed-chars: 5)
 )
 #assert.eq(
   parse-argument-list("pos,"), 
-  (args: (("pos",),), brace-level: 0)
+  (args: (("pos",),), brace-level: 0, processed-chars: 4)
 )
 #assert.eq(
   parse-argument-list("12, 13, a)"), 
-  (args: (("12",), ("13",), ("a",)), brace-level: -1)
+  (args: (("12",), ("13",), ("a",)), brace-level: -1, processed-chars: 10)
 )
 #assert.eq(
   parse-argument-list("a: 2, b: 3)"), 
-  (args: (("a", "2"), ("b", "3")), brace-level: -1)
+  (args: (("a", "2"), ("b", "3")), brace-level: -1, processed-chars: 11)
 )
 
 
@@ -200,6 +201,7 @@
   definition
 }
 
+#let curry-matcher = regex(" *= *([.\w\d\-_]+)\.with\(")
 
 #let parameter-parser(state, line) = {
   if line.starts-with("///") {
@@ -207,9 +209,13 @@
   } else {
     state.unfinished-param += trim-trailing-comments(line)
 
-    let (args, brace-level) = parse-argument-list(state.unfinished-param)
+    let (args, brace-level, processed-chars) = parse-argument-list(state.unfinished-param)
     if brace-level == -1 { // parentheses are already closed on this line
       state.state = "finished"
+      let curry = state.unfinished-param.slice(processed-chars).match(curry-matcher)
+      if curry != none {
+        state.curry = (name: curry.captures.first(), rest: state.unfinished-param.slice(processed-chars + curry.end))
+      }
     }
     if args.len() > 0 and (state.unfinished-param.ends-with(",") or state.state == "finished") {
       state.params.push((name: args.first(), desc-lines: state.unmatched-description))
@@ -223,13 +229,13 @@
 
 #{
   let state = (
-    state: "idle", 
+    state: "running", 
     params: (), 
     unmatched-description: (),
     unfinished-param: ""
   )
-  let lines = ("/// asd", "named: 3,", "/// -> int", "pos", ")").rev()
-  let lines = ("/// asd", "named: (", "fill: white, ", "cap: \"butt\")", ")").rev()
+  let lines = ("/// asd", "named: 3,", "/// -> int", "pos", ") = asd.with()", "").rev()
+  // let lines = ("/// asd", "named: (", "fill: white, ", "cap: \"butt\")", ")").rev()
   while state.state == "running" and lines.len() > 0 {
     state = parameter-parser(state, lines.pop())
   }
@@ -250,6 +256,7 @@
   let found-code = false // are we still looking for a potential module description?
   let args = ()
   let desc-lines = ()
+  let curry-info = none
 
   
   let param-parser-default = (
@@ -263,9 +270,29 @@
   
   for line in lines {
     if param-parser.state == "finished" {
-      args = param-parser.params
-      finished-definition = true
-      param-parser = param-parser-default
+      let curry = param-parser.at("curry", default: none)
+      
+      if curry-info != none {
+        finished-definition = true
+        curry-info.args = param-parser.params
+        param-parser = param-parser-default
+      } else {
+        args = param-parser.params
+        if "curry" in param-parser {
+          let curry = param-parser.curry
+          curry-info = (name: curry.name)
+          param-parser = param-parser-default
+          param-parser.state = "running"
+          param-parser = parameter-parser(param-parser, curry.rest)
+          if param-parser.state == "finished" { 
+            finished-definition = true
+            param-parser = param-parser-default
+          }
+        } else {
+          finished-definition = true
+          param-parser = param-parser-default
+        }
+      }
     }
     if param-parser.state == "running" {
       param-parser = parameter-parser(param-parser, line)
@@ -275,6 +302,10 @@
     if finished-definition {
       if name != none {
         definitions.push((name: name, description: desc-lines, args: args))
+        if curry-info != none {
+          definitions.at(-1).curry-info = curry-info
+          curry-info = none
+        }
       }
       desc-lines = ()
       name = none
@@ -288,7 +319,7 @@
       // look for something to attach the doc-comment to 
       // (a parameter or a definition)
       
-      line = line.trim("#")
+      line = line.trim("#", at: start)
       if line.starts-with("let ") and name == none {
         
         found-code = true
@@ -308,8 +339,11 @@
         if not found-code {
           found-code = true
           module-description = desc-lines.join("\n")
+        }
+        if name == none {
           desc-lines = ()
         }
+        
       }
     }
   }
@@ -323,9 +357,14 @@
 }
 #{
   
+
   let src = ```
   ///Description
-  let func() = { 34 }
+  let func(
+    pos, // some comment
+    
+    named: 2 // another comment
+  )
   ```.text
 
   assert.eq(
@@ -334,7 +373,10 @@
       (
         name: "func",
         description: "Description",
-        args: ()
+        args: (
+          (name: "pos", description: ""),
+          (name: "named", description: "", default: "2"),
+        )
       ),
     )
   )
