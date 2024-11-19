@@ -48,7 +48,7 @@
   omit-private-parameters: false,
 
   /// Whether to output an outline of all functions in the module at the beginning. 
-  /// -> function
+  /// -> boolean
   show-outline: true,
 
   /// Function to use to sort the function documentations. With `auto`, they are 

@@ -192,7 +192,9 @@
 
   if definition.args == none {
     definition.remove("args")
-    definition.type = types.first()
+    if types != none {
+      definition.type = types.first()
+    }
   } else {
     definition.return-types = types
     definition.args = process-parameters(definition.args)

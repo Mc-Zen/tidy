@@ -50,7 +50,7 @@
   let preview-outer-padding = 5pt
   let preview-inner-padding = 5pt
 
-  layout(size => style(styles => {
+  layout(size => context {
     let code-width
     let preview-width
     
@@ -70,11 +70,11 @@
     let scale-preview = scale-preview
 
     if scale-preview == auto {
-      preview-size = measure(preview, styles)
+      preview-size = measure(preview)
       assert(preview-size.width != 0pt, message: "The code example has a relative width. Please set `scale-preview` to a fixed ratio, e.g., `100%`")
       scale-preview = calc.min(1, available-preview-width / preview-size.width) * 100%
     } else {
-      preview-size = measure(block(preview, width: available-preview-width / (scale-preview / 100%)), styles)
+      preview-size = measure(block(preview, width: available-preview-width / (scale-preview / 100%)))
     }
 
     set par(hanging-indent: 0pt) // this messes up some stuff in case someone sets it
@@ -115,8 +115,7 @@
       )
     ))
     let height = if dir.axis() == "vertical" { auto } 
-      else { measure(arrangement(width: size.width), styles).height }
+      else { measure(arrangement(width: size.width)).height }
     arrangement(height: height)
   })
-  )
 }
