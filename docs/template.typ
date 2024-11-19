@@ -1,4 +1,4 @@
-#import "@preview/codly:1.0.0": codly-init, no-codly
+#import "@preview/codly:1.0.0": codly-init, no-codly, codly
 
 // The project function defines how your document looks.
 // It takes your content and some metadata and formats it.
@@ -71,7 +71,11 @@
   v(10em)
 
   
-  show: codly-init
+  show: codly-init.with(
+  )
+  codly(
+    fill: white
+  )
   // codly(
   //   languages: (:
   //     // typ: (name: "typ", icon: none, color: rgb("#239DAE")),
