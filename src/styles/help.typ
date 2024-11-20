@@ -13,7 +13,8 @@
   let prefix = module-doc.label-prefix
   let items = ()
   for fn in module-doc.functions {
-    items.push(link(label(prefix + fn.name + "()"), fn.name + "()"))
+    items.push(fn.name + "()")
+    // items.push(link(label(prefix + fn.name + "()"), fn.name + "()"))
   }
   list(..items)
 }

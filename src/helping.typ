@@ -20,7 +20,7 @@
   if type(entry) != array {
     entry = (entry,)
   }
-  parse-module(entry.map(x => x()).join("\n"), old-parser: old-parser)
+  parse-module(entry.map(x => x()).join("\n"), old-parser: old-parser, label-prefix: "help-")
 }
 
 #let search-docs(search, searching, namespace, style, old-parser: false) = {
@@ -55,7 +55,7 @@
   module.variables = variables
   return help-box({ 
     show search: highlight.with(fill: rgb("#FF28")) 
-    show-module(module, style: style)
+    show-module(module, style: style, enable-cross-references: false)
   })
 }
 
@@ -173,7 +173,7 @@
       style: style,
       enable-cross-references: false,
       enable-tests: false,
-      show-outline: false
+      show-outline: false,
     )
   }
   return result

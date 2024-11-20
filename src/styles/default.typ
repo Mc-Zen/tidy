@@ -119,7 +119,7 @@
 
 // Create a parameter description block, containing name, type, description and optionally the default value. 
 #let show-parameter-block(
-  name, types, content, style-args,
+  function-name: none, name, types, content, style-args,
   show-default: false, 
   default: none, 
 ) = block(
@@ -127,6 +127,7 @@
   breakable: style-args.break-param-descriptions,
   [
     #box(heading(level: style-args.first-heading-level + 3, name))
+    #if function-name != none and style-args.enable-cross-references { label(function-name + "." + name) }
     #h(1.2em) 
     #types.map(x => (style-args.style.show-type)(x, style-args: style-args)).join([ #text("or",size:.6em) ])
   
@@ -142,11 +143,11 @@
 
   if style-args.colors == auto { style-args.colors = colors }
 
-  if style-args.enable-cross-references [
+  [
     #heading(fn.name, level: style-args.first-heading-level + 1)
-    #label(style-args.label-prefix + fn.name + "()")
-  ] else [
-    #heading(fn.name, level: style-args.first-heading-level + 1)
+    #if style-args.enable-cross-references {
+      label(style-args.label-prefix + fn.name + "()")
+    }
   ]
   
   eval-docstring(fn.description, style-args)
@@ -168,6 +169,7 @@
       style-args,
       show-default: "default" in info, 
       default: info.at("default", default: none),
+      function-name: style-args.label-prefix + fn.name
     )
   }
   v(4.8em, weak: true)

@@ -100,7 +100,7 @@
 /// - `types` (optional): A list of accepted argument types. 
 /// - `default` (optional): Default value for this argument.
 /// 
-/// See @@show-module() for outputting the results of this function.
+/// See @show-module for outputting the results of this function.
 #let parse-module(
   
   /// Content of `.typ` file to analyze for docstrings. 
@@ -137,7 +137,7 @@
   /// -> boolean
   old-parser: true
 ) = {
-  if label-prefix == auto { label-prefix = name }
+  if label-prefix == auto { label-prefix = name + "-" }
   
   let docs = (
     name: name,
