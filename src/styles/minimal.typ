@@ -68,6 +68,7 @@
   name, types, content, style-args,
   show-default: false, 
   default: none, 
+  function-name: none
 ) = block(
   inset: 0pt, width: 100%,
   breakable: style-args.break-param-descriptions,
@@ -75,6 +76,7 @@
     #[
       #set text(fill: fn-color)
       #raw(name, lang: none) 
+      #if function-name != none and style-args.enable-cross-references { label(function-name + "." + name) }
     ]
     (#h(-.2em)
     #types.map(x => (style-args.style.show-type)(x)).join([ #text("or",size:.6em) ])
@@ -91,14 +93,12 @@
 ) = {
   set par(justify: false, hanging-indent: 1em, first-line-indent: 0em)
 
-  block(breakable: style-args.break-param-descriptions, 
-    if style-args.enable-cross-references [
-      #(style-args.style.show-parameter-list)(fn, style-args)
-      #label(style-args.label-prefix + fn.name + "()")
-    ] else [
-      #(style-args.style.show-parameter-list)(fn, style-args)
-    ]
-  )
+  block(breakable: style-args.break-param-descriptions)[
+    #(style-args.style.show-parameter-list)(fn, style-args)
+    #if style-args.enable-cross-references {
+      label(style-args.label-prefix + fn.name + "()")
+    }
+  ]
   pad(x: 0em, eval-docstring(fn.description, style-args))
 
   let parameter-block
@@ -115,6 +115,7 @@
       style-args,
       show-default: "default" in info, 
       default: info.at("default", default: none),
+      function-name: style-args.label-prefix + fn.name
     )
   }
   
