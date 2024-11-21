@@ -45,6 +45,9 @@
   if mode == "markup" and not code.has("lang") { 
     lang = "typ" 
   }
+  if mode == "code" {
+    preamble = ""
+  }
   code = raw(displayed-code, lang: lang, block: true)
   if code.has("block") and code.block == false {
     // code = raw(code.text, lang: lang, block: true)
