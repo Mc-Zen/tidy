@@ -5,7 +5,7 @@
 #import "old-parser.typ" as tidy-parse
 #import "utilities.typ"
 #import "testing.typ"
-#import "show-example.typ"
+#import "show-example.typ" as show-example: render-examples
 #import "parse-module.typ": parse-module
 #import "show-module.typ": show-module
 #import "helping.typ" as helping: generate-help

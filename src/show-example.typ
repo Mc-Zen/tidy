@@ -33,6 +33,10 @@
   col-spacing: 5pt,
   ..options
 ) = {
+  let content = code.text
+  let displayed-code = code.text.split("\n").filter(x => not x.starts-with(">>>")).join("\n")
+  let executed-code = code.text.split("\n").map(x => x.trim(">>>", at: start)).join("\n")
+  
   let lang = if code.has("lang") { code.lang } else { "typc" }
   if mode == auto {
     if lang == "typ" { mode = "markup" }
@@ -41,11 +45,12 @@
   if mode == "markup" and not code.has("lang") { 
     lang = "typ" 
   }
+  code = raw(displayed-code, lang: lang, block: true)
   if code.has("block") and code.block == false {
-    code = raw(code.text, lang: lang, block: true)
+    // code = raw(code.text, lang: lang, block: true)
   }
         
-  let preview = [#eval(preamble + code.text, mode: mode, scope: scope + inherited-scope)]
+  let preview = [#eval(preamble + executed-code, mode: mode, scope: scope + inherited-scope)]
   
   let preview-outer-padding = 5pt
   let preview-inner-padding = 5pt
@@ -118,4 +123,16 @@
       else { measure(arrangement(width: size.width)).height }
     arrangement(height: height)
   })
+}
+
+#let render-examples(body) = {
+  show raw.where(lang: "example"): it => {
+    set text(4em / 3)
+
+    show-example(
+      raw(it.text, block: true, lang: "typ"), 
+      mode: "markup"
+      )
+  }
+  body
 }

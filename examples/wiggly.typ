@@ -1,7 +1,10 @@
 /// Draw a sine function with $n$ periods into a rectangle of given size.
 ///
 /// *Example:*
-/// #example(`draw-sine(1cm, 0.5cm, 2)`)
+/// 
+/// ```example
+/// #draw-sine(1cm, 0.5cm, 2)
+/// ```
 ///
 /// -> content
 #let draw-sine(
@@ -13,8 +16,11 @@
   height, 
   
   /// Number of periods to draw. 
-  ///      Example with many periods: 
-  ///      #example(`draw-sine(4cm, 1.3cm, 10)`)
+  /// 
+  /// Example with many periods: 
+  /// ```example
+  /// #draw-sine(4cm, 1.3cm, 10)
+  /// ```
   /// -> int | float
   periods
 ) = box(width: width, height: height, {
