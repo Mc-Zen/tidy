@@ -1,7 +1,7 @@
 
-/// Default example layouter. 
-#let layout-example(
-  /// Code to display. 
+/// Default example layouter used with @show-example. 
+#let default-layout-example(
+  /// Code `raw` element to display. 
   /// -> raw
   code, 
   
@@ -108,22 +108,28 @@
 }
 
 
-/// Takes given code and both shows it and previews the result of its evaluation. 
+
+/// Takes a `raw` elements and both displays the code and previews the result of
+/// its evaluation. 
 /// 
 /// The code is by default shown in the language mode `lang: typc` (typst code)
 /// if no language has been specified. Code in typst markup lanugage (`lang: typ`)
 /// is automatically evaluated in markup mode. 
+/// 
+/// Lines in the raw code that start with `>>>` are removed from the outputted code
+/// but evaluated in the preview. 
 #let show-example(
 
   /// Raw object holding the example code. 
   /// -> raw
   code, 
 
-  /// Additional definitions to make available for the evaluated example code.
+  /// Additional definitions to make available in the evaluation of the preview.
   /// -> dictionary
   scope: (:),
 
   /// Code to prepend to the snippet. This can for example be used to configure imports. 
+  /// This is currently only supported in `markup` mode, see @show-example.mode. 
   /// -> str
   preamble: "",
 
@@ -131,17 +137,20 @@
   /// -> auto | str
   mode: auto,
 
-  /// Definitions that are made available to the entire parsed module. This parameter is only used internally.
+  /// This parameter is only used internally. Definitions that are made available to the 
+  /// entire parsed module. 
   /// -> dictionary
   inherited-scope: (:),
 
-  /// Layout function which is passed to code, the preview and all other options. See @show-example.options. 
+  /// Layout function which is passed to code, the preview and all other options, 
+  /// see @show-example.options. 
   /// -> function
-  by: layout-example,
+  layout: default-layout-example,
 
   /// Additional options to pass to the layout function. 
   /// -> any
   ..options
+
 ) = {
   let displayed-code = code.text
     .split("\n")
@@ -152,43 +161,66 @@
     .map(x => x.trim(">>>", at: start))
     .join("\n")
   
-  let lang = if code.has("lang") { code.lang } else { "typc" }
+  let lang = if code.has("lang") { code.lang } else { auto }
   if mode == auto {
     if lang == "typ" { mode = "markup" }
-    else { mode = "code" }
+    else if lang == "typc" { mode = "code" }
+    else if lang == "typm" { mode = "math" }
+    else if lang == auto { mode = "code" }
   }
-  if mode == "markup" and not code.has("lang") { 
-    lang = "typ" 
-  } else if mode == "code" {
+  if lang == auto {
+    if mode == "markup" { lang = "typ" }
+    if mode == "code" { lang = "typc" }
+    if mode == "math" { lang = "typm" }
+  }
+  if mode == "code" {
     preamble = ""
   }
-  code = raw(displayed-code, lang: lang, block: true)
-        
-  let preview = [#eval(preamble + executed-code, mode: mode, scope: scope + inherited-scope)]
+  assert(lang in ("typ", "typc", "typm"), message: "Previewing code only supports the languages \"typ\", \"typc\", and \"typm\"")
   
-  by(code, preview, ..options)
+  layout(
+    raw(displayed-code, lang: lang, block: true),
+    [#eval(preamble + executed-code, mode: mode, scope: scope + inherited-scope)],
+    ..options
+  )
 }
 
-#let render-examples(body, scope: (:), ..args) = {
+
+
+/// Adds the two languages `example` and `examplec` to `raw` that can be used
+/// to render code examples side-by-side with an automatic preview. 
+#let render-examples(
+  /// Body to apply the show rule to. 
+  /// -> any
+  body,
+
+  /// Scope
+  /// -> dictionary
+  scope: (:), 
+
+  /// Additional arguments that will be passed to the layouter of @show-example. 
+  /// -> any
+  ..args
+) = {
   show raw.where(lang: "example"): it => {
     set text(4em / 3)
 
     show-example(
       raw(it.text, block: true, lang: "typ"), 
-        mode: "markup", 
-        scope: scope, 
-        ..args
-      )
+      mode: "markup", 
+      scope: scope, 
+      ..args
+    )
   }
   show raw.where(lang: "examplec"): it => {
     set text(4em / 3)
 
     show-example(
       raw(it.text, block: true, lang: "typc"), 
-        mode: "code", 
-        scope: scope,
-        ..args
-      )
+      mode: "code", 
+      scope: scope,
+      ..args
+    )
   }
   body
 }
