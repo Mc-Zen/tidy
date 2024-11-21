@@ -204,16 +204,18 @@
 }
 
 
-#import "../show-example.typ": show-example as show-ex
+#import "../show-example.typ" as example
 
 #let show-example(
   ..args
 ) = {
   
-  show-ex(
+  example.show-example(
     ..args,
-    code-block: block.with(radius: 3pt, stroke: .5pt + luma(200)),
-    preview-block: block.with(radius: 3pt, fill: rgb("#e4e5ea")),
-    col-spacing: 5pt
+    layout: example.default-layout-example.with(
+      code-block: block.with(radius: 3pt, stroke: .5pt + luma(200)),
+      preview-block: block.with(radius: 3pt, fill: rgb("#e4e5ea")),
+      col-spacing: 5pt
+    ),
   )
 }

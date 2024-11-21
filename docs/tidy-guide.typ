@@ -139,7 +139,7 @@ We can now parse the module and pass the module `wiggly` through the `scope` par
   read("wiggly.typ"), 
   name: "wiggly",
   scope: (wiggly: wiggly),
-  preamble: "import wiggly: *;"
+  preamble: "#import wiggly: *\n"
 )
 ```
 
@@ -152,7 +152,7 @@ In the output, the preview of the code examples is shown next to it.
     read("/examples/wiggly.typ"), 
     name: "wiggly",
     scope: (wiggly: wiggly),
-    preamble: "import wiggly: draw-sine;", 
+    preamble: "#import wiggly: *\n", 
     old-parser: false
   )
   tidy-output-figure(tidy.show-module(module, show-outline: false))
@@ -255,7 +255,7 @@ Currently, the two predefined styles `tidy.styles.default` and `tidy-styles.mini
     read("/examples/wiggly.typ"), 
     name: "wiggly",
     scope: (wiggly: wiggly),
-    preamble: "import wiggly: *;",
+    preamble: "#import wiggly: *\n",
     old-parser: false
   )
   tidy-output-figure(tidy.show-module(module, show-outline: false, style: tidy.styles.minimal))

@@ -145,6 +145,22 @@
     (eval-scope.tidy.show-reference)(label(label-prefix + target), target)
   }
 
+  show raw.where(lang: "example"): it => {
+    set text(4em / 3)
+
+    (eval-scope.example)(
+      raw(it.text, block: true, lang: "typ"), 
+      mode: "markup"
+    )
+  }
+  show raw.where(lang: "examplec"): it => {
+    set text(4em / 3)
+
+    (eval-scope.example)(
+      raw(it.text, block: true, lang: "typc"),
+      mode: "code"
+    )
+  }
 
   // Show the docs
   
