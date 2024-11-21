@@ -166,7 +166,7 @@
     if lang == "typ" { mode = "markup" }
     else if lang == "typc" { mode = "code" }
     else if lang == "typm" { mode = "math" }
-    else if lang == auto { mode = "code" }
+    else if lang == auto { mode = "markup" }
   }
   if lang == auto {
     if mode == "markup" { lang = "typ" }
