@@ -125,13 +125,25 @@
   })
 }
 
-#let render-examples(body) = {
+#let render-examples(body, scope: (:), ..args) = {
   show raw.where(lang: "example"): it => {
     set text(4em / 3)
 
     show-example(
       raw(it.text, block: true, lang: "typ"), 
-      mode: "markup"
+        mode: "markup", 
+        scope: scope, 
+        ..args
+      )
+  }
+  show raw.where(lang: "examplec"): it => {
+    set text(4em / 3)
+
+    show-example(
+      raw(it.text, block: true, lang: "typc"), 
+        mode: "code", 
+        scope: scope,
+        ..args
       )
   }
   body
