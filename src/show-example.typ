@@ -201,11 +201,7 @@
   /// Layout function which is passed to code, the preview and all other options, 
   /// see @show-example.options. 
   /// -> function
-  layout: default-layout-example,
-
-  /// Additional arguments that will be passed to the layouter of @show-example. 
-  /// -> any
-  ..args
+  layout: default-layout-example
 ) = {
   show raw.where(lang: "example"): it => {
     set text(4em / 3)
@@ -215,7 +211,6 @@
       mode: "markup", 
       scope: scope, 
       layout: layout,
-      ..args
     )
   }
   show raw.where(lang: "examplec"): it => {
