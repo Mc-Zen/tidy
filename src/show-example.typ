@@ -198,6 +198,11 @@
   /// -> dictionary
   scope: (:), 
 
+  /// Layout function which is passed to code, the preview and all other options, 
+  /// see @show-example.options. 
+  /// -> function
+  layout: default-layout-example,
+
   /// Additional arguments that will be passed to the layouter of @show-example. 
   /// -> any
   ..args
@@ -209,6 +214,7 @@
       raw(it.text, block: true, lang: "typ"), 
       mode: "markup", 
       scope: scope, 
+      layout: layout,
       ..args
     )
   }
@@ -219,6 +225,7 @@
       raw(it.text, block: true, lang: "typc"), 
       mode: "code", 
       scope: scope,
+      layout: layout,
       ..args
     )
   }
