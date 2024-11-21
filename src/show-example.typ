@@ -1,59 +1,38 @@
 
-
-
-/// Takes given code and both shows it and previews the result of its evaluation. 
-/// 
-/// The code is by default shown in the language mode `lang: typc` (typst code)
-/// if no language has been specified. Code in typst markup lanugage (`lang: typ`)
-/// is automatically evaluated in markup mode. 
-/// 
-/// - code (raw): Raw object holding the example code. 
-/// - scope (dictionary): Additional definitions to make available for the evaluated 
-///          example code.
-/// - dir (direction): Direction for laying out the code and preview boxes. 
-/// - preamble (str): Code to prepend to the snippet. This can for example be used to configure imports. 
-/// - ratio (int): Configures the ratio of the widths of the code and preview boxes. 
-/// - scale-preview (auto, ratio): How much to rescale the preview. If set to auto, the the preview is scaled to fit the box. 
-/// - inherited-scope (dictionary): Definitions that are made available to the entire parsed
-///          module. This parameter is only used internally.
-/// - code-block (function): The code is passed to this function. Use this to customize how the code is shown. 
-/// - preview-block (function): The preview is passed to this function. Use this to customize how the preview is shown. 
-/// - col-spacing (length): Spacing between the code and preview boxes. 
-#let show-example(
+/// Default example layouter. 
+#let layout-example(
+  /// Code to display. 
+  /// -> raw
   code, 
-  scope: (:),
-  dir: ltr,
-  preamble: "",
-  ratio: 1,
-  scale-preview: auto,
-  mode: auto,
-  inherited-scope: (:),
-  code-block: block,
-  preview-block: block,
-  col-spacing: 5pt,
-  ..options
-) = {
-  let content = code.text
-  let displayed-code = code.text.split("\n").filter(x => not x.starts-with(">>>")).join("\n")
-  let executed-code = code.text.split("\n").map(x => x.trim(">>>", at: start)).join("\n")
   
-  let lang = if code.has("lang") { code.lang } else { "typc" }
-  if mode == auto {
-    if lang == "typ" { mode = "markup" }
-    else { mode = "code" }
-  }
-  if mode == "markup" and not code.has("lang") { 
-    lang = "typ" 
-  }
-  if mode == "code" {
-    preamble = ""
-  }
-  code = raw(displayed-code, lang: lang, block: true)
-  if code.has("block") and code.block == false {
-    // code = raw(code.text, lang: lang, block: true)
-  }
-        
-  let preview = [#eval(preamble + executed-code, mode: mode, scope: scope + inherited-scope)]
+  /// Rendered preview.
+  /// -> content
+  preview, 
+
+  /// Direction for laying out the code and preview boxes. 
+  /// -> direction
+  dir: ltr,
+
+  /// Configures the ratio of the widths of the code and preview boxes. 
+  /// -> int
+  ratio: 1,
+
+  /// How much to rescale the preview. If set to auto, the the preview is scaled to fit the box. 
+  /// -> auto | ratio
+  scale-preview: auto,
+
+  /// The code is passed to this function. Use this to customize how the code is shown. 
+  /// -> function
+  code-block: block,
+
+  /// The preview is passed to this function. Use this to customize how the preview is shown. 
+  /// -> function
+  preview-block: block,
+
+  /// Spacing between the code and preview boxes. 
+  /// -> length
+  col-spacing: 5pt
+) = {
   
   let preview-outer-padding = 5pt
   let preview-inner-padding = 5pt
@@ -126,6 +105,68 @@
       else { measure(arrangement(width: size.width)).height }
     arrangement(height: height)
   })
+}
+
+
+/// Takes given code and both shows it and previews the result of its evaluation. 
+/// 
+/// The code is by default shown in the language mode `lang: typc` (typst code)
+/// if no language has been specified. Code in typst markup lanugage (`lang: typ`)
+/// is automatically evaluated in markup mode. 
+#let show-example(
+
+  /// Raw object holding the example code. 
+  /// -> raw
+  code, 
+
+  /// Additional definitions to make available for the evaluated example code.
+  /// -> dictionary
+  scope: (:),
+
+  /// Code to prepend to the snippet. This can for example be used to configure imports. 
+  /// -> str
+  preamble: "",
+
+  /// Language mode. Can be `auto`, `"markup"`, or `"code"`. 
+  /// -> auto | str
+  mode: auto,
+
+  /// Definitions that are made available to the entire parsed module. This parameter is only used internally.
+  /// -> dictionary
+  inherited-scope: (:),
+
+  /// Layout function which is passed to code, the preview and all other options. See @show-example.options. 
+  /// -> function
+  by: layout-example,
+
+  /// Additional options to pass to the layout function. 
+  /// -> any
+  ..options
+) = {
+  let displayed-code = code.text
+    .split("\n")
+    .filter(x => not x.starts-with(">>>"))
+    .join("\n")
+  let executed-code = code.text
+    .split("\n")
+    .map(x => x.trim(">>>", at: start))
+    .join("\n")
+  
+  let lang = if code.has("lang") { code.lang } else { "typc" }
+  if mode == auto {
+    if lang == "typ" { mode = "markup" }
+    else { mode = "code" }
+  }
+  if mode == "markup" and not code.has("lang") { 
+    lang = "typ" 
+  } else if mode == "code" {
+    preamble = ""
+  }
+  code = raw(displayed-code, lang: lang, block: true)
+        
+  let preview = [#eval(preamble + executed-code, mode: mode, scope: scope + inherited-scope)]
+  
+  by(code, preview, ..options)
 }
 
 #let render-examples(body, scope: (:), ..args) = {
