@@ -33,7 +33,7 @@
 
 #pagebreak()
 
-#show-example(`Fit that code in a tiny space`)
+#almost-default-show-example(`Fit that code in a tiny space`)
 
 #pagebreak()
 

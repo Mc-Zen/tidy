@@ -5,3 +5,5 @@
 #include "argument-description.typ"
 #include "argument-type.typ"
 #include "currying.typ"
+
+#set page(width: auto, height: auto, margin: 2pt)
