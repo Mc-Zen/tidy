@@ -1,5 +1,6 @@
 #import "/src/tidy.typ"
 
+#set page(width: 10cm, height: auto, margin: 2pt)
 
 #let heymath = ```
 #import "vector.typ": *
@@ -20,14 +21,19 @@
 
 #let matrix = ```
 #import "solve.typ"
-/// - n (int): dimension
-#let id(n)
+/// 
+#let id(
+  /// dimension -> int
+  n
+  )
 ```.text
 
 #let solve = ```
 ///
 #let solve(n)
 ```.text
+
+#let error = highlight
 
 
 #let help(..args) = {
@@ -39,17 +45,16 @@
   tidy.generate-help(
     namespace: namespace, 
     package-name: "heymath",
-    onerror: msg => block(msg)
+    onerror: msg => error(msg)
   )(..args)
 }
 
 #help("pi-squared")
 
 #let assert-not-failed(help-result) = {
-  assert.eq(
-    help-result.child.body.children.at(1)
-      .child.children.first().fill,
-    rgb("#d8dbed44")
+  let body = help-result.body.children.at(1).child
+  assert(
+    body.func() != highlight,
   )
 }
 
@@ -60,20 +65,24 @@
 #assert-not-failed(help("vec-subtract"))
 #assert-not-failed(help("matrix.id"))
 #assert-not-failed(help("matrix.solve.solve"))
-// #assert-not-failed(help("matrix.id(n)"))
+#assert-not-failed(help("matrix.id(n)"))
 #help("matrix.id(n)")
 
 // Invalid definition
 #assert.eq(
   help("ma"), 
-  tidy.helping.help-box(block("The package `heymath` contains no (documented) definition `ma`"))
+  tidy.helping.help-box(
+    error("The package `heymath` contains no (documented) definition `ma`")
+  )
 )
 
 
 // Invalid submodule
 #assert.eq(
   help("matrixs.id"), 
-  tidy.helping.help-box(block("The package `heymath` contains no module `matrixs`"))
+  tidy.helping.help-box(
+    error("The package `heymath` contains no module `matrixs`")
+  )
 )
 
 
@@ -81,14 +90,18 @@
 // Invalid submodule
 #assert.eq(
   help("matrix.id(aaaa)"), 
-  tidy.helping.help-box(block("The function `matrix.id` has no parameter `aaaa`"))
+  tidy.helping.help-box(
+    error("The function `matrix.id` has no parameter `aaaa`")
+  )
 )
 
 
 // Invalid submodule
 #assert.eq(
   help("cos(aaaa)"), 
-  tidy.helping.help-box(block("The function `cos` has no parameter `aaaa`"))
+  tidy.helping.help-box(
+    error("The function `cos` has no parameter `aaaa`")
+  )
 )
 
 

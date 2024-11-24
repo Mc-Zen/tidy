@@ -5,13 +5,14 @@
 #import "show-module.typ": show-module
 
 #let help-box(content) = {
-  set text(size: .9em)
   block(
     above: 1em,
     inset: 1em,
     stroke: rgb("#AAA"),
-    fill: rgb("#F5F5F544"),
-    text(size: 2em, [? #smallcaps("help")#h(1fr)?]) + content
+    fill: rgb("#F5F5F544"), {
+      text(size: 1.8em, [? #smallcaps("help")#h(1fr)?])
+      text(.9em, content)
+    }
   )
 }
 
