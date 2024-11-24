@@ -8,5 +8,5 @@ description = "Documentation generator for Typst code in Typst."
 
 repository = "https://github.com/Mc-Zen/tidy"
 categories = ["utility", "scripting", "model"]
-compiler = "0.6.0"
+compiler = "0.11.0"
 exclude = ["/docs/*"]
