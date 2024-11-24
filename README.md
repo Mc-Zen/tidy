@@ -12,6 +12,9 @@
 
 **tidy** is a package that generates documentation directly in [Typst](https://typst.app/) for your Typst modules. It parses docstring comments similar to javadoc and co. and can be used to easily build a beautiful reference section for the parsed module.  Within the docstring you may use (almost) any Typst syntax − so markup, equations and even figures are no problem!
 
+> [!IMPORTANT]
+> In version 0.4.0, the default documentation syntax has changed. You can take a look at the [migration guide](docs/migration-to-0.4.0.md) or revert to the old syntax with `tidy.show-module(old-syntax: true, ...)`. 
+
 Features:
 - **Customizable** output styles. 
 - Automatically [**render code examples**](#example). 
@@ -114,7 +117,7 @@ A few test assertion functions are available to improve readability, simplicity,
 ### v0.4.0
 _Major redesign of the documentation syntax_
 - New features
-  - New parser for the new documentation syntax. The old parser is still available and can be activated via `tidy.show-module(old-syntax: true)`. You can find a [migration guide](migration-to-0.4.0.md) for adopting the new syntax. 
+  - New parser for the new documentation syntax. The old parser is still available and can be activated via `tidy.show-module(old-syntax: true)`. You can find a [migration guide](docs/migration-to-0.4.0.md) for adopting the new syntax. 
   - Cross-references to arguments
 - Breaking changes
 
