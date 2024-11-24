@@ -16,15 +16,15 @@
   )
 }
 
-#let parse-namespace-modules(entry, old-parser: false) = {
+#let parse-namespace-modules(entry, old-syntax: false) = {
   // "Module" is made up of several files
   if type(entry) != array {
     entry = (entry,)
   }
-  parse-module(entry.map(x => x()).join("\n"), old-parser: old-parser, label-prefix: "help-")
+  parse-module(entry.map(x => x()).join("\n"), old-syntax: old-syntax, label-prefix: "help-")
 }
 
-#let search-docs(search, searching, namespace, style, old-parser: false) = {
+#let search-docs(search, searching, namespace, style, old-syntax: false) = {
   if search == "" { return help-box(block[_empty search string_]) }
   let search-names = "n" in searching
   let search-descriptions = "d" in searching
@@ -43,11 +43,11 @@
   }
   
   let definitions = ()
-  let module = parse-namespace-modules(namespace.at("."), old-parser: old-parser)
+  let module = parse-namespace-modules(namespace.at("."), old-syntax: old-syntax)
   let functions = ()
   let variables = ()
   for (name, modules) in namespace {
-    let module = parse-namespace-modules(modules, old-parser: old-parser)
+    let module = parse-namespace-modules(modules, old-syntax: old-syntax)
    
     functions += module.functions.filter(filter)
     variables += module.variables.filter(x => search in x.name or search in x.description)
@@ -230,7 +230,7 @@
 
   /// Whether to use the old parser. 
   /// -> boolean
-  old-parser: false
+  old-syntax: false
 ) = {
 
   let validate-namespace-tree(namespace) = {
@@ -265,7 +265,7 @@
       let name = args.pos().first()
       help-box(get-docs(name, namespace, package-name, style, onerror: onerror))
     } else {
-      search-docs(search, searching, namespace, style, old-parser: old-parser)
+      search-docs(search, searching, namespace, style, old-syntax: old-syntax)
     }
   }
   help-function

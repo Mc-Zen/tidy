@@ -4,6 +4,7 @@
 
 #let eval-string(string) = eval-docstring(string, (scope: (:)))
 
+#let parse-module = parse-module.with(old-syntax: true)
 
 #{
   let code = ```

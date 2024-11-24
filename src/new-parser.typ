@@ -104,8 +104,8 @@
 #let parse-description-and-types(lines, label-prefix: "", first-line-number: 0) = {
 
   let description = lines
-    .enumerate(start: first-line-number)
-    .map(eval-doc-comment-test.with(label-prefix: label-prefix))
+    // .enumerate(start: first-line-number)
+    // .map(eval-doc-comment-test.with(label-prefix: label-prefix))
     .join("\n")
     
   if description == none { description = "" }
@@ -113,7 +113,7 @@
   let types = none
   if description.contains("->") {
     let parts = description.split("->")
-    types = parts.last().replace(",", "|").split("|").map(str.trim)
+    types = parts.last().split("|").map(str.trim)
     description = parts.slice(0, -1).join("->")
   }
   

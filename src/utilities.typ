@@ -6,10 +6,15 @@
 /// Take a documentation string (for example a function or parameter 
 /// description) and process docstring cross-references (starting with `@@`), 
 /// turning them into links. 
-///
-/// - text (str): Source code.
-/// - info (dictionary): 
-#let process-references(text, info) = {
+#let process-references(
+
+  /// Source code. -> str
+  text, 
+
+  /// -> dictionary
+  info
+
+) = {
   return text.replace(reference-matcher, match => {
     let target = match.captures.at(0)
     if info.enable-cross-references {
@@ -25,11 +30,16 @@
 /// Evaluate a docstring description (i.e., a function or parameter description)
 /// while processing cross-references (@@...) and providing the scope to the 
 /// evaluation context. 
-///
-/// - docstring (str): Docstring to evaluate. 
-/// - info (dictionary): Object holding information for cross-reference 
-///        processing and evaluation scope. 
-#let eval-docstring(docstring, info) = {
+#let eval-docstring(
+
+  /// Docstring to evaluate. -> str
+  docstring, 
+  
+  /// Object holding information for cross-reference processing and evaluation scope. 
+  /// -> dictionary
+  info
+  
+) = {
   let scope = info.scope
   let content = process-references(docstring.trim(), info)
   eval(content, mode: "markup", scope: scope)

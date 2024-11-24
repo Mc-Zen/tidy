@@ -1,7 +1,12 @@
 /// This function computes the cardinal sine, $sinc(x)=sin(x)/x$. 
 ///
-/// #example(`#sinc(0)`, mode: "markup")
+/// ```example
+/// #sinc(0)
+/// ```
 ///
-/// - x (int, float): The argument for the cardinal sine function. 
 /// -> float
-#let sinc(x) = if x == 0 {1} else {calc.sin(x) / x}
+#let sinc(
+  /// The argument for the cardinal sine function. 
+  /// -> int | float
+  x
+) = if x == 0 {1} else {calc.sin(x) / x}

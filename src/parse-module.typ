@@ -135,7 +135,7 @@
   enable-curried-functions: true,
 
   /// -> boolean
-  old-parser: true
+  old-syntax: false
 ) = {
   if label-prefix == auto { label-prefix = name + "-" }
   
@@ -145,7 +145,7 @@
     scope: scope,
     preamble: preamble
   )
-  if old-parser {
+  if old-syntax {
     docs += old-parse(content, require-all-parameters: require-all-parameters, label-prefix: label-prefix, enable-curried-functions: enable-curried-functions)
   } else {
     docs += new-parser.parse(content)

@@ -76,7 +76,7 @@
     #[
       #set text(fill: fn-color)
       #raw(name, lang: none) 
-      #if function-name != none and style-args.enable-cross-references { label(function-name + "." + name) }
+      #if function-name != none and style-args.enable-cross-references { label(function-name + "." + name.trim(".")) }
     ]
     (#h(-.2em)
     #types.map(x => (style-args.style.show-type)(x)).join([ #text("or",size:.6em) ])

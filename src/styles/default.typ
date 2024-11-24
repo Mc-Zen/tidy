@@ -127,7 +127,7 @@
   breakable: style-args.break-param-descriptions,
   [
     #box(heading(level: style-args.first-heading-level + 3, name))
-    #if function-name != none and style-args.enable-cross-references { label(function-name + "." + name) }
+    #if function-name != none and style-args.enable-cross-references { label(function-name + "." + name.trim(".")) }
     #h(1.2em) 
     #types.map(x => (style-args.style.show-type)(x, style-args: style-args)).join([ #text("or",size:.6em) ])
   

@@ -21,6 +21,7 @@
   // set heading(numbering: (..args) => if args.pos().len() == 1 { numbering("I", ..args) })
   set heading(numbering: "I.a")
   show list: pad.with(x: 5%)
+  show heading.where(level: 3): set text(1.2em)
 
   // show link: set text(fill: purple.darken(30%))
   show link: set text(fill: rgb("#1e8f6f"))
@@ -68,8 +69,10 @@
 
   // Main body.
   set par(justify: true)
-  v(10em)
+  v(7em)
 
+  pad(x: 10%, outline(depth: 2, indent: 2em))
+  pagebreak()
   
   show: codly-init.with(
   )
@@ -106,16 +109,22 @@
 ))
 
 
-#let tidy-output-figure(output) = no-codly({
+#let tidy-output-figure(
+  output, 
+  breakable: false,
+  fill: none
+) = no-codly({
   set heading(numbering: none)
   set text(size: .8em)
-  figure(align(left, box(
+  show figure: set block(breakable: breakable)
+  figure(align(left, block(
     width: 80%,
+    fill: fill,
     stroke: 0.5pt + luma(200), 
     inset: 20pt, 
     radius: 10pt,
     block(
-      breakable: false,
+      breakable: breakable,
       output
     )
   )))

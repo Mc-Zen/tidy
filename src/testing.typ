@@ -41,23 +41,30 @@
 ///  at least one test did not succeed. 
 ///
 /// This function is made available in all docstrings under the name 'test'. 
-///
-/// - ..tests (any): Tests to run in form of raw objects. 
-/// - scope (dictionary): Additional definitions to make available for the
-///          evaluated test code.
-/// - inherited-scope (dictionary): Definitions that are made available to the 
-///          entire parsed module including the test functions. This parameter 
-///          is only used internally.
-/// - source-location (dictionary): Information about the location of the test 
-///          source code. Should contain values for the keys `module` and 
-///          `line`. This parameter is only used internally.
-/// - enable (boolean): When set to `false`, the tests are ignored. 
 #let test(
+
+  /// Tests to run in form of raw objects. 
+  /// -> any
   ..tests, 
+
+  /// Additional definitions to make available for the evaluated test code.
+  /// -> dictionary
   scope: (:), 
+
+  /// Definitions that are made available to the entire parsed module including
+  /// the test functions. This parameter is only used internally.
+  /// -> dictionary
   inherited-scope: (:), 
+
+  /// Information about the location of the test source code. Should contain
+  /// values for the keys `module` and `line`. This parameter is only used internally.
+  /// -> dictionary
   source-location: none,
+
+  /// When set to `false`, the tests are ignored. 
+  /// -> boolean
   enable: true
+
 ) = {
   if not enable { return }
   let source-info = get-source-info-str(source-location)

@@ -2,9 +2,12 @@
 # Tidy
 *Keep it tidy.*
 
-[![Typst Package](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2FMc-Zen%2Ftidy%2Fmain%2Ftypst.toml&query=%24.package.version&prefix=v&logo=typst&label=package&color=239DAD)](https://typst.app/universe/package/tidy)
+[![Typst Package](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2FMc-Zen%2Ftidy%2Fv0.4.0%2Ftypst.toml&query=%24.package.version&prefix=v&logo=typst&label=package&color=239DAD)](https://typst.app/universe/package/tidy)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue)](https://github.com/Mc-Zen/tidy/blob/main/LICENSE)
+[![Test Status](https://github.com/Mc-Zen/tidy/actions/workflows/run_tests.yml/badge.svg)](https://github.com/Mc-Zen/tidy/actions/workflows/run_tests.yml)
 [![User Manual](https://img.shields.io/badge/manual-.pdf-purple)][guide]
+
+
 
 
 **tidy** is a package that generates documentation directly in [Typst](https://typst.app/) for your Typst modules. It parses docstring comments similar to javadoc and co. and can be used to easily build a beautiful reference section for the parsed module.  Within the docstring you may use (almost) any Typst syntax − so markup, equations and even figures are no problem!
@@ -39,18 +42,23 @@ A full example on how to use this module for your own package (maybe even consis
 ```typ
 /// This function computes the cardinal sine, $sinc(x)=sin(x)/x$. 
 ///
-/// #example(`#sinc(0)`, mode: "markup")
+/// ```example
+/// #sinc(0)
+/// ```
 ///
-/// - x (int, float): The argument for the cardinal sine function. 
 /// -> float
-#let sinc(x) = if x == 0 {1} else {calc.sin(x) / x}
+#let sinc(
+  /// The argument for the cardinal sine function. 
+  /// -> int | float
+  x
+) = if x == 0 {1} else {calc.sin(x) / x}
 ```
 
 **tidy** turns this into:
 
-<h3 align="center">
+<div align="center">
   <img alt="Tidy example output" src="docs/images/sincx-docs.svg" style="max-width: 100%; padding: 10px 10px; box-shadow: 1pt 1pt 10pt 0pt #AAAAAA; border-radius: 4pt; box-sizing: border-box; background: white">
-</h3>
+</div>
 
 
 ## Access user-defined functions and images
@@ -92,18 +100,26 @@ It is possible to add simple docstring tests — assertions that will be run whe
 /// )
 #let my-square(n) = n * n
 ```
-With the short-hand syntax, a unfulfilled assertion will even print the line number of the failed test:
+<!-- With the short-hand syntax, a unfulfilled assertion will even print the line number of the failed test:
 ```typ
 /// >>> my-square(2) == 4
 /// >>> my-square(4) == 16
 #let my-square(n) = n * n
-```
-A few test assertion functions are available to improve readability, simplicity, and error messages. Currently, these are `eq(a, b)` for equality tests, `ne(a, b)` for inequality tests and `approx(a, b, eps: 1e-10)` for floating point comparisons. These assertion helper functions are always available within docstring tests (with both `test()` and `>>>` syntax). 
+``` -->
+A few test assertion functions are available to improve readability, simplicity, and error messages. Currently, these are `eq(a, b)` for equality tests, `ne(a, b)` for inequality tests and `approx(a, b, eps: 1e-10)` for floating point comparisons. These assertion helper functions are always available within docstring tests. 
 
 
 ## Changelog
 
+### v0.4.0
+_Major redesign of the documentation syntax_
+- New features
+  - New parser for the new documentation syntax. The old parser is still available and can be activated via `tidy.show-module(old-syntax: true)`. You can find a [migration guide](migration-to-0.4.0.md) for adopting the new syntax. 
+  - Cross-references to arguments
+- Breaking changes
+
 ### v0.3.0
+_Adds a help feature and more options_
 - New features:
   - Help feature. 
   - `preamble` option for examples (e.g., to add `import` statements). 
@@ -135,6 +151,6 @@ A few test assertion functions are available to improve readability, simplicity,
 
 ### v0.1.0
 
-Initial Release.
+_Initial Release_
 
 [guide]: https://github.com/Mc-Zen/tidy/releases/download/v0.3.0/tidy-guide.pdf
