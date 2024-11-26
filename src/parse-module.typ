@@ -8,7 +8,7 @@
     let docs = function-docs.at(i)
     if not "parent" in docs { continue }
     
-    let parent = docs.parent
+    let parent = docs.at("parent", default: none)
     if parent == none { continue }
     
     let parent-docs = function-docs.find(x => x.name == parent.name)
@@ -40,7 +40,12 @@
 }
 
 
-#let old-parse(content, label-prefix: "", require-all-parameters: false, enable-curried-functions: true) = {
+#let old-parse(
+  content, 
+  label-prefix: "", 
+  require-all-parameters: false,
+  enable-curried-functions: true
+) = {
   
   let parse-info = (
     label-prefix: label-prefix,
@@ -63,7 +68,8 @@
           variable-docs.push(doc)
         } else {
           doc.parent = parent-info
-          doc.remove("type")
+          if "type" in doc { doc.remove("type") }
+          doc.args = (:)
           function-docs.push(doc)
         }
       } else {
@@ -153,9 +159,9 @@
     docs += new-parser.parse(content)
   }
   // TODO
-  // if enable-curried-functions {
-  //   function-docs = resolve-parents(function-docs)
-  // }
+  if enable-curried-functions {
+    docs.functions = resolve-parents(docs.functions)
+  }
 
   
   return docs
