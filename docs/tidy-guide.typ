@@ -2,7 +2,6 @@
 #import "/src/tidy.typ"
 
 #let version = toml("/typst.toml").package.version
-#let import-statement = "#import \"@preview/tidy:" + version + "\""
 #show "tidy:0.0.0": "tidy:" + version
 
 
@@ -24,7 +23,7 @@
 
 = Introduction
 
-You can easily feed *tidy* your in-code documented source files and get beautiful documentation of all your functions and variables printed out. // Enjoy features like type annotations, links to other documented definitions and arbitrary formatting within function and parameter descriptions. Let's get started.
+You can easily feed *tidy* your in-code documented source files and get beautiful documentation of all your functions and variables printed out. 
 The main features are:
 - Type annotations,
 - seamless cross references,
@@ -38,7 +37,6 @@ First, we import *tidy*.
 
 We now assume we have a Typst module called `repeater.typ`, containing a definition for a function named `repeat()`. 
 
-// *Example of some documented source code:*
 
 #let example-code = read("/examples/repeater.typ")
 #file-code("repeater.typ", raw(block: true, lang: "typ", example-code))
@@ -142,7 +140,6 @@ In the output, the preview of the code examples is shown next to it.
   ), breakable: true)
 }
 
-// #pagebreak()
 
 
 
@@ -339,12 +336,7 @@ As a demonstration, calling #raw(lang: "typ", "#tidy.help(\"parse-module\")") pr
   )
     
 }
-/*
-The feature that will make using *your* package attractive. 
-Without leaving the editor
 
-The usage and ease of access for typst packages is about to be revolutionized!
-*/
 
 This feature supports:
 - function and variable definitions,
@@ -359,8 +351,10 @@ This feature supports:
 If you have already documented your code, adding such a help function will require only little further effort in implementation. In your root library file, add some code of the following kind:
 #raw(block: true, lang: "typ", ```
 #let help(..args) = {
-```.text + "\n  " + import-statement.slice(1) + "\n" + 
+```.text +
 ```
+
+  import "@preview/tidy:0.0.0"
   let namespace = (
     ".": read.with("/src/my-package.typ")
   )

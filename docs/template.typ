@@ -100,7 +100,7 @@
   stroke: rgb("#239DAE") + 1pt,
   radius: 3pt,
   {
-    block(align(right, text(raw(filename))), width: 100%, inset: 5pt)
+    block(align(right, text(raw(filename, lang: "cmd"))), width: 100%, inset: 5pt)
     v(1pt, weak: true)
     move(dx: -1pt, line(length: 100% + 2pt, stroke: 1pt + rgb("#239DAE")))
         v(1pt, weak: true)
