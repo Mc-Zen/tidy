@@ -24,8 +24,12 @@
   show heading.where(level: 3): set text(1.2em)
 
   // show link: set text(fill: purple.darken(30%))
-  show link: set text(fill: rgb("#1e8f6f"))
-  show link: underline
+  show link: it => {
+    let dest = str(it.dest)
+    if "." in dest and not "/" in dest { return underline(it, stroke: luma(60%), offset: 1pt) }
+    set text(fill: rgb("#1e8f6f")) 
+    underline(it)
+  }
   
   v(4em)
 

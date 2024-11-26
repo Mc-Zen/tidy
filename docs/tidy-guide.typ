@@ -129,6 +129,7 @@ In the output, the preview of the code examples is shown next to it.
     read("/examples/wiggly.typ"), 
     name: "wiggly",
     scope: (wiggly: wiggly),
+    label-prefix: "wiggly1-",
     preamble: "#import wiggly: *\n", 
     old-syntax: false
   )
@@ -299,6 +300,7 @@ Currently, the two predefined styles `tidy.styles.default` and `tidy-styles.mini
     read("/examples/wiggly.typ"), 
     name: "wiggly",
     scope: (wiggly: wiggly),
+    label-prefix: "wiggly2-",
     preamble: "#import wiggly: *\n",
     old-syntax: false
   )
@@ -471,8 +473,15 @@ Let us now _self-document_ this package:
 
 #let style = tidy.styles.default
 #{
-  set heading(numbering: none)
   set text(size: 9pt)
+  set heading(numbering: none)
+  show heading.where(level: 3): set text(1.5em)
+  show heading.where(level: 4): it => {
+    set text(1.4em)
+    set align(center)
+    set block(below: 1.2em)
+    it
+  }
   
   let module = tidy.parse-module(
     (
