@@ -10,7 +10,7 @@
 
 
 
-**tidy** is a package that generates documentation directly in [Typst](https://typst.app/) for your Typst modules. It parses doc-comments similar to javadoc and co. and can be used to easily build a beautiful reference section for the parsed module.  Within the doc-comments you may use (almost) any Typst syntax − so markup, equations and even figures are no problem!
+**tidy** is a package that generates documentation directly in [Typst](https://typst.app/) for your Typst modules. It parses doc-comments and can be used to easily build a reference section for a module.  Doc-comments use Typst syntax − so markup, equations and even figures are no problem!
 
 > [!IMPORTANT]
 > In version 0.4.0, the default documentation syntax has changed. You can take a look at the [migration guide](docs/migration-to-0.4.0.md) or revert to the old syntax with `tidy.show-module(old-syntax: true, ...)`. 
@@ -19,11 +19,12 @@
 
 Features:
 - **Customizable** output styles. 
-- Automatically [**render code examples**](#example). 
+- Automatically [**preview code examples**](#example). 
 - **Annotate types** of parameters and return values.
+- **Cross-references** to definitions and function parameters. 
 - Automatically read off default values for named parameters.
 - [**Help** feature](#generate-a-help-command-for-you-package) for your package. 
-- [Doc-comment tests](#doc-comment-tests). 
+- [Doc-tests](#doc-tests). 
 
 
 The [guide][guide] fully describes the usage of this module and defines documentation syntax. 
@@ -38,7 +39,7 @@ Using `tidy` is as simple as writing some doc-comments and calling:
 #tidy.show-module(docs, style: tidy.styles.default)
 ```
 
-The available predefined styles are currenty `tidy.styles.default` and `tidy.styles.minimal`. Custom styles can be added by hand (take a look at the [guide][guide]). 
+The available predefined styles are currently `tidy.styles.default` and `tidy.styles.minimal`. Custom styles can be added by hand (take a look at the [user guide][guide]). 
 
 ## Example
 
@@ -68,7 +69,7 @@ A full example on how to use this module for your own package (maybe even consis
 
 ## Access user-defined functions and images
 
-The code in the doc-comments is evaluated via `eval()`. In order to access user-defined functions and images, you can make use of the `scope` argument of `tidy.parse-module()`:
+The code in the doc-comments is evaluated through the [`eval`](https://typst.app/docs/reference/foundations/eval/) function. In order to access user-defined functions and images, you can make use of the `scope` argument of `tidy.parse-module()`:
 
 ```typ
 #{
@@ -94,9 +95,9 @@ With **tidy**, you can add a help command to you package that allows users to ob
 #mypackage.help("func(param1)") // print only parameter description of param1
 ```
 
-This will print the documentation of `func` directly into the document — no need to look it up in a manual. Read up in the [guide][guide] for setup instructions. 
+This will print the documentation of `func` directly into the document — no need to look it up in a manual. Read up on setup instructions in the [user guide][guide]. 
 
-## Doc-comment tests
+## Doc-tests
 It is possible to add simple doc-tests — assertions that will be run when the documentation is generated. This is useful if you want to keep small tests and documentation in one place. 
 ```typ
 /// #test(
@@ -159,4 +160,4 @@ _Adds a help feature and more options_
 
 _Initial Release_
 
-[guide]: https://github.com/Mc-Zen/tidy/releases/download/v0.3.0/tidy-guide.pdf
+[guide]: https://github.com/Mc-Zen/tidy/releases/download/v0.4.0/tidy-guide.pdf
