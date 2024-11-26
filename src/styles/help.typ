@@ -33,7 +33,7 @@
 
 #let show-parameter-list(fn, style-args) = {
   block(fill: rgb("#d8dbed44"), width: 100%, inset: (x: 0.5em, y: 0.7em), {
-    set text(font: "Cascadia Mono", size: 0.85em, weight: 340)
+    set text(font: "DejaVu Sans Mono", size: 0.85em, weight: 340)
     text(fn.name)
     "("
     let inline-args = fn.args.len() < 5
@@ -130,11 +130,11 @@
   block(breakable: style-args.break-param-descriptions, fill: rgb("#d8dbed44"), width: 100%, inset: (x: 0.5em, y: 0.7em),
     stack(dir: ltr, spacing: 1.2em,
       if style-args.enable-cross-references [
-        #set text(font: "Cascadia Mono", size: 0.85em, weight: 340)
+        #set text(font: "DejaVu Sans Mono", size: 0.85em, weight: 340)
         #text(var.name)
         #label(style-args.label-prefix + var.name)
       ] else [
-        #set text(font: "Cascadia Mono", size: 0.85em, weight: 340)
+        #set text(font: "DejaVu Sans Mono", size: 0.85em, weight: 340)
         #text(var.name)
       ],
       type

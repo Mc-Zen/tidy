@@ -1,6 +1,6 @@
 
 
-// Matches Typst docstring for a function declaration. Example:
+// Matches Typst doc-comment for a function declaration. Example:
 // 
 // // This function does something
 // //
@@ -326,7 +326,7 @@
   )
 }
 
-/// Parse a function docstring that has been located in the source code with 
+/// Parse a function doc-comment that has been located in the source code with 
 /// given match. 
 /// 
 /// The return value is a dictionary with the keys

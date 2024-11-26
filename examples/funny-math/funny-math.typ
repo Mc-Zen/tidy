@@ -5,9 +5,11 @@
 ///
 /// See also @@funny-sqrt() for computing square roots. 
 ///
-/// - phi (float): Angle for the sine function. 
 /// -> float
-#let funny-sin(phi) = { calc.sqrt(phi) }
+#let funny-sin(
+  /// Angle for the sine function. -> float
+  phi
+) = { calc.sqrt(phi) }
 
 
 
@@ -16,10 +18,17 @@
 ///
 ///
 /// === Example
-/// #example(`funny-math.funny-sqrt(12)`)
+/// ```example
+/// #funny-math.funny-sqrt(12)
+/// ```
 ///
 ///
-/// - x (float, int): Argument to take the square root of. For $x=0$, the result is $0$:
-///      #example(`funny-math.funny-sqrt(0)`)
 /// -> float
-#let funny-sqrt(x) = { calc.sqrt(x) }
+#let funny-sqrt(
+  /// Argument to take the square root of. For $x=0$, the result is $0$: 
+  /// ```example
+  /// #funny-math.funny-sqrt(0)
+  /// ```
+  /// -> float | x
+  x
+) = { calc.sqrt(x) }

@@ -2,10 +2,13 @@
 /// Construct a complex number of the form
 ///  $ z= a + i b in CC. $
 ///
-/// - real (float): Real part of the complex number. 
-/// - imag (float): Imaginary part of the complex number. 
 /// -> float
-#let complex(real, imag) = { 
+#let complex(
+  /// Real part of the complex number. -> float
+  real, 
+  /// Imaginary part of the complex number. -> float
+  imag
+) = { 
   (radius * calc.cos(phi), radius * calc.sin(phi))
 }
 
@@ -13,9 +16,12 @@
 /// Construct a complex number from polar coordinates: @@funny-sqrt()
 ///  $ z= r e^(i phi) in CC. $
 /// #image-polar
-/// - phi (float): Angle to the real axis. 
-/// - radius (float): Radius (euclidian distance to the origin). 
 /// -> float
-#let polar(phi, radius: 1.0) = { 
+#let polar(
+  /// Angle to the real axis. -> float
+  phi, 
+  /// Radius (euclidian distance to the origin). -> float
+  radius: 1.0
+) = { 
   (radius * calc.cos(phi), radius * calc.sin(phi))
 }

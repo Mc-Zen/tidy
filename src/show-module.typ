@@ -60,7 +60,7 @@
   /// -> auto | none | function
   sort-functions: auto,
 
-  /// Whether to run docstring tests. 
+  /// Whether to run doc-comment tests. 
   /// -> boolean
   enable-tests: true,
 
@@ -109,7 +109,7 @@
   
   
   let eval-scope = (
-    // Predefined functions that may be called by the user in docstring code
+    // Predefined functions that may be called by the user in doc-comment code
     example: style-functions.show-example.with(
       inherited-scope: module-doc.scope,
       preamble: module-doc.preamble

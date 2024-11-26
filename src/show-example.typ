@@ -189,6 +189,11 @@
 
 /// Adds the two languages `example` and `examplec` to `raw` that can be used
 /// to render code examples side-by-side with an automatic preview. 
+/// 
+/// This function is intended to be used in a show rule
+/// ```typ
+/// #show: render-example
+/// ```
 #let render-examples(
   /// Body to apply the show rule to. 
   /// -> any
@@ -198,7 +203,7 @@
   /// -> dictionary
   scope: (:), 
 
-  /// Layout function which is passed to code, the preview and all other options, 
+  /// Layout function which is passed the code, the preview and all other options, 
   /// see @show-example.options. 
   /// -> function
   layout: default-layout-example

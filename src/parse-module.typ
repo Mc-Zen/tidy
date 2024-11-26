@@ -8,7 +8,7 @@
     let docs = function-docs.at(i)
     if not "parent" in docs { continue }
     
-    let parent = docs.parent
+    let parent = docs.at("parent", default: none)
     if parent == none { continue }
     
     let parent-docs = function-docs.find(x => x.name == parent.name)
@@ -40,7 +40,12 @@
 }
 
 
-#let old-parse(content, label-prefix: "", require-all-parameters: false, enable-curried-functions: true) = {
+#let old-parse(
+  content, 
+  label-prefix: "", 
+  require-all-parameters: false,
+  enable-curried-functions: true
+) = {
   
   let parse-info = (
     label-prefix: label-prefix,
@@ -63,7 +68,8 @@
           variable-docs.push(doc)
         } else {
           doc.parent = parent-info
-          doc.remove("type")
+          if "type" in doc { doc.remove("type") }
+          doc.args = (:)
           function-docs.push(doc)
         }
       } else {
@@ -82,7 +88,7 @@
 }
 
 
-/// Parse the docstrings of a typst module. This function returns a dictionary 
+/// Parse the doc-comments of a typst module. This function returns a dictionary 
 /// with the keys
 /// - `name`: The module name as a string.
 /// - `functions`: A list of function documentations as dictionaries.
@@ -92,7 +98,7 @@
 /// 
 /// The function documentation dictionaries contain the keys
 /// - `name`: The function name.
-/// - `description`: The function's docstring description.
+/// - `description`: The function's description.
 /// - `args`: A dictionary of info objects for each function argument.
 ///
 /// These again are dictionaries with the keys
@@ -131,11 +137,13 @@
   /// -> str
   preamble: "",
 
+  /// Whether to enable the detection of curried functions. 
   /// -> boolean
   enable-curried-functions: true,
 
+  /// Whether to use the old documentation syntax. 
   /// -> boolean
-  old-parser: true
+  old-syntax: false
 ) = {
   if label-prefix == auto { label-prefix = name + "-" }
   
@@ -145,15 +153,15 @@
     scope: scope,
     preamble: preamble
   )
-  if old-parser {
+  if old-syntax {
     docs += old-parse(content, require-all-parameters: require-all-parameters, label-prefix: label-prefix, enable-curried-functions: enable-curried-functions)
   } else {
     docs += new-parser.parse(content)
   }
   // TODO
-  // if enable-curried-functions {
-  //   function-docs = resolve-parents(function-docs)
-  // }
+  if enable-curried-functions {
+    docs.functions = resolve-parents(docs.functions)
+  }
 
   
   return docs
