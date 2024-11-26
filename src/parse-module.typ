@@ -131,9 +131,11 @@
   /// -> str
   preamble: "",
 
+  /// Whether to enable the detection of curried functions. 
   /// -> boolean
   enable-curried-functions: true,
 
+  /// Whether to use the old documentation syntax. 
   /// -> boolean
   old-syntax: false
 ) = {
