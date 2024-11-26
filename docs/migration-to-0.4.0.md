@@ -10,6 +10,7 @@ Below you can find an overview over the breaking changes that the new syntax int
 - [Documentation of function arguments](#documentation-of-function-arguments)
 - [Cross-references](#cross-references)
 - [Example previews](#example-previews) (not strictly a breaking change)
+- [Doc-comment tests](#doc-comment-tests)
 
 
 ### Documentation of function arguments
@@ -127,3 +128,6 @@ The output format of the example can be customized through the parameter `layout
 ````typ
 #show: render-examples.with(layout: (code, preview) => grid(code, preview))
 ````
+
+## Doc-comment tests
+Doc-comment tests can still be used as before but the short-hand syntax with `>>>` is no longer supported with the new documentation syntax. With `old-parser: true`, it is still available. 

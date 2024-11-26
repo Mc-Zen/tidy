@@ -37,10 +37,10 @@
 
 
 
-/// Implementation for docstring tests. All tests are run immediately. Fails if
+/// Implementation for doc-comment tests. All tests are run immediately. Fails if
 ///  at least one test did not succeed. 
 ///
-/// This function is made available in all docstrings under the name 'test'. 
+/// This function is made available in all doc-comments under the name 'test'. 
 #let test(
 
   /// Tests to run in form of raw objects. 

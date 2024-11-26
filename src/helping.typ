@@ -112,7 +112,7 @@
       )
           
       let eval-scope = (
-        // Predefined functions that may be called by the user in docstring code
+        // Predefined functions that may be called by the user in doc-comment code
         example: style-functions.show-example.with(
           inherited-scope: module.scope
         ),

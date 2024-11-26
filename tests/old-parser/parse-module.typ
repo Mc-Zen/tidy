@@ -143,7 +143,7 @@ assert.eq(result.functions.at(0).return-types, none)
 // }
 
 
-// Ignore interrupted docstring
+// Ignore interrupted doc-comment
 #{
   let a = ```
   /// Func

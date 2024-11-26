@@ -10,10 +10,12 @@
 
 
 
-**tidy** is a package that generates documentation directly in [Typst](https://typst.app/) for your Typst modules. It parses docstring comments similar to javadoc and co. and can be used to easily build a beautiful reference section for the parsed module.  Within the docstring you may use (almost) any Typst syntax − so markup, equations and even figures are no problem!
+**tidy** is a package that generates documentation directly in [Typst](https://typst.app/) for your Typst modules. It parses doc-comments similar to javadoc and co. and can be used to easily build a beautiful reference section for the parsed module.  Within the doc-comments you may use (almost) any Typst syntax − so markup, equations and even figures are no problem!
 
 > [!IMPORTANT]
 > In version 0.4.0, the default documentation syntax has changed. You can take a look at the [migration guide](docs/migration-to-0.4.0.md) or revert to the old syntax with `tidy.show-module(old-syntax: true, ...)`. 
+>
+> You can still find the documentation for the old syntax in the [0.3.0 user guide](https://github.com/Mc-Zen/tidy/releases/download/v0.3.0/tidy-guide.pdf). 
 
 Features:
 - **Customizable** output styles. 
@@ -21,14 +23,14 @@ Features:
 - **Annotate types** of parameters and return values.
 - Automatically read off default values for named parameters.
 - [**Help** feature](#generate-a-help-command-for-you-package) for your package. 
-- [Docstring tests](#docstring-tests). 
+- [Doc-comment tests](#doc-comment-tests). 
 
 
-The [guide][guide] fully describes the usage of this module and defines the format for the docstrings. 
+The [guide][guide] fully describes the usage of this module and defines documentation syntax. 
 
 ## Usage
 
-Using `tidy` is as simple as writing some docstrings and calling:
+Using `tidy` is as simple as writing some doc-comments and calling:
 ```typ
 #import "@preview/tidy:0.3.0"
 
@@ -66,7 +68,7 @@ A full example on how to use this module for your own package (maybe even consis
 
 ## Access user-defined functions and images
 
-The code in the docstrings is evaluated via `eval()`. In order to access user-defined functions and images, you can make use of the `scope` argument of `tidy.parse-module()`:
+The code in the doc-comments is evaluated via `eval()`. In order to access user-defined functions and images, you can make use of the `scope` argument of `tidy.parse-module()`:
 
 ```typ
 #{
@@ -80,10 +82,10 @@ The code in the docstrings is evaluated via `eval()`. In order to access user-de
     )
 }
 ```
-The docstrings in `my-module.typ` may now access the image with `#img` and can call any function or variable from `my-module` in the style of `#my-module.my-function()`. This makes rendering examples right in the docstrings as easy as a breeze!
+The doc-comments in `my-module.typ` may now access the image with `#img` and can call any function or variable from `my-module` in the style of `#my-module.my-function()`. This makes rendering examples right in the doc-comments as easy as a breeze!
 
 ## Generate a help command for you package
-With **tidy**, you can add a help command to you package that allows users to obtain the documentation of a specific definition or parameter right in the document. This is similar to CLI-style help commands. If you have already written docstrings for your package, it is quite low-effort to add this feature. Once set up, the end-user can use it like this:
+With **tidy**, you can add a help command to you package that allows users to obtain the documentation of a specific definition or parameter right in the document. This is similar to CLI-style help commands. If you have already written doc-comments for your package, it is quite low-effort to add this feature. Once set up, the end-user can use it like this:
 
 ```typ
 // happily coding, but how do I use this one complex function again?
@@ -94,8 +96,8 @@ With **tidy**, you can add a help command to you package that allows users to ob
 
 This will print the documentation of `func` directly into the document — no need to look it up in a manual. Read up in the [guide][guide] for setup instructions. 
 
-## Docstring tests
-It is possible to add simple docstring tests — assertions that will be run when the documentation is generated. This is useful if you want to keep small tests and documentation in one place. 
+## Doc-comment tests
+It is possible to add simple doc-tests — assertions that will be run when the documentation is generated. This is useful if you want to keep small tests and documentation in one place. 
 ```typ
 /// #test(
 ///   `num.my-square(2) == 4`,
@@ -109,7 +111,7 @@ It is possible to add simple docstring tests — assertions that will be run whe
 /// >>> my-square(4) == 16
 #let my-square(n) = n * n
 ``` -->
-A few test assertion functions are available to improve readability, simplicity, and error messages. Currently, these are `eq(a, b)` for equality tests, `ne(a, b)` for inequality tests and `approx(a, b, eps: 1e-10)` for floating point comparisons. These assertion helper functions are always available within docstring tests. 
+A few test assertion functions are available to improve readability, simplicity, and error messages. Currently, these are `eq(a, b)` for equality tests, `ne(a, b)` for inequality tests and `approx(a, b, eps: 1e-10)` for floating point comparisons. These assertion helper functions are always available within doc-comment tests. 
 
 
 ## Changelog
@@ -117,9 +119,10 @@ A few test assertion functions are available to improve readability, simplicity,
 ### v0.4.0
 _Major redesign of the documentation syntax_
 - New features
-  - New parser for the new documentation syntax. The old parser is still available and can be activated via `tidy.show-module(old-syntax: true)`. You can find a [migration guide](docs/migration-to-0.4.0.md) for adopting the new syntax. 
-  - Cross-references to arguments
-- Breaking changes
+  - New parser for the new documentation syntax. The old parser is still available and can be activated via `tidy.show-module(old-syntax: true)`. There is a [migration guide](docs/migration-to-0.4.0.md) for adopting the new syntax. 
+  - Cross-references to function arguments.
+  - Support for detecting _curried functions_, i.e., function aliases with prepended arguments using the `.with()` function. 
+  
 
 ### v0.3.0
 _Adds a help feature and more options_
@@ -137,9 +140,9 @@ _Adds a help feature and more options_
 
 ### v0.2.0
 - New features:
-  - Add executable examples to docstrings. 
+  - Add executable examples to doc-comments. 
   - Documentation for variables (as well as functions). 
-  - Docstring tests. 
+  - Doc-tests. 
   - Rainbow-colored types `color` and `gradient`. 
 - Improvements:
   - Allow customization of cross-references through `show-reference()`. 

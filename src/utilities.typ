@@ -1,10 +1,10 @@
 
-// Matches docstring references of the form `@@otherfunc` or `@@otherfunc()`. 
+// Matches doc-comment references of the form `@@otherfunc` or `@@otherfunc()`. 
 #let reference-matcher = regex(`@@([\w\d\-_\)\(]+)`.text)
 
 
 /// Take a documentation string (for example a function or parameter 
-/// description) and process docstring cross-references (starting with `@@`), 
+/// description) and process doc-comment cross-references (starting with `@@`), 
 /// turning them into links. 
 #let process-references(
 
@@ -27,12 +27,12 @@
 
 
 
-/// Evaluate a docstring description (i.e., a function or parameter description)
+/// Evaluate a doc-comment description (i.e., a function or parameter description)
 /// while processing cross-references (@@...) and providing the scope to the 
 /// evaluation context. 
 #let eval-docstring(
 
-  /// Docstring to evaluate. -> str
+  /// Doc-comment to evaluate. -> str
   docstring, 
   
   /// Object holding information for cross-reference processing and evaluation scope. 

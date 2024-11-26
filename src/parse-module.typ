@@ -82,7 +82,7 @@
 }
 
 
-/// Parse the docstrings of a typst module. This function returns a dictionary 
+/// Parse the doc-comments of a typst module. This function returns a dictionary 
 /// with the keys
 /// - `name`: The module name as a string.
 /// - `functions`: A list of function documentations as dictionaries.
@@ -92,7 +92,7 @@
 /// 
 /// The function documentation dictionaries contain the keys
 /// - `name`: The function name.
-/// - `description`: The function's docstring description.
+/// - `description`: The function's description.
 /// - `args`: A dictionary of info objects for each function argument.
 ///
 /// These again are dictionaries with the keys
