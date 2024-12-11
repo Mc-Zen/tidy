@@ -33,7 +33,7 @@ The [guide][guide] fully describes the usage of this module and defines document
 
 Using `tidy` is as simple as writing some doc-comments and calling:
 ```typ
-#import "@preview/tidy:0.3.0"
+#import "@preview/tidy:0.4.0"
 
 #let docs = tidy.parse-module(read("my-module.typ"))
 #tidy.show-module(docs, style: tidy.styles.default)
