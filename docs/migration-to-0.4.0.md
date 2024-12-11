@@ -1,7 +1,7 @@
 # Migration guide from 0.3.0 to 0.4.0 (new parser)
 
 
-If you choose to use the new documentation parser, this guide helps you with migrating your existing documentation to the new documentation syntax. Of course, you can also keep using the old syntax which will still be around for some time. It can be activated via `tidy.show-module(old-syntax: true, ...)`. 
+If you choose to use the new documentation parser, this guide helps you with migrating your existing documentation to the new documentation syntax. Of course, you can also keep using the old syntax which will still be around for some time. It can be activated via `tidy.parse-module(old-syntax: true, ...)`. 
 
 ## Breaking changes
 
