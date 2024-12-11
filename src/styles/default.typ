@@ -96,15 +96,15 @@
     if not inline-args { "\n  " }
     let items = ()
     let args = fn.args
-    for (name, description) in fn.args {
+    for (name, info) in fn.args {
       if style-args.omit-private-parameters and name.starts-with("_") { 
         continue
       }
       let types 
-      if "types" in description {
-        types = ": " + description.types.map(x => show-type(x, style-args: style-args)).join(" ")
+      if "types" in info {
+        types = ": " + info.types.map(x => show-type(x, style-args: style-args)).join(" ")
       }
-      if style-args.enable-cross-references and not (description.description == "" and style-args.omit-empty-param-descriptions) {
+      if style-args.enable-cross-references and not (info.at("description", default: "") == "" and style-args.omit-empty-param-descriptions) {
         name = link(label(style-args.label-prefix + fn.name + "." + name.trim(".")), name)
       }
       items.push(name + types)
