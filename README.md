@@ -13,7 +13,7 @@
 **tidy** is a package that generates documentation directly in [Typst](https://typst.app/) for your Typst modules. It parses doc-comments and can be used to easily build a reference section for a module.  Doc-comments use Typst syntax − so markup, equations and even figures are no problem!
 
 > [!IMPORTANT]
-> In version 0.4.0, the default documentation syntax has changed. You can take a look at the [migration guide](docs/migration-to-0.4.0.md) or revert to the old syntax with `tidy.show-module(old-syntax: true, ...)`. 
+> In version 0.4.0, the default documentation syntax has changed. You can take a look at the [migration guide][migration guide] or revert to the old syntax with `tidy.show-module(old-syntax: true, ...)`. 
 >
 > You can still find the documentation for the old syntax in the [0.3.0 user guide](https://github.com/Mc-Zen/tidy/releases/download/v0.3.0/tidy-guide.pdf). 
 
@@ -120,7 +120,7 @@ A few test assertion functions are available to improve readability, simplicity,
 ### v0.4.0
 _Major redesign of the documentation syntax_
 - New features
-  - New parser for the new documentation syntax. The old parser is still available and can be activated via `tidy.show-module(old-syntax: true)`. There is a [migration guide](docs/migration-to-0.4.0.md) for adopting the new syntax. 
+  - New parser for the new documentation syntax. The old parser is still available and can be activated via `tidy.show-module(old-syntax: true)`. There is a [migration guide][migration guide] for adopting the new syntax. 
   - Cross-references to function arguments.
   - Support for detecting _curried functions_, i.e., function aliases with prepended arguments using the `.with()` function. 
   
@@ -161,3 +161,5 @@ _Adds a help feature and more options_
 _Initial Release_
 
 [guide]: https://github.com/Mc-Zen/tidy/releases/download/v0.4.0/tidy-guide.pdf
+
+[migration guide]: https://github.com/Mc-Zen/tidy/tree/v0.4.0/docs/migration-to-0.4.0.md
