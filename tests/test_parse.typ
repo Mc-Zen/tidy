@@ -4,6 +4,7 @@
 
 #let eval-string(string) = eval-docstring(string, (scope: (:)))
 
+#let parse-module = parse-module.with(old-syntax: true)
 
 #{
   let code = ```
@@ -142,7 +143,7 @@ assert.eq(result.functions.at(0).return-types, none)
 // }
 
 
-// Ignore interrupted docstring
+// Ignore interrupted doc-comment
 #{
   let a = ```
   /// Func

@@ -43,15 +43,18 @@
     let inline-args = fn.args.len() < 5
     if not inline-args { "\n  " }
     let items = ()
-    for (arg-name, info) in fn.args {
-      if style-args.omit-private-parameters and arg-name.starts-with("_") { 
+    for (name, info) in fn.args {
+      if style-args.omit-private-parameters and name.starts-with("_") { 
         continue
       }
       let types 
       if "types" in info {
         types = ": " + info.types.map(x => show-type(x)).join(" ")
       }
-      items.push(box(arg-name + types))
+      if style-args.enable-cross-references and not (info.at("description", default: "") == "" and style-args.omit-empty-param-descriptions) {
+        name = link(label(style-args.label-prefix + fn.name + "." + name.trim(".")), name)
+      }
+      items.push(box(name + types))
     }
     items.join( if inline-args {", "} else { ",\n  "})
     if not inline-args { "\n" } + ")"
@@ -76,7 +79,7 @@
     #[
       #set text(fill: fn-color)
       #raw(name, lang: none) 
-      #if function-name != none and style-args.enable-cross-references { label(function-name + "." + name) }
+      #if function-name != none and style-args.enable-cross-references { label(function-name + "." + name.trim(".")) }
     ]
     (#h(-.2em)
     #types.map(x => (style-args.style.show-type)(x)).join([ #text("or",size:.6em) ])

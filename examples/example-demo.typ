@@ -22,9 +22,12 @@
 ///  ```/// #example(`#example-demo.flashy(map: color.map.crest)[Very extremely long examples might maybe require the need of vertical layouting]`, dir: ttb)```
 ///  #example(`#example-demo.flashy(map: color.map.crest)[Very extremely long examples might maybe require the need of vertical layouting]`, dir: ttb)
 ///
-/// - body (content): 
-/// - map (array): 
 /// -> content
-#let flashy(body, map: color.map.spectral) = highlight(
+#let flashy(
+    /// -> content
+    body, 
+    /// -> array 
+    map: color.map.spectral
+) = highlight(
     body, fill: gradient.linear(..map)
 )

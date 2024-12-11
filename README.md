@@ -2,27 +2,36 @@
 # Tidy
 *Keep it tidy.*
 
-[![Typst Package](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2FMc-Zen%2Ftidy%2Fmain%2Ftypst.toml&query=%24.package.version&prefix=v&logo=typst&label=package&color=239DAD)](https://typst.app/universe/package/tidy)
+[![Typst Package](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2FMc-Zen%2Ftidy%2Fv0.4.0%2Ftypst.toml&query=%24.package.version&prefix=v&logo=typst&label=package&color=239DAD)](https://typst.app/universe/package/tidy)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue)](https://github.com/Mc-Zen/tidy/blob/main/LICENSE)
+[![Test Status](https://github.com/Mc-Zen/tidy/actions/workflows/run_tests.yml/badge.svg)](https://github.com/Mc-Zen/tidy/actions/workflows/run_tests.yml)
 [![User Manual](https://img.shields.io/badge/manual-.pdf-purple)][guide]
 
 
-**tidy** is a package that generates documentation directly in [Typst](https://typst.app/) for your Typst modules. It parses docstring comments similar to javadoc and co. and can be used to easily build a beautiful reference section for the parsed module.  Within the docstring you may use (almost) any Typst syntax − so markup, equations and even figures are no problem!
+
+
+**tidy** is a package that generates documentation directly in [Typst](https://typst.app/) for your Typst modules. It parses doc-comments and can be used to easily build a reference section for a module.  Doc-comments use Typst syntax − so markup, equations and even figures are no problem!
+
+> [!IMPORTANT]
+> In version 0.4.0, the default documentation syntax has changed. You can take a look at the [migration guide][migration guide] or revert to the old syntax with `tidy.show-module(old-syntax: true, ...)`. 
+>
+> You can still find the documentation for the old syntax in the [0.3.0 user guide](https://github.com/Mc-Zen/tidy/releases/download/v0.3.0/tidy-guide.pdf). 
 
 Features:
 - **Customizable** output styles. 
-- Automatically [**render code examples**](#example). 
+- Automatically [**preview code examples**](#example). 
 - **Annotate types** of parameters and return values.
+- **Cross-references** to definitions and function parameters. 
 - Automatically read off default values for named parameters.
 - [**Help** feature](#generate-a-help-command-for-you-package) for your package. 
-- [Docstring tests](#docstring-tests). 
+- [Doc-tests](#doc-tests). 
 
 
-The [guide][guide] fully describes the usage of this module and defines the format for the docstrings. 
+The [guide][guide] fully describes the usage of this module and defines documentation syntax. 
 
 ## Usage
 
-Using `tidy` is as simple as writing some docstrings and calling:
+Using `tidy` is as simple as writing some doc-comments and calling:
 ```typ
 #import "@preview/tidy:0.3.0"
 
@@ -30,7 +39,7 @@ Using `tidy` is as simple as writing some docstrings and calling:
 #tidy.show-module(docs, style: tidy.styles.default)
 ```
 
-The available predefined styles are currenty `tidy.styles.default` and `tidy.styles.minimal`. Custom styles can be added by hand (take a look at the [guide][guide]). 
+The available predefined styles are currently `tidy.styles.default` and `tidy.styles.minimal`. Custom styles can be added by hand (take a look at the [user guide][guide]). 
 
 ## Example
 
@@ -39,23 +48,28 @@ A full example on how to use this module for your own package (maybe even consis
 ```typ
 /// This function computes the cardinal sine, $sinc(x)=sin(x)/x$. 
 ///
-/// #example(`#sinc(0)`, mode: "markup")
+/// ```example
+/// #sinc(0)
+/// ```
 ///
-/// - x (int, float): The argument for the cardinal sine function. 
 /// -> float
-#let sinc(x) = if x == 0 {1} else {calc.sin(x) / x}
+#let sinc(
+  /// The argument for the cardinal sine function. 
+  /// -> int | float
+  x
+) = if x == 0 {1} else {calc.sin(x) / x}
 ```
 
 **tidy** turns this into:
 
-<h3 align="center">
+<div align="center">
   <img alt="Tidy example output" src="docs/images/sincx-docs.svg" style="max-width: 100%; padding: 10px 10px; box-shadow: 1pt 1pt 10pt 0pt #AAAAAA; border-radius: 4pt; box-sizing: border-box; background: white">
-</h3>
+</div>
 
 
 ## Access user-defined functions and images
 
-The code in the docstrings is evaluated via `eval()`. In order to access user-defined functions and images, you can make use of the `scope` argument of `tidy.parse-module()`:
+The code in the doc-comments is evaluated through the [`eval`](https://typst.app/docs/reference/foundations/eval/) function. In order to access user-defined functions and images, you can make use of the `scope` argument of `tidy.parse-module()`:
 
 ```typ
 #{
@@ -69,10 +83,10 @@ The code in the docstrings is evaluated via `eval()`. In order to access user-de
     )
 }
 ```
-The docstrings in `my-module.typ` may now access the image with `#img` and can call any function or variable from `my-module` in the style of `#my-module.my-function()`. This makes rendering examples right in the docstrings as easy as a breeze!
+The doc-comments in `my-module.typ` may now access the image with `#img` and can call any function or variable from `my-module` in the style of `#my-module.my-function()`. This makes rendering examples right in the doc-comments as easy as a breeze!
 
 ## Generate a help command for you package
-With **tidy**, you can add a help command to you package that allows users to obtain the documentation of a specific definition or parameter right in the document. This is similar to CLI-style help commands. If you have already written docstrings for your package, it is quite low-effort to add this feature. Once set up, the end-user can use it like this:
+With **tidy**, you can add a help command to you package that allows users to obtain the documentation of a specific definition or parameter right in the document. This is similar to CLI-style help commands. If you have already written doc-comments for your package, it is quite low-effort to add this feature. Once set up, the end-user can use it like this:
 
 ```typ
 // happily coding, but how do I use this one complex function again?
@@ -81,10 +95,10 @@ With **tidy**, you can add a help command to you package that allows users to ob
 #mypackage.help("func(param1)") // print only parameter description of param1
 ```
 
-This will print the documentation of `func` directly into the document — no need to look it up in a manual. Read up in the [guide][guide] for setup instructions. 
+This will print the documentation of `func` directly into the document — no need to look it up in a manual. Read up on setup instructions in the [user guide][guide]. 
 
-## Docstring tests
-It is possible to add simple docstring tests — assertions that will be run when the documentation is generated. This is useful if you want to keep small tests and documentation in one place. 
+## Doc-tests
+It is possible to add simple doc-tests — assertions that will be run when the documentation is generated. This is useful if you want to keep small tests and documentation in one place. 
 ```typ
 /// #test(
 ///   `num.my-square(2) == 4`,
@@ -92,18 +106,27 @@ It is possible to add simple docstring tests — assertions that will be run whe
 /// )
 #let my-square(n) = n * n
 ```
-With the short-hand syntax, a unfulfilled assertion will even print the line number of the failed test:
+<!-- With the short-hand syntax, a unfulfilled assertion will even print the line number of the failed test:
 ```typ
 /// >>> my-square(2) == 4
 /// >>> my-square(4) == 16
 #let my-square(n) = n * n
-```
-A few test assertion functions are available to improve readability, simplicity, and error messages. Currently, these are `eq(a, b)` for equality tests, `ne(a, b)` for inequality tests and `approx(a, b, eps: 1e-10)` for floating point comparisons. These assertion helper functions are always available within docstring tests (with both `test()` and `>>>` syntax). 
+``` -->
+A few test assertion functions are available to improve readability, simplicity, and error messages. Currently, these are `eq(a, b)` for equality tests, `ne(a, b)` for inequality tests and `approx(a, b, eps: 1e-10)` for floating point comparisons. These assertion helper functions are always available within doc-comment tests. 
 
 
 ## Changelog
 
+### v0.4.0
+_Major redesign of the documentation syntax_
+- New features
+  - New parser for the new documentation syntax. The old parser is still available and can be activated via `tidy.show-module(old-syntax: true)`. There is a [migration guide][migration guide] for adopting the new syntax. 
+  - Cross-references to function arguments.
+  - Support for detecting _curried functions_, i.e., function aliases with prepended arguments using the `.with()` function. 
+  
+
 ### v0.3.0
+_Adds a help feature and more options_
 - New features:
   - Help feature. 
   - `preamble` option for examples (e.g., to add `import` statements). 
@@ -118,9 +141,9 @@ A few test assertion functions are available to improve readability, simplicity,
 
 ### v0.2.0
 - New features:
-  - Add executable examples to docstrings. 
+  - Add executable examples to doc-comments. 
   - Documentation for variables (as well as functions). 
-  - Docstring tests. 
+  - Doc-tests. 
   - Rainbow-colored types `color` and `gradient`. 
 - Improvements:
   - Allow customization of cross-references through `show-reference()`. 
@@ -135,6 +158,8 @@ A few test assertion functions are available to improve readability, simplicity,
 
 ### v0.1.0
 
-Initial Release.
+_Initial Release_
 
-[guide]: https://github.com/Mc-Zen/tidy/releases/download/v0.3.0/tidy-guide.pdf
+[guide]: https://github.com/Mc-Zen/tidy/releases/download/v0.4.0/tidy-guide.pdf
+
+[migration guide]: https://github.com/Mc-Zen/tidy/tree/v0.4.0/docs/migration-to-0.4.0.md

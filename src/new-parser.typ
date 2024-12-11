@@ -104,8 +104,8 @@
 #let parse-description-and-types(lines, label-prefix: "", first-line-number: 0) = {
 
   let description = lines
-    .enumerate(start: first-line-number)
-    .map(eval-doc-comment-test.with(label-prefix: label-prefix))
+    // .enumerate(start: first-line-number)
+    // .map(eval-doc-comment-test.with(label-prefix: label-prefix))
     .join("\n")
     
   if description == none { description = "" }
@@ -113,7 +113,7 @@
   let types = none
   if description.contains("->") {
     let parts = description.split("->")
-    types = parts.last().replace(",", "|").split("|").map(str.trim)
+    types = parts.last().split("|").map(str.trim)
     description = parts.slice(0, -1).join("->")
   }
   
@@ -214,10 +214,10 @@
     let (args, brace-level, processed-chars) = parse-argument-list(state.unfinished-param)
     if brace-level == -1 { // parentheses are already closed on this line
       state.state = "finished"
-      let curry = state.unfinished-param.slice(processed-chars).match(curry-matcher)
-      if curry != none {
-        state.curry = (name: curry.captures.first(), rest: state.unfinished-param.slice(processed-chars + curry.end))
-      }
+      // let curry = state.unfinished-param.slice(processed-chars).match(curry-matcher)
+      // if curry != none {
+      //   state.curry = (name: curry.captures.first(), rest: state.unfinished-param.slice(processed-chars + curry.end))
+      // }
     }
     if args.len() > 0 and (state.unfinished-param.ends-with(",") or state.state == "finished") {
       state.params.push((name: args.first(), desc-lines: state.unmatched-description))
@@ -229,21 +229,35 @@
   return state
 }
 
-#{
-  let state = (
-    state: "running", 
-    params: (), 
-    unmatched-description: (),
-    unfinished-param: ""
-  )
-  let lines = ("/// asd", "named: 3,", "/// -> int", "pos", ") = asd.with()", "").rev()
-  // let lines = ("/// asd", "named: (", "fill: white, ", "cap: \"butt\")", ")").rev()
-  while state.state == "running" and lines.len() > 0 {
-    state = parameter-parser(state, lines.pop())
-  }
-  let kstate = state
-}
+// #{
+//   let state = (
+//     state: "running", 
+//     params: (), 
+//     unmatched-description: (),
+//     unfinished-param: ""
+//   )
+//   let lines = ("/// asd", "named: 3,", "/// -> int", "pos", ") = asd.with()", "").rev()
+//   // let lines = ("/// asd", "named: (", "fill: white, ", "cap: \"butt\")", ")").rev()
+//   while state.state == "running" and lines.len() > 0 {
+//     state = parameter-parser(state, lines.pop())
+//   }
+//   let kstate = state
+// }
 
+#let process-curry-info(info) = {
+  let pos = info.args
+    .filter(x => x.name.len() == 1)
+    .map(x => x.name.at(0))
+  let named = info.args
+    .filter(x => x.name.len() == 2)
+    .map(x => x.name).to-dict()
+
+  (
+    name: info.name,
+    pos: pos,
+    named: named
+  )
+}
 
 
 #let parse(src) = {
@@ -278,18 +292,19 @@
         finished-definition = true
         curry-info.args = param-parser.params
         param-parser = param-parser-default
+        args = ()
       } else {
         args = param-parser.params
         if "curry" in param-parser {
-          let curry = param-parser.curry
-          curry-info = (name: curry.name)
-          param-parser = param-parser-default
-          param-parser.state = "running"
-          param-parser = parameter-parser(param-parser, curry.rest)
-          if param-parser.state == "finished" { 
-            finished-definition = true
-            param-parser = param-parser-default
-          }
+          // let curry = param-parser.curry
+          // curry-info = (name: curry.name)
+          // param-parser = param-parser-default
+          // param-parser.state = "running"
+          // param-parser = parameter-parser(param-parser, curry.rest)
+          // if param-parser.state == "finished" { 
+          //   finished-definition = true
+          //   param-parser = param-parser-default
+          // }
         } else {
           finished-definition = true
           param-parser = param-parser-default
@@ -305,7 +320,7 @@
       if name != none {
         definitions.push((name: name, description: desc-lines, args: args))
         if curry-info != none {
-          definitions.at(-1).curry-info = curry-info
+          definitions.at(-1).parent = process-curry-info(curry-info)
           curry-info = none
         }
       }
@@ -331,9 +346,17 @@
           if match.captures.at(1) != "" { // it's a function
             param-parser.state = "running"
             param-parser = parameter-parser(param-parser, line.slice(match.end))
-          } else { // it's a variable
+          } else { // it's a variable or a function alias
             args = none
             finished-definition = true
+            let p = line.slice(match.end)
+                  
+            let curry = line.slice(match.end).match(curry-matcher)
+            if curry != none {
+              curry-info = (name: curry.captures.first())
+              param-parser = parameter-parser(param-parser, line.slice(match.end + curry.end))
+              // param-parser.curry = (name: curry.captures.first(), rest: state.unfinished-param.slice(processed-chars + curry.end))
+            }
           }
         }
         
@@ -357,30 +380,30 @@
     variables: definitions.filter(x => "args" not in x),
   )
 }
-#{
+// #{
   
 
-  let src = ```
-  ///Description
-  let func(
-    pos, // some comment
+//   let src = ```
+//   ///Description
+//   let func(
+//     pos, // some comment
     
-    named: 2 // another comment
-  )
-  ```.text
+//     named: 2 // another comment
+//   )
+//   ```.text
 
-  assert.eq(
-    parse(src).functions,
-    (
-      (
-        name: "func",
-        description: "Description",
-        args: (
-          pos: (description: ""),
-          named: (description: "", default: "2"),
-        ),
-        return-types: none
-      ),
-    )
-  )
-}
+//   assert.eq(
+//     parse(src).functions,
+//     (
+//       (
+//         name: "func",
+//         description: "Description",
+//         args: (
+//           pos: (description: ""),
+//           named: (description: "", default: "2"),
+//         ),
+//         return-types: none
+//       ),
+//     )
+//   )
+// }

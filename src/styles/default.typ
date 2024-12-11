@@ -96,13 +96,16 @@
     if not inline-args { "\n  " }
     let items = ()
     let args = fn.args
-    for (name, description) in fn.args {
+    for (name, info) in fn.args {
       if style-args.omit-private-parameters and name.starts-with("_") { 
         continue
       }
       let types 
-      if "types" in description {
-        types = ": " + description.types.map(x => show-type(x, style-args: style-args)).join(" ")
+      if "types" in info {
+        types = ": " + info.types.map(x => show-type(x, style-args: style-args)).join(" ")
+      }
+      if style-args.enable-cross-references and not (info.at("description", default: "") == "" and style-args.omit-empty-param-descriptions) {
+        name = link(label(style-args.label-prefix + fn.name + "." + name.trim(".")), name)
       }
       items.push(name + types)
     }
@@ -127,7 +130,7 @@
   breakable: style-args.break-param-descriptions,
   [
     #box(heading(level: style-args.first-heading-level + 3, name))
-    #if function-name != none and style-args.enable-cross-references { label(function-name + "." + name) }
+    #if function-name != none and style-args.enable-cross-references { label(function-name + "." + name.trim(".")) }
     #h(1.2em) 
     #types.map(x => (style-args.style.show-type)(x, style-args: style-args)).join([ #text("or",size:.6em) ])
   

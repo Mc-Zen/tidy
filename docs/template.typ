@@ -21,10 +21,15 @@
   // set heading(numbering: (..args) => if args.pos().len() == 1 { numbering("I", ..args) })
   set heading(numbering: "I.a")
   show list: pad.with(x: 5%)
+  show heading.where(level: 3): set text(1.2em)
 
   // show link: set text(fill: purple.darken(30%))
-  show link: set text(fill: rgb("#1e8f6f"))
-  show link: underline
+  show link: it => {
+    let dest = str(it.dest)
+    if "." in dest and not "/" in dest { return underline(it, stroke: luma(60%), offset: 1pt) }
+    set text(fill: rgb("#1e8f6f")) 
+    underline(it)
+  }
   
   v(4em)
 
@@ -68,8 +73,10 @@
 
   // Main body.
   set par(justify: true)
-  v(10em)
+  v(7em)
 
+  pad(x: 10%, outline(depth: 2, indent: 2em))
+  pagebreak()
   
   show: codly-init.with(
   )
@@ -97,7 +104,7 @@
   stroke: rgb("#239DAE") + 1pt,
   radius: 3pt,
   {
-    block(align(right, text(raw(filename))), width: 100%, inset: 5pt)
+    block(align(right, text(raw(filename, lang: "cmd"))), width: 100%, inset: 5pt)
     v(1pt, weak: true)
     move(dx: -1pt, line(length: 100% + 2pt, stroke: 1pt + rgb("#239DAE")))
         v(1pt, weak: true)
@@ -106,16 +113,22 @@
 ))
 
 
-#let tidy-output-figure(output) = no-codly({
+#let tidy-output-figure(
+  output, 
+  breakable: false,
+  fill: none
+) = no-codly({
   set heading(numbering: none)
   set text(size: .8em)
-  figure(align(left, box(
+  show figure: set block(breakable: breakable)
+  figure(align(left, block(
     width: 80%,
+    fill: fill,
     stroke: 0.5pt + luma(200), 
     inset: 20pt, 
     radius: 10pt,
     block(
-      breakable: false,
+      breakable: breakable,
       output
     )
   )))
