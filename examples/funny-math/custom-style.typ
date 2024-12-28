@@ -12,6 +12,7 @@
   "string": rgb("#d1ffe2"),
   "none": rgb("#ffcbc4"),
   "auto": rgb("#ffcbc4"),
+  "bool": rgb("#ffedc1"),
   "boolean": rgb("#ffedc1"),
   "integer": rgb("#e7d9ff"),
   "float": rgb("#e7d9ff"),

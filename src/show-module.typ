@@ -30,27 +30,27 @@
   first-heading-level: 2,
 
   /// Whether to output the name of the module at the top. 
-  /// -> boolean
+  /// -> bool
   show-module-name: true,
 
   /// Whether to allow breaking of parameter description blocks. 
-  /// -> boolean
+  /// -> bool
   break-param-descriptions: false,
 
   /// Whether to omit description blocks for parameters with empty description. 
-  /// -> boolean
+  /// -> bool
   omit-empty-param-descriptions: true,
 
   /// Whether to omit functions and variables starting with an underscore. 
-  /// -> boolean
+  /// -> bool
   omit-private-definitions: false,
 
   /// Whether to omit named function arguments starting with an underscore. 
-  /// -> boolean
+  /// -> bool
   omit-private-parameters: false,
 
   /// Whether to output an outline of all functions in the module at the beginning. 
-  /// -> boolean
+  /// -> bool
   show-outline: true,
 
   /// Function to use to sort the function documentations. With `auto`, they are 
@@ -61,12 +61,12 @@
   sort-functions: auto,
 
   /// Whether to run doc-comment tests. 
-  /// -> boolean
+  /// -> bool
   enable-tests: true,
 
   /// Whether to enable links for cross-references. If set to auto, the style 
   /// will select its default color set. 
-  /// -> boolean
+  /// -> bool
   enable-cross-references: true,
 
   /// Give a dictionary for type and colors and other colors. 
@@ -82,7 +82,7 @@
   let label-prefix = module-doc.label-prefix
   if sort-functions == auto { 
     module-doc.functions = module-doc.functions.sorted(key: x => x.name) 
-  } else if type(sort-functions) == "function" { 
+  } else if type(sort-functions) == function { 
     module-doc.functions = module-doc.functions.sorted(key: sort-functions) 
   }
 

@@ -55,7 +55,7 @@
   let show-variable = styles.default.show-variable
   
   let style-functions = style 
-  if type(style) == "module" {
+  if type(style) == module {
     import style: *
     style-functions = (
       show-outline: show-outline,

@@ -62,7 +62,7 @@
   source-location: none,
 
   /// When set to `false`, the tests are ignored. 
-  /// -> boolean
+  /// -> bool
   enable: true
 
 ) = {
@@ -73,7 +73,7 @@
     let result = eval(test.text, scope: scope + inherited-scope)
     let result-type = type(result)
     
-    if result-type == "array" {
+    if result-type == array {
       if not result.at(0) {
         assert(
           false, 
@@ -81,7 +81,7 @@
             + result.at(1) + "\nin " + test.text
         )
       }
-    } else if result-type == "boolean" {
+    } else if result-type == bool {
       if not result {
         let msg = test.text
         assert(false, message: "Failed test " + source-info + ": " + msg)

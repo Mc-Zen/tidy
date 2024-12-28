@@ -105,7 +105,7 @@ assert.eq(result.functions.at(0).return-types, none)
   let a = ```
   /// Func
   /// - p1 (string): a param $a$
-  /// - p2 (boolean, function): a param $b$
+  /// - p2 (bool, function): a param $b$
   ///        Oh yes
   /// - p3 (string): 
   /// -> content, integer
@@ -122,7 +122,7 @@ assert.eq(result.functions.at(0).return-types, none)
   assert.eq(eval-string(f0.args.p1.description), [a param $a$])
   assert.eq(f0.args.p2.default, "2")
   assert.eq(eval-string(f0.args.p2.description), [a param $b$ Oh yes])
-  assert.eq(f0.args.p2.types, ("boolean", "function"))
+  assert.eq(f0.args.p2.types, ("bool", "function"))
   assert.eq(f0.return-types, ("content", "integer"))
 }
 
@@ -172,7 +172,7 @@ assert.eq(result.functions.at(0).return-types, none)
 #{
   let code = ```
 /// - foo (content): Something.
-/// - bar (boolean): A boolean.
+/// - bar (bool): A bool.
 /// -> content
 #let myfunc(foo, bar: false) = strong(foo)
 
@@ -191,8 +191,8 @@ assert.eq(result.functions.at(0).return-types, none)
   // assert.eq(f2.args.len(), 1)
   // assert.eq(f2.args.bar, (
   //   default: "true",
-  //   description: "A boolean.",
-  //   types: ("boolean",),
+  //   description: "A bool.",
+  //   types: ("bool",),
   // ))
 }
 

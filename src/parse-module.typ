@@ -124,7 +124,7 @@
 
   /// Require that all parameters of a functions are documented and fail
   /// if some are not. 
-  /// -> boolean
+  /// -> bool
   require-all-parameters: false,
   
   /// A dictionary of definitions that are then available in all function
@@ -138,11 +138,11 @@
   preamble: "",
 
   /// Whether to enable the detection of curried functions. 
-  /// -> boolean
+  /// -> bool
   enable-curried-functions: true,
 
   /// Whether to use the old documentation syntax. 
-  /// -> boolean
+  /// -> bool
   old-syntax: false
 ) = {
   if label-prefix == auto { label-prefix = name + "-" }

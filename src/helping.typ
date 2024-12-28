@@ -229,7 +229,7 @@
   onerror: msg => assert(false, message: msg),
 
   /// Whether to use the old parser. 
-  /// -> boolean
+  /// -> bool
   old-syntax: false
 ) = {
 
