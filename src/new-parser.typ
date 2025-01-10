@@ -24,14 +24,15 @@
         return (arg.trim(),)
       }
   }
-  
+  let skip-line = false
+
   for c in text {
     let ignore-char = false
+    
     if c == "\"" and previous-char != "\\" { 
       if literal-mode == none { literal-mode = "\"" }
       else if literal-mode == "\"" { literal-mode = none }
-    }
-    if literal-mode == none {
+    } else if literal-mode == none {
       if c == "(" { brace-level += 1 }
       else if c == ")" { brace-level -= 1 }
       else if c == "," and brace-level == 1 {
@@ -47,6 +48,11 @@
         is-named = false
       } else if c == ":" and brace-level == 1 {
         is-named = true
+      } else if c == "/" and previous-char == "/" {
+        skip-line = true
+        arg = arg.slice(0, -1)
+      } else if c == "\n" {
+        skip-line = false
       }
     }
     count-processed-chars += 1
@@ -54,20 +60,17 @@
       if arg.trim().len() > 0 {
         if is-named {
           let (name, value) = split-once(arg, ":").map(str.trim)
-          args.push((name, value))
+          args.push((name, value.replace("\n", "")))
         } else {
-          arg = arg.trim()
+          arg = arg.trim().replace("\n", "")
           args.push((arg,))
         }
-        // arg = ""
       }
       break
     }
-    if not ignore-char { arg += c }
+    if not (ignore-char or skip-line) { arg += c }
     previous-char = c
   }
-  // arg = arg.trim()
-  // if arg != "" { args.push(arg) }
   return (
     args: args,
     brace-level: brace-level - 1,
@@ -90,6 +93,14 @@
 #assert.eq(
   parse-argument-list("a: 2, b: 3)"), 
   (args: (("a", "2"), ("b", "3")), brace-level: -1, processed-chars: 11)
+)
+#assert.eq(
+  parse-argument-list("a: 2 // 2\n)"), 
+  (args: (("a", "2"),), brace-level: -1, processed-chars: 11)
+)
+#assert.eq(
+  parse-argument-list("a: 2, // 2\nb)"), 
+  (args: (("a", "2"),("b",)), brace-level: -1, processed-chars: 13)
 )
 
 
@@ -183,9 +194,6 @@
 }
 
 
-// #assert.eq(
-//   process-parameters(((arg: "myarg)", desc-lines: ()),)), ()
-// )
 
 #let process-definition(definition) = {
   let (description, types) = parse-description-and-types(definition.description, label-prefix: "")
@@ -209,7 +217,7 @@
   if line.starts-with("///") {
     state.unmatched-description.push(line.slice(3))
   } else {
-    state.unfinished-param += trim-trailing-comments(line)
+    state.unfinished-param += line + "\n"
 
     let (args, brace-level, processed-chars) = parse-argument-list(state.unfinished-param)
     if brace-level == -1 { // parentheses are already closed on this line
@@ -219,7 +227,7 @@
       //   state.curry = (name: curry.captures.first(), rest: state.unfinished-param.slice(processed-chars + curry.end))
       // }
     }
-    if args.len() > 0 and (state.unfinished-param.ends-with(",") or state.state == "finished") {
+    if args.len() > 0 and (state.unfinished-param.trim("\n").ends-with(",") or state.state == "finished") {
       state.params.push((name: args.first(), desc-lines: state.unmatched-description))
       state.unmatched-description = ()
       state.params += args.slice(1).map(arg => (name: arg, desc-lines: ()))
@@ -228,21 +236,6 @@
   }
   return state
 }
-
-// #{
-//   let state = (
-//     state: "running", 
-//     params: (), 
-//     unmatched-description: (),
-//     unfinished-param: ""
-//   )
-//   let lines = ("/// asd", "named: 3,", "/// -> int", "pos", ") = asd.with()", "").rev()
-//   // let lines = ("/// asd", "named: (", "fill: white, ", "cap: \"butt\")", ")").rev()
-//   while state.state == "running" and lines.len() > 0 {
-//     state = parameter-parser(state, lines.pop())
-//   }
-//   let kstate = state
-// }
 
 #let process-curry-info(info) = {
   let pos = info.args
@@ -380,30 +373,4 @@
     variables: definitions.filter(x => "args" not in x),
   )
 }
-// #{
-  
 
-//   let src = ```
-//   ///Description
-//   let func(
-//     pos, // some comment
-    
-//     named: 2 // another comment
-//   )
-//   ```.text
-
-//   assert.eq(
-//     parse(src).functions,
-//     (
-//       (
-//         name: "func",
-//         description: "Description",
-//         args: (
-//           pos: (description: ""),
-//           named: (description: "", default: "2"),
-//         ),
-//         return-types: none
-//       ),
-//     )
-//   )
-// }
