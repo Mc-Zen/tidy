@@ -2,7 +2,7 @@
 # Tidy
 *Keep it tidy.*
 
-[![Typst Package](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2FMc-Zen%2Ftidy%2Fv0.4.0%2Ftypst.toml&query=%24.package.version&prefix=v&logo=typst&label=package&color=239DAD)](https://typst.app/universe/package/tidy)
+[![Typst Package](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2FMc-Zen%2Ftidy%2Fv0.4.1%2Ftypst.toml&query=%24.package.version&prefix=v&logo=typst&label=package&color=239DAD)](https://typst.app/universe/package/tidy)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue)](https://github.com/Mc-Zen/tidy/blob/main/LICENSE)
 [![Test Status](https://github.com/Mc-Zen/tidy/actions/workflows/run_tests.yml/badge.svg)](https://github.com/Mc-Zen/tidy/actions/workflows/run_tests.yml)
 [![User Manual](https://img.shields.io/badge/manual-.pdf-purple)][guide]
@@ -33,7 +33,7 @@ The [guide][guide] fully describes the usage of this module and defines document
 
 Using `tidy` is as simple as writing some doc-comments and calling:
 ```typ
-#import "@preview/tidy:0.4.0"
+#import "@preview/tidy:0.4.1"
 
 #let docs = tidy.parse-module(read("my-module.typ"))
 #tidy.show-module(docs, style: tidy.styles.default)
@@ -116,6 +116,12 @@ A few test assertion functions are available to improve readability, simplicity,
 
 
 ## Changelog
+
+### v0.4.1
+_Fixes_
+- Strings containing `"//"` can now be used in default arguments.
+- References like `@section` can now link to labels outside the documentation. 
+- Fixes issues with upcoming Typst 0.13.
 
 ### v0.4.0
 _Major redesign of the documentation syntax_
