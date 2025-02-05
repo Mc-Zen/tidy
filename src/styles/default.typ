@@ -4,6 +4,7 @@
 #let function-name-color = rgb("#4b69c6")
 #let rainbow-map = ((rgb("#7cd5ff"), 0%), (rgb("#a6fbca"), 33%),(rgb("#fff37c"), 66%), (rgb("#ffa49d"), 100%))
 #let gradient-for-color-types = gradient.linear(angle: 7deg, ..rainbow-map)
+#let gradient-for-tiling = gradient.linear(angle: -45deg, rgb("#ffd2ec"), rgb("#c6feff")).sharp(2).repeat(5)
 
 #let default-type-color = rgb("#eff0f3")
 
@@ -36,8 +37,10 @@
   "function": rgb("#f9dfff"),
   "color": gradient-for-color-types,
   "gradient": gradient-for-color-types,
+  "tiling": gradient-for-tiling,
   "signature-func-name": rgb("#4b69c6"),
 )
+
 
 
 #let colors-dark = {
@@ -47,7 +50,7 @@
     if type(value) == color {
       value = darkify(value)
     } else if type(value) == gradient {
-      let map = value.stops().map(((clr, stop)) => (darkify(clr), stop))
+      let map = value.stops().map(((clr, stop)) => (darkify(clr), calc.round(stop/1%)*1%))
       value = value.kind()(..map)
     }
     k.insert(key, value)
