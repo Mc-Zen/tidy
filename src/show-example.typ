@@ -118,6 +118,8 @@
 /// 
 /// Lines in the raw code that start with `>>>` are removed from the outputted code
 /// but evaluated in the preview. 
+///
+/// Lines starting with `<<<` are displayed in the preview, but not evaluated.
 #let show-example(
 
   /// Raw object holding the example code. 
@@ -152,12 +154,16 @@
   ..options
 
 ) = {
-  let displayed-code = code.text
+  let displayed-code = code
+    .text
     .split("\n")
     .filter(x => not x.starts-with(">>>"))
+    .map(x => x.trim("<<<", at: start))
     .join("\n")
-  let executed-code = code.text
+  let executed-code = code
+    .text
     .split("\n")
+    .filter(x => not x.starts-with("<<<"))
     .map(x => x.trim(">>>", at: start))
     .join("\n")
   
