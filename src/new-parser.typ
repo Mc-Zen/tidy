@@ -259,7 +259,7 @@
     // trim only doc-comment lines
     let l = line.trim(at: start)
     if l.starts-with("///") { l }
-    else { line }
+    else { line.trim(at: end) }
   })
 
   let module-description = none
