@@ -105,7 +105,7 @@ Hello world
 ````
 With the new version, this should be replaced with 
 ```typ
-#import "@preview/tidy:0.4.1": render-examples
+#import "@preview/tidy:0.4.2": render-examples
 #show: render-examples
 
 ...
