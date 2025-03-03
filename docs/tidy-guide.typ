@@ -175,6 +175,8 @@ In both versions, you can insert _hidden_ code lines starting with `>>>` anywher
 ````
 This is useful for many scenarios like import statements, wrapping everything inside a container of a fixed size and other things.
 
+Conversely, lines starting with `<<<` will only be shown but not executed. 
+
 #pagebreak()
 
 As an alternative, the function `example()` provides some bells and whistles which are showcased with the following `example-demo.typ` module which contains a function for highlighting text with gradients #footnote[which seems not very advisable due to the poor readability.]:
