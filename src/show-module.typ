@@ -92,8 +92,9 @@
     module-doc.variables = module-doc.variables.filter(filter)
   }
 
-  
   let style-functions = utilities.get-style-functions(style)
+
+  let local-names-overrided = local-names != (parameters: [Parameters], default: [Default], variables: [Variables])
   
   let style-args = (
     style: style-functions,
@@ -105,8 +106,8 @@
     colors: colors,
     enable-cross-references: enable-cross-references,
     local-names: local-names,
+    local-names-overrided: local-names-overrided
   )
-  
   
   let eval-scope = (
     // Predefined functions that may be called by the user in doc-comment code
