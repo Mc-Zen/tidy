@@ -21,7 +21,7 @@
   }
     
   if module-doc.variables.len() > 0 {
-    text([Variables:], weight: "bold")
+    text(style-args.local-names.at("variables"), weight: "bold")
     list(..module-doc.variables.map(var => gen-entry(var.name)))
   }
 }

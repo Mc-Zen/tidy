@@ -75,9 +75,9 @@
 
   /// Language-specific names for strings used in the output. Currently, these 
   /// are `parameters` and `default`. You can for example use: 
-  /// `local-names: (parameters: [Paramètres], default: [défault])`.
+  /// `local-names: (parameters: [Paramètres], default: [Défault], variables: [Alterné])`.
   /// -> dictionary
-  local-names: (parameters: [Parameters], default: [Default])
+  local-names: (parameters: [Parameters], default: [Default], variables: [Variables])
 ) = block({
   let label-prefix = module-doc.label-prefix
   if sort-functions == auto { 
