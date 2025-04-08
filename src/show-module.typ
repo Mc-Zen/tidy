@@ -75,7 +75,7 @@
 
   /// Language-specific names for strings used in the output. Currently, these 
   /// are `parameters` and `default`. You can for example use: 
-  /// `local-names: (parameters: [Paramètres], default: [Défault], variables: [Alterné])`.
+  /// `local-names: (parameters: [Parameter], default: [Standard], variables: [Variablen])`.
   /// -> dictionary
   local-names: (parameters: [Parameters], default: [Default], variables: [Variables])
 ) = block({
