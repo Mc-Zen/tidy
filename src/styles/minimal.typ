@@ -21,7 +21,10 @@
   }
     
   if module-doc.variables.len() > 0 {
-    text(style-args.local-names.at("variables"), weight: "bold")
+    text(
+      get-local-name("variables", style-args: style-args, language: text.lang),
+      weight: "bold"
+    )
     list(..module-doc.variables.map(var => gen-entry(var.name)))
   }
 }
@@ -122,8 +125,8 @@
     )
   }
   
-  if parameter-block != none {
-    [*#style-args.local-names.parameters:*]
+  context if parameter-block != none {
+    [*#get-local-name("parameters", style-args: style-args, language: text.lang):*]
     parameter-block
   }
   v(4em, weak: true)
