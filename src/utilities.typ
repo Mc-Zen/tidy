@@ -84,5 +84,8 @@
   if style-args.local-names-overrided {
     return style-args.local-names.at(target)
   }
+  if language not in locales.local-names.keys() {
+    panic("Unknown language '" + language + "', you can use custom translations with #show-module(local-names: ...)")
+  }
   return locales.local-names.at(text.lang).at(target)
 }
