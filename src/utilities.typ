@@ -72,7 +72,8 @@
   return style-functions
 }
 
-/// Get the local name for string with the given language.
+
+/// Get the local name for a string with the given language.
 #let get-local-name(
   /// String to get the local name for -> str
   target,
@@ -81,11 +82,12 @@
   /// Target language known by context -> str
   language: "en"
 ) = context {
-  if style-args.local-names-overrided {
+
+  if target in style-args.local-names {
     return style-args.local-names.at(target)
   }
   if language not in locales.local-names.keys() {
-    panic("Unknown language '" + language + "', you can use custom translations with #show-module(local-names: ...)")
+    panic("Unknown language '" + language + "', you can use custom translations with `#show-module(local-names: ...)`")
   }
   return locales.local-names.at(text.lang).at(target)
 }

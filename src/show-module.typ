@@ -77,7 +77,8 @@
   /// are `parameters` and `default`. You can for example use: 
   /// `local-names: (parameters: [Parameter], default: [Standard], variables: [Variablen])`.
   /// -> dictionary
-  local-names: (parameters: [Parameters], default: [Default], variables: [Variables])
+  local-names: auto
+
 ) = block({
   let label-prefix = module-doc.label-prefix
   if sort-functions == auto { 
@@ -94,7 +95,9 @@
 
   let style-functions = utilities.get-style-functions(style)
 
-  let local-names-overrided = local-names != (parameters: [Parameters], default: [Default], variables: [Variables])
+  if local-names == auto {
+    local-names = (:)
+  }
   
   let style-args = (
     style: style-functions,
@@ -106,7 +109,6 @@
     colors: colors,
     enable-cross-references: enable-cross-references,
     local-names: local-names,
-    local-names-overrided: local-names-overrided
   )
   
   let eval-scope = (
