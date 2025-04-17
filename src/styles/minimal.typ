@@ -125,8 +125,8 @@
     )
   }
   
-  context if parameter-block != none {
-    [*#get-local-name("parameters", style-args: style-args, language: text.lang):*]
+  if parameter-block != none {
+    [*#get-local-name("parameters", style-args: style-args):*]
     parameter-block
   }
   v(4em, weak: true)

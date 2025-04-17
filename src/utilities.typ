@@ -75,17 +75,19 @@
 
 /// Get the local name for a string with the given language.
 #let get-local-name(
+
   /// String to get the local name for -> str
   target,
+
   /// Style-args provided from styles -> dict
-  style-args: (:),
-  /// Target language known by context -> str
-  language: "en"
+  style-args: (:)
+
 ) = context {
 
   if target in style-args.local-names {
     return style-args.local-names.at(target)
   }
+  let language = text.lang
   if language not in locales.local-names.keys() {
     panic("Unknown language '" + language + "', you can use custom translations with `#show-module(local-names: ...)`")
   }

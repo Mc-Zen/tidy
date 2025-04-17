@@ -75,8 +75,8 @@
     list(..module-doc.functions.map(fn => gen-entry(fn.name + "()")))
   }
     
-  context if module-doc.variables.len() > 0 {
-    text(get-local-name("variables", style-args: style-args, language: text.lang), weight: "bold")
+  if module-doc.variables.len() > 0 {
+    text(get-local-name("variables", style-args: style-args), weight: "bold")
     list(..module-doc.variables.map(var => gen-entry(var.name)))
   }
 }
@@ -139,9 +139,9 @@
     #types.map(x => (style-args.style.show-type)(x, style-args: style-args)).join([ #text("or",size:.6em) ])
   
     #content
-    #context if show-default [
+    #if show-default [
       #parbreak()
-      #get-local-name("default", style-args: style-args, language: text.lang): #raw(lang: "typc", default)
+      #get-local-name("default", style-args: style-args): #raw(lang: "typc", default)
     ]
   ]
 )
@@ -162,9 +162,9 @@
   
   eval-docstring(fn.description, style-args)
 
-  block(breakable: style-args.break-param-descriptions, context {
+  block(breakable: style-args.break-param-descriptions, {
     heading(
-      get-local-name("parameters", style-args: style-args, language: text.lang),
+      get-local-name("parameters", style-args: style-args),
       level: style-args.first-heading-level + 2
     )
     (style-args.style.show-parameter-list)(fn, style-args: style-args)
