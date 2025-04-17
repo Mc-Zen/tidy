@@ -77,7 +77,8 @@
   /// are `parameters` and `default`. You can for example use: 
   /// `local-names: (parameters: [Parameter], default: [Standard], variables: [Variablen])`.
   /// -> dictionary
-  local-names: (parameters: [Parameters], default: [Default], variables: [Variables])
+  local-names: auto
+
 ) = block({
   let label-prefix = module-doc.label-prefix
   if sort-functions == auto { 
@@ -92,8 +93,16 @@
     module-doc.variables = module-doc.variables.filter(filter)
   }
 
-  
   let style-functions = utilities.get-style-functions(style)
+
+  if local-names == auto {
+    local-names = (:)
+  } else {
+    assert(
+      type(local-names) == dictionary, 
+      message: "The parameter `local-names` expects a dictionary of translations. "
+    )
+  }
   
   let style-args = (
     style: style-functions,
@@ -106,7 +115,6 @@
     enable-cross-references: enable-cross-references,
     local-names: local-names,
   )
-  
   
   let eval-scope = (
     // Predefined functions that may be called by the user in doc-comment code

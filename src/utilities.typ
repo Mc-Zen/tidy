@@ -1,3 +1,4 @@
+#import "locales.typ"
 
 // Matches doc-comment references of the form `@@otherfunc` or `@@otherfunc()`. 
 #let reference-matcher = regex(`@@([\w\d\-_\)\(]+)`.text)
@@ -69,4 +70,26 @@
     )
   }
   return style-functions
+}
+
+
+/// Get the local name for a string with the given language.
+#let get-local-name(
+
+  /// String to get the local name for -> str
+  target,
+
+  /// Style-args provided from styles -> dict
+  style-args: (:)
+
+) = context {
+
+  if target in style-args.local-names {
+    return style-args.local-names.at(target)
+  }
+  let language = text.lang
+  if language not in locales.local-names.keys() {
+    panic("Unknown language '" + language + "', you can use custom translations with `#show-module(local-names: ...)`")
+  }
+  return locales.local-names.at(text.lang).at(target)
 }

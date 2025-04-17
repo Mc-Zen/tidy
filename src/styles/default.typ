@@ -76,7 +76,7 @@
   }
     
   if module-doc.variables.len() > 0 {
-    text(style-args.local-names.at("variables"), weight: "bold")
+    text(get-local-name("variables", style-args: style-args), weight: "bold")
     list(..module-doc.variables.map(var => gen-entry(var.name)))
   }
 }
@@ -139,7 +139,10 @@
     #types.map(x => (style-args.style.show-type)(x, style-args: style-args)).join([ #text("or",size:.6em) ])
   
     #content
-    #if show-default [ #parbreak() #style-args.local-names.default: #raw(lang: "typc", default) ]
+    #if show-default [
+      #parbreak()
+      #get-local-name("default", style-args: style-args): #raw(lang: "typc", default)
+    ]
   ]
 )
 
@@ -160,7 +163,10 @@
   eval-docstring(fn.description, style-args)
 
   block(breakable: style-args.break-param-descriptions, {
-    heading(style-args.local-names.parameters, level: style-args.first-heading-level + 2)
+    heading(
+      get-local-name("parameters", style-args: style-args),
+      level: style-args.first-heading-level + 2
+    )
     (style-args.style.show-parameter-list)(fn, style-args: style-args)
   })
 
