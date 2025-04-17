@@ -97,6 +97,11 @@
 
   if local-names == auto {
     local-names = (:)
+  } else {
+    assert(
+      type(local-names) == dictionary, 
+      message: "The parameter `local-names` expects a dictionary of translations. "
+    )
   }
   
   let style-args = (
