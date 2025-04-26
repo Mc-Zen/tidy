@@ -1,4 +1,4 @@
-#import "@preview/codly:1.0.0": codly-init, no-codly, codly
+#import "@preview/codly:1.3.0": codly-init, no-codly, codly
 
 // The project function defines how your document looks.
 // It takes your content and some metadata and formats it.
