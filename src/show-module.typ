@@ -76,6 +76,8 @@
   /// Language-specific names for strings used in the output. Currently, these 
   /// are `parameters` and `default`. You can for example use: 
   /// `local-names: (parameters: [Parameter], default: [Standard], variables: [Variablen])`.
+  /// If set to `auto`, automatic translations will be used according to the 
+  /// current document language. 
   /// -> dictionary
   local-names: auto
 
