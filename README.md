@@ -2,7 +2,7 @@
 # Tidy
 *Keep it tidy.*
 
-[![Typst Package](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2FMc-Zen%2Ftidy%2Fv0.4.2%2Ftypst.toml&query=%24.package.version&prefix=v&logo=typst&label=package&color=239DAD)](https://typst.app/universe/package/tidy)
+[![Typst Package](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2FMc-Zen%2Ftidy%2Fv0.4.3%2Ftypst.toml&query=%24.package.version&prefix=v&logo=typst&label=package&color=239DAD)](https://typst.app/universe/package/tidy)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue)](https://github.com/Mc-Zen/tidy/blob/main/LICENSE)
 [![Test Status](https://github.com/Mc-Zen/tidy/actions/workflows/run_tests.yml/badge.svg)](https://github.com/Mc-Zen/tidy/actions/workflows/run_tests.yml)
 [![User Manual](https://img.shields.io/badge/manual-.pdf-purple)][guide]
@@ -33,7 +33,7 @@ The [guide][guide] fully describes the usage of this module and defines document
 
 Using `tidy` is as simple as writing some doc-comments and calling:
 ```typ
-#import "@preview/tidy:0.4.2"
+#import "@preview/tidy:0.4.3"
 
 #let docs = tidy.parse-module(read("my-module.typ"))
 #tidy.show-module(docs, style: tidy.styles.default)
@@ -117,6 +117,11 @@ A few test assertion functions are available to improve readability, simplicity,
 
 ## Changelog
 
+### v0.4.3
+_Automatic locale support_
+- Tidy now detects the document language and adjusts words like "Parameters" and "Default" accordingly. It is still possible to set these values manually through the parameter `show-module.local-names`. 
+- The word `Variables` can now also be customized. 
+
 ### v0.4.2
 _Fixes and Improvements_
 - Code examples can now also show code that is _not_ executed on lines starting with `<<<`. 
@@ -172,6 +177,6 @@ _Adds a help feature and more options_
 
 _Initial Release_
 
-[guide]: https://github.com/Mc-Zen/tidy/releases/download/v0.4.2/tidy-guide.pdf
+[guide]: https://github.com/Mc-Zen/tidy/releases/download/v0.4.3/tidy-guide.pdf
 
-[migration guide]: https://github.com/Mc-Zen/tidy/tree/v0.4.2/docs/migration-to-0.4.0.md
+[migration guide]: https://github.com/Mc-Zen/tidy/tree/v0.4.3/docs/migration-to-0.4.0.md
