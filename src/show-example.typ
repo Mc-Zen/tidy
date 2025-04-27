@@ -136,7 +136,7 @@
   preamble: "",
 
   /// Language mode. Can be `auto`, `"markup"`, or `"code"`. 
-  /// -> auto | str
+  /// -> auto | str
   mode: auto,
 
   /// This parameter is only used internally. Definitions that are made available to the 

@@ -7,6 +7,6 @@
 /// -> float
 #let sinc(
   /// The argument for the cardinal sine function. 
-  /// -> int | float
+  /// -> int | float
   x
 ) = if x == 0 {1} else {calc.sin(x) / x}
