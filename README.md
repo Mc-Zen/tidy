@@ -73,14 +73,16 @@ The code in the doc-comments is evaluated through the [`eval`](https://typst.app
 
 ```typ
 #{
-    import "my-module.typ"
-    let module = tidy.parse-module(read("my-module.typ"))
-    let an-image = image("img.png")
-    tidy.show-module(
-        module,
-        style: tidy.styles.default,
-        scope: (my-module: my-module, img: an-image)
-    )
+  import "my-module.typ"
+  let module = tidy.parse-module(
+    read("my-module.typ"),
+    scope: (my-module: my-module, img: an-image)
+  )
+  let an-image = image("img.png")
+  tidy.show-module(
+    module,
+    style: tidy.styles.default
+  )
 }
 ```
 The doc-comments in `my-module.typ` may now access the image with `#img` and can call any function or variable from `my-module` in the style of `#my-module.my-function()`. This makes rendering examples right in the doc-comments as easy as a breeze!
