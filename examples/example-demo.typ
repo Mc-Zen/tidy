@@ -7,7 +7,7 @@
 ///  #example(`#example-demo.flashy[Change code to preview ratio]`, ratio: 2)
 ///  ```/// #example(`#example-demo.flashy(map: color.map.vlag)[Huge preview]`, scale-preview: 200%)```
 ///  #example(`#example-demo.flashy(map: color.map.vlag)[Huge preview]`, scale-preview: 200%)
-///  ```/// #example(`#flashy[Add to scope]`, scope: (flashy: example-demo.flashy, i: 2))```
+///  ```/// #example(`#flashy[Add to scope #i ...]`, scope: (flashy: example-demo.flashy, i: 2))```
 ///  #example(`#flashy[Add to scope #i ...]`, scope: (flashy: example-demo.flashy, i: 2))
 ///
 /// \
