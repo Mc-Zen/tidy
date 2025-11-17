@@ -117,6 +117,10 @@
   /// -> str
   name: "", 
 
+  /// The description for the module.
+  /// -> content | str
+  description: none,
+
   /// The label-prefix for internal function references. If `auto`, the 
   /// label-prefix name will be the module name. 
   /// -> auto | str
@@ -163,6 +167,7 @@
     docs.functions = resolve-parents(docs.functions)
   }
 
+  if description != none {docs.description = description}
   
   return docs
 }

@@ -33,6 +33,10 @@
   /// -> bool
   show-module-name: true,
 
+  /// Whether to output the module description under the module name.
+  /// -> bool
+  show-module-description: false,
+
   /// Whether to allow breaking of parameter description blocks. 
   /// -> bool
   break-param-descriptions: false,
@@ -183,6 +187,11 @@
   
   if "name" in module-doc and show-module-name and module-doc.name != "" {
     heading(module-doc.name, level: first-heading-level)
+    parbreak()
+  }
+
+  if "description" in module-doc and show-module-description and module-doc.description != none {
+    module-doc.description
     parbreak()
   }
   
