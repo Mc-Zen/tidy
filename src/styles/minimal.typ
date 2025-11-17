@@ -22,7 +22,7 @@
     
   if module-doc.variables.len() > 0 {
     text(
-      get-local-name("variables", style-args: style-args, language: text.lang),
+      get-local-name("variables", style-args: style-args),
       weight: "bold"
     )
     list(..module-doc.variables.map(var => gen-entry(var.name)))
@@ -144,11 +144,11 @@
   block(breakable: style-args.break-param-descriptions, fill: rgb("#d8dbed"), width: 100%, inset: (x: 0.5em, y: 0.7em),
     stack(dir: ltr, spacing: 1.2em,
       if style-args.enable-cross-references [
-        #set text(font: "Cascadia Mono", size: 0.85em, weight: 340)
+        #set text(font: "DejaVu Sans Mono", size: 0.85em, weight: 340)
         #text(var.name, fill: fn-color)
         #label(style-args.label-prefix + var.name)
       ] else [
-        #set text(font: "Cascadia Mono", size: 0.85em, weight: 340)
+        #set text(font: "DejaVu Sans Mono", size: 0.85em, weight: 340)
         #text(var.name, fill: fn-color)
       ],
       type
