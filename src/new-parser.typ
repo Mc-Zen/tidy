@@ -114,19 +114,38 @@
 
 #let parse-description-and-types(lines, label-prefix: "", first-line-number: 0) = {
 
+    
+  let types = none
+  if lines.last(default: "").contains("->") {
+    let parts = lines.last().split("->")
+    types = parts.last().split("|").map(str.trim)
+
+    lines.last() = parts.slice(0, -1).join("->")
+  } else {
+    let line-index = lines
+      .map(str.trim)
+      .enumerate()
+      .filter(((i, line)) => line.starts-with("->"))
+      .map(((i, line)) => i)
+      .first(default: none)
+
+    if line-index != none {
+      types = lines
+        .slice(line-index)
+        .join("\n")
+        .trim()
+        .trim("->")
+        .split("|")
+        .map(str.trim)
+    }
+  }
+  
   let description = lines
     // .enumerate(start: first-line-number)
     // .map(eval-doc-comment-test.with(label-prefix: label-prefix))
     .join("\n")
     
   if description == none { description = "" }
-    
-  let types = none
-  if description.contains("->") {
-    let parts = description.split("->")
-    types = parts.last().split("|").map(str.trim)
-    description = parts.slice(0, -1).join("->")
-  }
   
   return (
     description: description.trim(), 
