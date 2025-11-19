@@ -137,6 +137,7 @@
         .trim("->")
         .split("|")
         .map(str.trim)
+      lines = lines.slice(0, line-index)
     }
   }
   
