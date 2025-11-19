@@ -52,3 +52,83 @@ let func(
     ),
   )
 )
+
+
+
+
+// No argument type
+#let src = ```
+/// 
+#let edge(
+  /// This is no problem -> int
+  /// yes
+  data,
+) = {..}
+```.text
+
+#assert.eq(
+  parse(src).functions,
+  (
+    (
+      name: "edge",
+      description: "",
+      args: (
+        data: (description: "This is no problem -> int\n yes"),
+      ),
+      return-types: none
+    ),
+  )
+)
+
+
+
+// Trailing argument type
+#let src = ````
+/// 
+#let edge(
+  /// This is the problem -> int
+  data,
+) = {..}
+````.text
+
+#assert.eq(
+  parse(src).functions,
+  (
+    (
+      name: "edge",
+      description: "",
+      args: (
+        data: (description: "This is the problem", types: ("int",)),
+      ),
+      return-types: none
+    ),
+  )
+)
+
+
+
+// Multiline argument type
+#let src = ```
+/// 
+#let edge(
+  /// -> int | bool | string |
+  ///    array
+  data,
+) = {..}
+```.text
+
+#assert.eq(
+  parse(src).functions,
+  (
+    (
+      name: "edge",
+      description: "",
+      args: (
+        data: (description: "", types: ("int", "bool", "string", "array")),
+      ),
+      return-types: none
+    ),
+  )
+)
+
+
