@@ -7,4 +7,3 @@
 #include "currying.typ"
 #include "issue_#40.typ"
 
-#set page(width: auto, height: auto, margin: 2pt)
