@@ -8,6 +8,8 @@
       repr(it.type) 
     } else if it.type.starts-with("\"") { 
       it.type
+    } else {
+      it.type
     }
   },
   fields: (
@@ -21,7 +23,7 @@
   prefix: "tidy",
   display: it => it.types.join(it.separator),
   fields: (
-    e.field("types", e.types.array(e.types.union(type, std.type, str)), required: true),
+    e.field("types", e.types.array(type), required: true),
     e.field("separator", content, default: [ | ]),
   )
 )
@@ -49,7 +51,7 @@
 #let parameter = e.element.declare(
   "parameter",
   prefix: "tidy",
-  display: it => block(stroke: 1pt, inset: .5em, {
+  display: it => {
     block[
       #box(parameter-name(it.name))
       #h(1em)
@@ -59,7 +61,7 @@
     if it.named {
       par[default: #parameter-default(it.default)]
     }
-  }),
+  },
   fields: (
     e.field("name", str, required: true),
     e.field("description", content, required: true),
@@ -100,20 +102,39 @@
   "signature",
   prefix: "tidy",
   display: it => {
-    it.name
-    [(]
-      it.parameters
-        .map(signature-parameter) 
-        .join[, ]
-    [)]
-    if it.type != () [
-       -> #it.type-list
-    ]
+    let inline(pre: none, post: none) = {
+      it.name
+      [(#pre]
+        it.parameters
+          .map(signature-parameter,) 
+          .join[, #pre]
+      [#post)]
+      if it.type != () [
+        -> #it.type-list
+      ]
+    }
+    let broken = inline.with(pre: [\ ~~], post: [\ ])
+
+    if it.inline == auto {
+      layout(size => {
+        let inline = inline()
+        if measure(inline).width <= size.width {
+          inline
+        } else {
+          broken()
+        }
+      })
+    } else if it.inline {
+      inline()
+    } else {
+      broken()
+    }
   },
   fields: (
     e.field("name", str, required: true),
     e.field("parameters", e.types.array(parameter), required: true),
-    e.field("type", e.types.array(std.type), default: ())
+    e.field("type", e.types.array(std.type), default: ()),
+    e.field("inline", e.types.union(auto, bool), default: auto)
   ),
   synthesize: it => {
     it.type-list = type-list(it.type.map(type))
@@ -127,7 +148,7 @@
   prefix: "tidy",
   display: it => {
     function-name(it.name)
-    block(it.description)
+    par(it.description)
     it.signature
     it.parameters.join()
   },
@@ -149,7 +170,7 @@
   prefix: "tidy",
   display: it => {
     function-name(it.name)
-    block(it.description)
+    par(it.description)
     it.type-list
   },
   fields: (
@@ -163,49 +184,61 @@
   }
 )
 
+#let theme-default(body) = {
 
-#show e.selector(function-name): heading.with(level: 2)
-#show e.selector(parameter-name): heading.with(level: 3)
+  show e.selector(function-name): heading.with(level: 2)
+  show e.selector(parameter-name): heading.with(level: 3)
 
-  
-#show e.selector(type-list): set text(font: "DejaVu Sans Mono")
+    
+  show: e.set_(type-list, separator: [ ])
+  show: e.set_(signature, inline: false)
+  show e.selector(type-list): set text(.9em, font: "DejaVu Sans Mono")
 
-#show e.selector(parameter): it => {
-  set text(.8em)
-  show: e.set_(type-list, separator: [ or ])
-  it
-}
-
-#show e.selector(type): it => {
-  import "../styles/default.typ": colors
-  let type = e.fields(it).type
-  if std.type(type) == std.type {
-    type = repr(type)
-  } 
-  
-  if type.starts-with("\"") {
-    return raw(lang: "typc", type)
+  show e.selector(parameter): it => {
+    show: e.set_(type-list, separator: [ or ])
+    it
   }
-  return highlight(type, fill: colors.at(type, default: gray))
-
-  box(
-    fill: colors.at(type, default: gray),
-    inset: (x: 0.35em), 
-    outset: (y: 0.35em), 
-    radius: 0.35em, 
-    type
+  show e.selector(parameter): block.with(
+    width: 100%,
+    fill: luma(95%), 
+    inset: 1em
   )
+
+
+
+  show e.selector(type): it => {
+    import "../styles/default.typ": colors
+    let type = e.fields(it).type
+    if std.type(type) == std.type {
+      type = repr(type)
+    } 
+    
+    if type.starts-with("\"") {
+      return raw(lang: "typc", type)
+    }
+
+    box(
+      fill: colors.at(type, default: gray),
+      inset: (x: 0.35em), 
+      outset: (y: 0.35em), 
+      radius: 0.35em, 
+      type
+    )
+  }
+
+
+  show e.selector(signature): it => {
+    set text(font: "DejaVu Sans Mono", size: 0.8em)
+    it
+  }
+  body
 }
 
-// #show e.selector(type-list): it => {
-//   e.fields(it).types.join(h(0.35em))
-// }
 
-#show e.selector(signature): it => {
-  set text(font: "DejaVu Sans Mono", size: 0.8em)
-  it
-}
+// #show e.selector(function-name): heading.with(level: 2)
+// #show e.selector(parameter-name): heading.with(level: 3)
 
+#show: theme-default
 
 #function(
   "foo", 
