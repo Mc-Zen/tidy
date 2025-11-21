@@ -32,11 +32,13 @@
 #let parameter-default = e.element.declare(
   "parameter-default",
   prefix: "tidy",
-  display: it => raw(lang: "typc", repr(it.value)),
+  display: it => it.supplement + raw(lang: "typc", repr(it.value)),
   fields: (
     e.field("value", e.types.any, required: true),
+    e.field("supplement", content, default: [Default: ]),
   )
 )
+
 
 // to be parameter.name
 #let parameter-name = e.element.declare(
@@ -59,7 +61,7 @@
     ]
     it.description
     if it.named {
-      par[default: #parameter-default(it.default)]
+      par(parameter-default(it.default))
     }
   },
   fields: (
@@ -200,7 +202,7 @@
   }
   show e.selector(parameter): block.with(
     width: 100%,
-    fill: luma(95%), 
+    fill: luma(96%), 
     inset: 1em
   )
 
