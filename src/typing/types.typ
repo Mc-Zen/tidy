@@ -1,31 +1,34 @@
 #import "@preview/elembic:1.1.1" as e
 
-#let Type = e.element.declare(
-  "Type",
+#let type = e.element.declare(
+  "type",
   prefix: "tidy",
   display: it => {
-    if type(it.type) == type { 
+    if type(it.type) == std.type { // is built-in type
       repr(it.type) 
     } else if it.type.starts-with("\"") { 
       it.type
     }
   },
   fields: (
-    e.field("type", e.types.union(type, str), required: true),
+    e.field("type", e.types.union(std.type, str), required: true),
   )
 )
 
-#let TypeList = e.element.declare(
-  "TypeList",
+
+#let type-list = e.element.declare(
+  "type-list",
   prefix: "tidy",
-  display: it => it.types.join[ | ],
+  display: it => it.types.join(it.separator),
   fields: (
-    e.field("types", e.types.array(e.types.union(Type, type, str)), required: true),
+    e.field("types", e.types.array(e.types.union(type, std.type, str)), required: true),
+    e.field("separator", content, default: [ | ]),
   )
 )
 
-#let Default = e.element.declare(
-  "Default",
+// to be parameter.default
+#let parameter-default = e.element.declare(
+  "parameter-default",
   prefix: "tidy",
   display: it => raw(lang: "typc", repr(it.value)),
   fields: (
@@ -33,9 +36,9 @@
   )
 )
 
-
-#let ParameterName = e.element.declare(
-  "ParameterName",
+// to be parameter.name
+#let parameter-name = e.element.declare(
+  "parameter-name",
   prefix: "tidy",
   display: it => it.name,
   fields: (
@@ -43,18 +46,18 @@
   )
 )
 
-#let Parameter = e.element.declare(
-  "Parameter",
+#let parameter = e.element.declare(
+  "parameter",
   prefix: "tidy",
   display: it => block(stroke: 1pt, inset: .5em, {
     block[
-      #box(ParameterName(it.name))
+      #box(parameter-name(it.name))
       #h(1em)
-      #TypeList(it.type.map(Type))
+      #type-list(it.type.map(type))
     ]
     it.description
     if it.named {
-      par([Default: #Default(it.default)])
+      par[default: #parameter-default(it.default)]
     }
   }),
   fields: (
@@ -67,8 +70,10 @@
   )
 )
 
-#let FunctionName = e.element.declare(
-  "FunctionName",
+
+// to be function.name
+#let function-name = e.element.declare(
+  "function-name",
   prefix: "tidy",
   display: it => it.name,
   fields: (
@@ -76,28 +81,29 @@
   )
 )
 
-#let SignatureParameter = e.element.declare(
-  "SignatureParameter",
+// to be signature.parameter
+#let signature-parameter = e.element.declare(
+  "signature-parameter",
   prefix: "tidy",
   display: it => {
     let parameter = e.fields(it.parameter)
-    if parameter.at("sink", default: false) [.. ]
+    if parameter.at("sink", default: false) [..]
     else { parameter.name + [: ] }
-    TypeList(parameter.type.map(Type))
+    type-list(parameter.type.map(type))
   },
   fields: (
-    e.field("parameter", Parameter, required: true),
+    e.field("parameter", parameter, required: true),
   )
 )
 
-#let Signature = e.element.declare(
-  "Signature",
+#let signature = e.element.declare(
+  "signature",
   prefix: "tidy",
   display: it => {
     it.name
     [(]
       it.parameters
-        .map(SignatureParameter) 
+        .map(signature-parameter) 
         .join[, ]
     [)]
     if it.type != () [
@@ -106,20 +112,21 @@
   },
   fields: (
     e.field("name", str, required: true),
-    e.field("parameters", e.types.array(Parameter), required: true),
-    e.field("type", e.types.array(type), default: ())
+    e.field("parameters", e.types.array(parameter), required: true),
+    e.field("type", e.types.array(std.type), default: ())
   ),
   synthesize: it => {
-    it.type-list = TypeList(it.type.map(Type))
+    it.type-list = type-list(it.type.map(type))
     it
   }
 )
 
-#let Function = e.element.declare(
-  "Function",
+
+#let function = e.element.declare(
+  "function",
   prefix: "tidy",
   display: it => {
-    FunctionName(it.name)
+    function-name(it.name)
     block(it.description)
     it.signature
     it.parameters.join()
@@ -127,49 +134,49 @@
   fields: (
     e.field("name", str, required: true),
     e.field("description", content, required: true),
-    e.field("parameters", e.types.array(Parameter), default: ()),
-    e.field("type", e.types.array(type), default: ()),
+    e.field("parameters", e.types.array(parameter), default: ()),
+    e.field("type", e.types.array(std.type), default: ()),
   ),
   synthesize: it => {
-    it.signature = Signature(it.name, it.parameters, type: it.type)
-    it.type-list = TypeList(it.type.map(Type))
+    it.signature = signature(it.name, it.parameters, type: it.type)
+    it.type-list = type-list(it.type.map(type))
     it
   }
 )
 
-#let Constant = e.element.declare(
-  "Constant",
+#let constant = e.element.declare(
+  "constant",
   prefix: "tidy",
   display: it => {
-    FunctionName(it.name)
+    function-name(it.name)
     block(it.description)
     it.type-list
   },
   fields: (
     e.field("name", str, required: true),
     e.field("description", content, required: true),
-    e.field("type", e.types.array(type), default: ()),
+    e.field("type", e.types.array(std.type), default: ()),
   ),
   synthesize: it => {
-    it.type-list = TypeList(it.type.map(Type))
+    it.type-list = type-list(it.type.map(type))
     it
   }
 )
 
 
-#show e.selector(FunctionName): heading.with(level: 2)
-#show e.selector(ParameterName): heading.with(level: 3)
+#show e.selector(function-name): heading.with(level: 2)
+#show e.selector(parameter-name): heading.with(level: 3)
 
   
-#show e.selector(TypeList): set text(font: "DejaVu Sans Mono")
+#show e.selector(type-list): set text(font: "DejaVu Sans Mono")
 
-#show e.selector(Parameter): it => {
+#show e.selector(parameter): it => {
   set text(.8em)
-  show e.selector(TypeList): it => e.fields(it).types.join(text(.85em, " or "))
+  show: e.set_(type-list, separator: [ or ])
   it
 }
 
-#show e.selector(Type): it => {
+#show e.selector(type): it => {
   import "../styles/default.typ": colors
   let type = e.fields(it).type
   if std.type(type) == std.type {
@@ -179,6 +186,7 @@
   if type.starts-with("\"") {
     return raw(lang: "typc", type)
   }
+  return highlight(type, fill: colors.at(type, default: gray))
 
   box(
     fill: colors.at(type, default: gray),
@@ -189,29 +197,29 @@
   )
 }
 
-#show e.selector(TypeList): it => {
-  e.fields(it).types.join(h(0.35em))
-}
+// #show e.selector(type-list): it => {
+//   e.fields(it).types.join(h(0.35em))
+// }
 
-#show e.selector(Signature): it => {
+#show e.selector(signature): it => {
   set text(font: "DejaVu Sans Mono", size: 0.8em)
   it
 }
 
 
-#Function(
+#function(
   "foo", 
   [A real foo. ], 
   parameters: (
-    Parameter("bar", [A fake bar. ], (int,), named: true, default: 2),
-    Parameter("baz", [Just a baz. ], (bool, str, "yes", "\"x\"")),
-    Parameter("bag", [A bag of things. ], (content,), sink: true),
+    parameter("bar", [A fake bar. ], (int,), named: true, default: 2),
+    parameter("baz", [Just a baz. ], (bool, str, "yes", "\"x\"")),
+    parameter("bag", [A bag of things. ], (content,), sink: true),
   ),
   type: (int,)
 )
 
 
-#Constant(
+#constant(
   "int-maker", 
   [Makes an int. ], 
   type: (int,)
@@ -219,7 +227,7 @@
 
 
 #{
-  let a = Parameter("asd", [ASD], (str,))
+  let a = parameter("asd", [ASD], (str,))
   e.fields(a) 
 }
 
