@@ -1,7 +1,23 @@
 #import "@preview/elembic:1.1.1" as e
 
-#let type = e.element.declare(
-  "type",
+
+Todo: 
+- Be able to get namespace, e.g., to use it in signature: `asd.foo` and also for nested definitions. 
+
+
+#let namespace = e.element.declare(
+  "namespace",
+  prefix: "tidy",
+  display: it => {
+    it.namespace
+  },
+  fields: (
+    e.field("namespace", str, default: ""),
+  )
+)
+
+#let type-annotation = e.element.declare(
+  "type-annotation",
   prefix: "tidy",
   display: it => {
     if type(it.type) == std.type { // is built-in type
@@ -23,7 +39,7 @@
   prefix: "tidy",
   display: it => it.types.join(it.separator),
   fields: (
-    e.field("types", e.types.array(type), required: true),
+    e.field("types", e.types.array(type-annotation), required: true),
     e.field("separator", content, default: [ | ]),
   )
 )
@@ -57,7 +73,7 @@
     block[
       #box(parameter-name(it.name))
       #h(1em)
-      #type-list(it.type.map(type))
+      #type-list(it.type.map(type-annotation))
     ]
     it.description
     if it.named {
@@ -93,7 +109,7 @@
     let parameter = e.fields(it.parameter)
     if parameter.at("sink", default: false) [..]
     else { parameter.name + [: ] }
-    type-list(parameter.type.map(type))
+    type-list(parameter.type.map(type-annotation))
   },
   fields: (
     e.field("parameter", parameter, required: true),
@@ -105,7 +121,7 @@
   prefix: "tidy",
   display: it => {
     let inline(pre: none, post: none) = {
-      it.name
+      namespace() + it.name
       [(#pre]
         it.parameters
           .map(signature-parameter,) 
@@ -116,8 +132,9 @@
       ]
     }
     let broken = inline.with(pre: [\ ~~], post: [\ ])
-
-    if it.inline == auto {
+    if it.inline or it.parameters.len() == 0 {
+      inline()
+    } else if it.inline == auto {
       layout(size => {
         let inline = inline()
         if measure(inline).width <= size.width {
@@ -126,8 +143,6 @@
           broken()
         }
       })
-    } else if it.inline {
-      inline()
     } else {
       broken()
     }
@@ -139,7 +154,7 @@
     e.field("inline", e.types.union(auto, bool), default: auto)
   ),
   synthesize: it => {
-    it.type-list = type-list(it.type.map(type))
+    it.type-list = type-list(it.type.map(type-annotation))
     it
   }
 )
@@ -158,11 +173,12 @@
     e.field("name", str, required: true),
     e.field("description", content, required: true),
     e.field("parameters", e.types.array(parameter), default: ()),
+    e.field("contextual", bool, default: false),
     e.field("type", e.types.array(std.type), default: ()),
   ),
   synthesize: it => {
     it.signature = signature(it.name, it.parameters, type: it.type)
-    it.type-list = type-list(it.type.map(type))
+    it.type-list = type-list(it.type.map(type-annotation))
     it
   }
 )
@@ -181,7 +197,30 @@
     e.field("type", e.types.array(std.type), default: ()),
   ),
   synthesize: it => {
-    it.type-list = type-list(it.type.map(type))
+    it.type-list = type-list(it.type.map(type-annotation))
+    it
+  }
+)
+
+#let type = e.element.declare(
+  "type",
+  prefix: "tidy",
+  display: it => {
+    function-name(it.name)
+    par(it.description)
+    it.signature
+    it.parameters.join()
+    show: e.set_(namespace, namespace: it.name + ".")
+    it.members.join()
+  },
+  fields: (
+    e.field("name", str, required: true),
+    e.field("description", content, required: true),
+    e.field("parameters", e.types.array(parameter), default: ()),
+    e.field("members", e.types.array(e.types.union(function, e.types.any/*type*/)), default: ()),
+  ),
+  synthesize: it => {
+    it.signature = signature(it.name, it.parameters, type: (content,))
     it
   }
 )
@@ -208,7 +247,7 @@
 
 
 
-  show e.selector(type): it => {
+  show e.selector(type-annotation): it => {
     import "../styles/default.typ": colors
     let type = e.fields(it).type
     if std.type(type) == std.type {
@@ -255,10 +294,35 @@
 
 
 #constant(
-  "int-maker", 
+  "out", 
   [Makes an int. ], 
   type: (int,)
 )
+#type(
+  "entry", 
+  [Represents an entry line in an outline.], 
+  parameters: (
+    parameter("level", [The level of the entry. ], (int,)),
+    parameter("element", [The element this entry refers to. ], (content,)),
+  ),
+  members: (
+    type(
+      "a",
+      "asd"
+    ),
+    function(
+      "indented",
+      [A helper function for. ],
+      type: (content,),
+      parameters: (
+        parameter("prefix", [The prefix is aligned... ], ("none", content)),
+        parameter("inner", [The formatted inner content of the entry.], (content,)),
+        parameter("gap", [The gap between the prefix and the inner content.], (length,), named: true, default: 0.5em),
+      )
+    ),
+  )
+)
+
 
 
 #{
