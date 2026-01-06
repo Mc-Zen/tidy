@@ -258,10 +258,11 @@
 }
 
 #let process-curry-info(info) = {
-  let pos = info.args
+  let args = info.at("args", default: ())
+  let pos = args
     .filter(x => x.name.len() == 1)
     .map(x => x.name.at(0))
-  let named = info.args
+  let named = args
     .filter(x => x.name.len() == 2)
     .map(x => x.name).to-dict()
 
