@@ -22,6 +22,29 @@
 )
 
 
+#let src = ```
+/// Doc
+#let aey = text.with(
+  1pt, weight: 200
+)
+```.text
+
+#assert.eq(
+  parse-module(src).functions.at(0),
+  (
+    name: "aey", 
+    description: "Doc", 
+    args: (:),
+    parent: (
+      name: "text",
+      pos: ("1pt",),
+      named: (weight: "200")
+    ),
+    return-types: none
+  ),
+)
+
+
 // Parent resolving
 
 #let src = ```
@@ -54,4 +77,5 @@ let my-text(
     return-types: ("any",)
   ),
 )
+
 

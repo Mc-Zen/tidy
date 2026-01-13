@@ -367,14 +367,14 @@
             param-parser = parameter-parser(param-parser, line.slice(match.end))
           } else { // it's a variable or a function alias
             args = none
-            finished-definition = true
-            let p = line.slice(match.end)
-                  
             let curry = line.slice(match.end).match(curry-matcher)
-            if curry != none {
+            if curry != none { // is function alias
               curry-info = (name: curry.captures.first())
+              param-parser.state = "running"
               param-parser = parameter-parser(param-parser, line.slice(match.end + curry.end))
               // param-parser.curry = (name: curry.captures.first(), rest: state.unfinished-param.slice(processed-chars + curry.end))
+            } else { // is variable
+              finished-definition = true
             }
           }
         }
