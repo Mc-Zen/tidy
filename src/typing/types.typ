@@ -30,7 +30,7 @@ Todo:
   },
   fields: (
     e.field("type", e.types.union(std.type, str), required: true),
-  )
+  ),
 )
 
 
@@ -132,7 +132,7 @@ Todo:
       ]
     }
     let broken = inline.with(pre: [\ ~~], post: [\ ])
-    if it.inline or it.parameters.len() == 0 {
+    if it.inline == true or it.parameters.len() == 0 {
       inline()
     } else if it.inline == auto {
       layout(size => {
@@ -231,12 +231,11 @@ Todo:
   show e.selector(parameter-name): heading.with(level: 3)
 
     
-  show: e.set_(type-list, separator: [ ])
+  show: e.set_(type-list, separator: h(0.3em))
   show: e.set_(signature, inline: false)
-  show e.selector(type-list): set text(.9em, font: "DejaVu Sans Mono")
 
   show e.selector(parameter): it => {
-    show: e.set_(type-list, separator: [ or ])
+    show: e.set_(type-list, separator: [ #text(.7em)[or] ])
     it
   }
   show e.selector(parameter): block.with(
@@ -263,7 +262,7 @@ Todo:
       inset: (x: 0.35em), 
       outset: (y: 0.35em), 
       radius: 0.35em, 
-      type
+      raw(lang: none, type)
     )
   }
 
@@ -280,13 +279,14 @@ Todo:
 // #show e.selector(parameter-name): heading.with(level: 3)
 
 #show: theme-default
+#show: e.set_(namespace, namespace: "tidy.")
 
 #function(
   "foo", 
   [A real foo. ], 
   parameters: (
     parameter("bar", [A fake bar. ], (int,), named: true, default: 2),
-    parameter("baz", [Just a baz. ], (bool, str, "yes", "\"x\"")),
+    parameter("baz", [Just a baz. ], (bool, str, "yes", "\"yes\"")),
     parameter("bag", [A bag of things. ], (content,), sink: true),
   ),
   type: (int,)
@@ -295,7 +295,7 @@ Todo:
 
 #constant(
   "out", 
-  [Makes an int. ], 
+  [Is an int. ], 
   type: (int,)
 )
 #type(
