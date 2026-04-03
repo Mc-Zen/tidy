@@ -232,7 +232,6 @@
       mode: "code", 
       scope: scope,
       layout: layout,
-      ..args
     )
   }
   body
