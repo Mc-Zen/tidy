@@ -12,51 +12,47 @@ Todo:
     it.namespace
   },
   fields: (
-    e.field("namespace", str, default: ""),
+    e.field("namespace", e.types.wrap(str, fold: _ => (a, b) => if b.starts-with(".") { a + b.trim(".", at: start) } else { b }), default: ""),
   )
 )
 
-#let type-annotation = e.element.declare(
-  "type-annotation",
+// #namespace()\
+// #show: e.set_(namespace, namespace: "asd")
+// #namespace()\
+// #show: e.set_(namespace, namespace: ".kjh")
+// #namespace()\
+
+
+/// An atomic annotation expression. This can be
+/// - a type like `int`, `bool`, `module`, or
+/// - a value like `top`, `2`, or `"bounds"`. 
+#let annotation-expr = e.element.declare(
+  "annotation-expr",
   prefix: "tidy",
   display: it => {
-    if type(it.type) == std.type { // is built-in type
-      repr(it.type) 
-    } else if it.type.starts-with("\"") { 
-      it.type
-    } else {
-      it.type
-    }
+    repr(it.type)
   },
   fields: (
-    e.field("type", e.types.union(std.type, str), required: true),
+    e.field("type", e.types.any, required: true),
   ),
 )
 
-
-#let type-list = e.element.declare(
-  "type-list",
+/// An annotation for a parameter or return value, consisting of 
+/// a list of possible annotation expressions. 
+#let annotation = e.element.declare(
+  "annotation",
   prefix: "tidy",
   display: it => it.types.join(it.separator),
   fields: (
-    e.field("types", e.types.array(type-annotation), required: true),
+    e.field("types", e.types.array(annotation-expr), required: true),
     e.field("separator", content, default: [ | ]),
   )
 )
 
-// to be parameter.default
-#let parameter-default = e.element.declare(
-  "parameter-default",
-  prefix: "tidy",
-  display: it => it.supplement + raw(lang: "typc", repr(it.value)),
-  fields: (
-    e.field("value", e.types.any, required: true),
-    e.field("supplement", content, default: [Default: ]),
-  )
-)
 
 
-// to be parameter.name
+// (to be parameter.name)
+/// The name of a function or type parameter
 #let parameter-name = e.element.declare(
   "parameter-name",
   prefix: "tidy",
@@ -66,6 +62,20 @@ Todo:
   )
 )
 
+
+// (to be parameter.default)
+/// A default value for a function or type parameter. 
+#let parameter-default = e.element.declare(
+  "parameter-default",
+  prefix: "tidy",
+  display: it => it.supplement + repr(it.value),
+  fields: (
+    e.field("value", e.types.any, required: true),
+    e.field("supplement", content, default: [Default: ]),
+  )
+)
+
+/// A function or type parameter. 
 #let parameter = e.element.declare(
   "parameter",
   prefix: "tidy",
@@ -73,7 +83,7 @@ Todo:
     block[
       #box(parameter-name(it.name))
       #h(1em)
-      #type-list(it.type.map(type-annotation))
+      #annotation(it.type.map(annotation-expr))
     ]
     it.description
     if it.named {
@@ -91,7 +101,8 @@ Todo:
 )
 
 
-// to be function.name
+// (to be function.name or definition-name)
+/// The name of a function, constant, or type. 
 #let function-name = e.element.declare(
   "function-name",
   prefix: "tidy",
@@ -101,7 +112,8 @@ Todo:
   )
 )
 
-// to be signature.parameter
+// (to be signature.parameter)
+/// A parameter in a function or type signature. 
 #let signature-parameter = e.element.declare(
   "signature-parameter",
   prefix: "tidy",
@@ -109,13 +121,15 @@ Todo:
     let parameter = e.fields(it.parameter)
     if parameter.at("sink", default: false) [..]
     else { parameter.name + [: ] }
-    type-list(parameter.type.map(type-annotation))
+    annotation(parameter.type.map(annotation-expr))
   },
   fields: (
     e.field("parameter", parameter, required: true),
   )
 )
 
+/// Represents a signature of a function or type, summarizing 
+/// the name, all parameters, and their type annotations. 
 #let signature = e.element.declare(
   "signature",
   prefix: "tidy",
@@ -128,7 +142,7 @@ Todo:
           .join[, #pre]
       [#post)]
       if it.type != () [
-        -> #it.type-list
+        -> #it.annotation
       ]
     }
     let broken = inline.with(pre: [\ ~~], post: [\ ])
@@ -154,12 +168,12 @@ Todo:
     e.field("inline", e.types.union(auto, bool), default: auto)
   ),
   synthesize: it => {
-    it.type-list = type-list(it.type.map(type-annotation))
+    it.annotation = annotation(it.type.map(annotation-expr))
     it
   }
 )
 
-
+/// Represents the full documentation of a function. 
 #let function = e.element.declare(
   "function",
   prefix: "tidy",
@@ -178,18 +192,20 @@ Todo:
   ),
   synthesize: it => {
     it.signature = signature(it.name, it.parameters, type: it.type)
-    it.type-list = type-list(it.type.map(type-annotation))
+    it.annotation = annotation(it.type.map(annotation-expr))
     it
   }
 )
 
+/// Represents the full documentation of a constant (or variable 
+/// but Typst packages effectively only expose constants).  
 #let constant = e.element.declare(
   "constant",
   prefix: "tidy",
   display: it => {
     function-name(it.name)
     par(it.description)
-    it.type-list
+    it.annotation
   },
   fields: (
     e.field("name", str, required: true),
@@ -197,11 +213,13 @@ Todo:
     e.field("type", e.types.array(std.type), default: ()),
   ),
   synthesize: it => {
-    it.type-list = type-list(it.type.map(type-annotation))
+    it.annotation = annotation(it.type.map(annotation-expr))
     it
   }
 )
 
+
+/// Represents the full documentation of a type. 
 #let type = e.element.declare(
   "type",
   prefix: "tidy",
@@ -210,8 +228,17 @@ Todo:
     par(it.description)
     it.signature
     it.parameters.join()
-    show: e.set_(namespace, namespace: it.name + ".")
-    it.members.join()
+    it.members
+      .map(member => {
+        if e.eid(member) == e.eid(function) {
+          show: e.set_(namespace, namespace: "self.")
+          member
+        } else {
+          show: e.set_(namespace, namespace: "." + it.name + ".")
+          member
+        }
+      })
+      .join()
   },
   fields: (
     e.field("name", str, required: true),
@@ -231,11 +258,11 @@ Todo:
   show e.selector(parameter-name): heading.with(level: 3)
 
     
-  show: e.set_(type-list, separator: h(0.3em))
+  show: e.set_(annotation, separator: h(0.3em))
   show: e.set_(signature, inline: false)
 
   show e.selector(parameter): it => {
-    show: e.set_(type-list, separator: [ #text(.7em)[or] ])
+    show: e.set_(annotation, separator: [ #text(.7em)[or] ])
     it
   }
   show e.selector(parameter): block.with(
@@ -244,18 +271,20 @@ Todo:
     inset: 1em
   )
 
+  show e.selector(parameter-default): it => {
+    it = e.fields(it)
+    it.supplement + raw(lang: "typc", repr(it.value))
+  }
 
-
-  show e.selector(type-annotation): it => {
+  show e.selector(annotation-expr): it => {
     import "../styles/default.typ": colors
     let type = e.fields(it).type
     if std.type(type) == std.type {
       type = repr(type)
-    } 
-    
-    if type.starts-with("\"") {
-      return raw(lang: "typc", type)
+    } else {
+      return raw(lang: "typc", repr(type))
     }
+    
 
     box(
       fill: colors.at(type, default: gray),
@@ -282,11 +311,11 @@ Todo:
 #show: e.set_(namespace, namespace: "tidy.")
 
 #function(
-  "foo", 
-  [A real foo. ], 
+  "foonction", 
+  [A real foonction. ], 
   parameters: (
     parameter("bar", [A fake bar. ], (int,), named: true, default: 2),
-    parameter("baz", [Just a baz. ], (bool, str, "yes", "\"yes\"")),
+    parameter("baz", [Just a baz. ], (bool, str, "yes", 2)),
     parameter("bag", [A bag of things. ], (content,), sink: true),
   ),
   type: (int,)
@@ -294,10 +323,11 @@ Todo:
 
 
 #constant(
-  "out", 
+  "coonstant", 
   [Is an int. ], 
   type: (int,)
 )
+
 #type(
   "entry", 
   [Represents an entry line in an outline.], 
@@ -306,10 +336,6 @@ Todo:
     parameter("element", [The element this entry refers to. ], (content,)),
   ),
   members: (
-    type(
-      "a",
-      "asd"
-    ),
     function(
       "indented",
       [A helper function for. ],
@@ -318,6 +344,24 @@ Todo:
         parameter("prefix", [The prefix is aligned... ], ("none", content)),
         parameter("inner", [The formatted inner content of the entry.], (content,)),
         parameter("gap", [The gap between the prefix and the inner content.], (length,), named: true, default: 0.5em),
+      )
+    ),
+    type(
+      "body",
+      "Description",
+      parameters: (
+        parameter("level", [The level of the entry. ], (int,)),
+        parameter("element", [The element this entry refers to. ], (content,)),
+      ),
+      members: (
+        function(
+          "convert",
+          [A helper function for. ],
+          type: (content,),
+          parameters: (
+            parameter("converter", [How to convert.], (std.function,), named: true, default: int),
+          )
+        ),
       )
     ),
   )
