@@ -60,6 +60,13 @@
   /// -> auto | none | function
   sort-functions: auto,
 
+  /// Function to use to sort the variable documentations. With `auto`, they are 
+  /// sorted alphabetically by name and with `none` they are not sorted. Otherwise 
+  /// a function can be passed that each variable documentation object is passed to 
+  /// and that should return some key to sort the variable by. 
+  /// -> auto | none | function
+  sort-variables: auto,
+
   /// Whether to run doc-comment tests. 
   /// -> bool
   enable-tests: true,
@@ -87,6 +94,11 @@
     module-doc.functions = module-doc.functions.sorted(key: x => x.name) 
   } else if type(sort-functions) == function { 
     module-doc.functions = module-doc.functions.sorted(key: sort-functions) 
+  }
+  if sort-variables == auto { 
+    module-doc.variables = module-doc.variables.sorted(key: x => x.name) 
+  } else if type(sort-variables) == function { 
+    module-doc.variables = module-doc.variables.sorted(key: sort-variables) 
   }
 
   if omit-private-definitions {
@@ -197,5 +209,3 @@
     (style-functions.show-variable)(fn, style-args)
   }
 })
-
-

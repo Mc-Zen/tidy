@@ -501,6 +501,7 @@ Let us now _self-document_ this package:
     style: style,
     show-outline: true, 
     sort-functions: false, 
+    sort-variables: false, 
     omit-private-parameters: true,
     omit-private-definitions: true,
     first-heading-level: 3
