@@ -23,11 +23,11 @@
 
   /// The code is passed to this function. Use this to customize how the code is shown. 
   /// -> function
-  code-block: block,
+  code-block: block.with(breakable: false),
 
   /// The preview is passed to this function. Use this to customize how the preview is shown. 
   /// -> function
-  preview-block: block,
+  preview-block: block.with(breakable: false),
 
   /// Spacing between the code and preview boxes. 
   /// -> length

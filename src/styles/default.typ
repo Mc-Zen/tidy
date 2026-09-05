@@ -226,8 +226,8 @@
   example.show-example(
     ..args,
     layout: example.default-layout-example.with(
-      code-block: block.with(radius: 3pt, stroke: .5pt + luma(200)),
-      preview-block: block.with(radius: 3pt, fill: rgb("#e4e5ea")),
+      code-block: block.with(radius: 3pt, stroke: .5pt + luma(200), breakable: false),
+      preview-block: block.with(radius: 3pt, fill: rgb("#e4e5ea"), breakable: false),
       col-spacing: 5pt
     ),
   )

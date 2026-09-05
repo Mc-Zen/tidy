@@ -173,8 +173,8 @@
   example.show-example(
     ..args,
     layout: example.default-layout-example.with(
-    code-block: block.with(stroke: .5pt +  fn-color),
-    preview-block: block.with(stroke: .5pt +  fn-color),
+    code-block: block.with(stroke: .5pt +  fn-color, breakable: false),
+    preview-block: block.with(stroke: .5pt +  fn-color, breakable: false),
     col-spacing: 0pt
     ),
   )
